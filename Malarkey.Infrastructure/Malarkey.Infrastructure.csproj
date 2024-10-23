@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+    <PackageReference Include="NSwag.CodeGeneration.CSharp" Version="14.0.6" />
+    <PackageReference Include="Microsoft.AspNetCore.HeaderPropagation" Version="8.0.3" />
+    <PackageReference Include="NSwag.MSBuild" Version="14.0.6">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(NSwagExe_Net80) run Clients/ClapTrapClient.nswag" Condition="1 == 2"></Exec>
+  </Target>  
+</Project>

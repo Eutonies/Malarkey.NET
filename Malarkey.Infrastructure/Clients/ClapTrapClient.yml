@@ -1,0 +1,73 @@
+openapi: 3.0.1
+info:
+  title: ClapTrap API
+  description: ClapTrap handles issuance of access tokens
+  termsOfService: ""
+  version: "1.0"
+servers:
+- url: http://localhost:8081
+security: []
+paths:
+  /access/access-scope:
+    post:
+      summary: Creates new Access Scope
+      operationId: createAccessScope
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateAccessScopeRequest'
+        required: true
+      responses:
+        "200":
+          description: New Access Scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessScope'
+  /access/access-scopes:
+    get:
+      summary: Get all Access Scopes
+      operationId: getAccessScopes
+      responses:
+        "200":
+          description: New Access Scope
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccessScope'
+components:
+  schemas:
+    AccessScope:
+      required:
+      - expiration
+      - publicKey
+      - scopeName
+      - userId
+      type: object
+      properties:
+        userId:
+          type: string
+        scopeName:
+          type: string
+        publicKey:
+          type: string
+        expiration:
+          type: string
+          format: date-time
+    CreateAccessScopeRequest:
+      required:
+      - expiration
+      - scopeName
+      - userId
+      type: object
+      properties:
+        userId:
+          type: string
+        scopeName:
+          type: string
+        expiration:
+          type: string
+          format: date-time
+    Function1RequestContextFutureRouteResult:
+      type: object

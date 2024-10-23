@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.11.35312.102
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Infrastructure", "Malarkey.Infrastructure\Malarkey.Infrastructure.csproj", "{A03BBF49-85FA-4675-A942-3960EC31ABBF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A03BBF49-85FA-4675-A942-3960EC31ABBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A03BBF49-85FA-4675-A942-3960EC31ABBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A03BBF49-85FA-4675-A942-3960EC31ABBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A03BBF49-85FA-4675-A942-3960EC31ABBF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D3ADE7B4-BAFA-4241-A158-A05296E83445}
+	EndGlobalSection
+EndGlobal
