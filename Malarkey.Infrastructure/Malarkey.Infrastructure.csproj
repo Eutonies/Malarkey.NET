@@ -16,6 +16,10 @@
     </PackageReference>
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Malarkey.Application\Malarkey.Application.csproj" />
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="$(NSwagExe_Net80) run Clients/ClapTrapClient.nswag" Condition="1 == 2"></Exec>
   </Target>  
