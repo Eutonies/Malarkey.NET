@@ -1,0 +1,12 @@
+﻿@page "/authenticate"
+@using Malarkey.Integration
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize(Policy = IntegrationConstants.AuthorizationPolicies.IsAuthenticatedName)]
+
+
+<div>
+    <p>
+        If you are here, you must be authenticated I suppose
+    </p>
+</div>
+

@@ -9,6 +9,17 @@ public static class IntegrationConstants
 {
     public const string IntegrationConfigurationName = "Integration";
 
+    public static class IdProviders
+    {
+        public const string MicrosoftIdCookieName = "MalarkeyAzureId";
+    }
+
+
+    public static class AuthorizationPolicies
+    {
+        public const string IsAuthenticatedName = "MalarkeyIsAuthenticated";
+    }
+
 
 }
 

@@ -398,3 +398,4 @@ FodyWeavers.xsd
 *.sln.iml
 /resources/certificate/malarkey.key
 /Malarkey.Service/appsettings.local.json
+/Malarkey.UI/appsettings.local.json
