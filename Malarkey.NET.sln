@@ -5,13 +5,15 @@ VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Infrastructure", "Malarkey.Infrastructure\Malarkey.Infrastructure.csproj", "{A03BBF49-85FA-4675-A942-3960EC31ABBF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Domain", "Malarkey.Domain\Malarkey.Domain.csproj", "{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Domain", "Malarkey.Domain\Malarkey.Domain.csproj", "{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Integration.Microsoft", "Malarkey.Integration.Microsoft\Malarkey.Integration.Microsoft.csproj", "{E006AE6A-0CC5-49CD-AC0C-31F02BFA41BD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration.Microsoft", "Malarkey.Integration.Microsoft\Malarkey.Integration.Microsoft.csproj", "{E006AE6A-0CC5-49CD-AC0C-31F02BFA41BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Application", "Malarkey.Application\Malarkey.Application.csproj", "{D7087605-2585-4E4B-A504-C53C19FAB089}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Application", "Malarkey.Application\Malarkey.Application.csproj", "{D7087605-2585-4E4B-A504-C53C19FAB089}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Integration", "Malarkey.Integration\Malarkey.Integration.csproj", "{D8CE544E-293F-4ACF-A680-515532AA6F64}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration", "Malarkey.Integration\Malarkey.Integration.csproj", "{D8CE544E-293F-4ACF-A680-515532AA6F64}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Service", "Malarkey.Service\Malarkey.Service.csproj", "{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{D8CE544E-293F-4ACF-A680-515532AA6F64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8CE544E-293F-4ACF-A680-515532AA6F64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8CE544E-293F-4ACF-A680-515532AA6F64}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
