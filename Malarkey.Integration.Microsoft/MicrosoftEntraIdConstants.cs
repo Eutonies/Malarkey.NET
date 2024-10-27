@@ -8,8 +8,7 @@ namespace Malarkey.Integration.Microsoft;
 public static class MicrosoftEntraIdConstants
 {
     public const string MicrosoftIntegrationElementName = "Microsoft";
-    public const string AzureElementName = "AzureAd";
-    public const string AzureConfigurationName = $"{IntegrationConstants.IntegrationConfigurationName}:{MicrosoftIntegrationElementName}:{AzureElementName}";
+    public const string MicrosoftConfigurationName = $"{IntegrationConstants.IntegrationConfigurationName}:{MicrosoftIntegrationElementName}";
 
 
 }

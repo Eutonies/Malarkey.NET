@@ -17,7 +17,7 @@ public static class DependencyInjection
     public static IServiceCollection AddApiEntraIdIdentityProvider(this IServiceCollection services, IConfiguration config)
     {
         var withAuth = services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
-        var withIdentityWebApi = withAuth.AddMicrosoftIdentityWebApi(config.GetSection(MicrosoftEntraIdConstants.AzureConfigurationName));
+        var withIdentityWebApi = withAuth.AddMicrosoftIdentityWebApi(config.GetSection(MicrosoftEntraIdConstants.MicrosoftConfigurationName));
         return services;
     }
 
@@ -29,7 +29,7 @@ public static class DependencyInjection
             {
                 cookieAuthOpts.Cookie.Name = IntegrationConstants.IdProviders.MicrosoftIdCookieName;
             });
-        var withIdentityWebApp = withAuth.AddMicrosoftIdentityWebApp(config.GetSection(MicrosoftEntraIdConstants.AzureConfigurationName));
+        var withIdentityWebApp = withAuth.AddMicrosoftIdentityWebApp(config.GetSection(MicrosoftEntraIdConstants.MicrosoftConfigurationName));
         return services;
     }
 

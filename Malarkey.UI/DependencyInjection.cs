@@ -19,11 +19,10 @@ public static class DependencyInjection
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents()
             .AddMicrosoftIdentityConsentHandler();
-        //builder.Services.AddAppEntraIdIdentityProvider(builder.Configuration);
-        //builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration.GetSection(MicrosoftEntraIdConstants.AzureConfigurationName));
-        builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration.GetSection("Integration:Microsoft"));
+        builder.Services.AddMicrosoftIdentityWebAppAuthentication(builder.Configuration.GetSection(MicrosoftEntraIdConstants.MicrosoftConfigurationName));
         builder.Services.AddAuthenticatedAuthorizationPolicy();
         builder.Services.AddAntiforgery();
+        builder.Services.AddCascadingAuthenticationState();
         return builder;
     }
 }
