@@ -9,5 +9,7 @@ public record MicrosoftImportProfile(
     string UserId,
     string Name,
     string? LastName,
+    ImportImage? ProfileImage,
+    IReadOnlyCollection<ImportImage>? Images,
     IReadOnlyCollection<MicrosoftImportProfile>? Contacts
     );

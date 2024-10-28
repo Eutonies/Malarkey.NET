@@ -14,6 +14,9 @@ public partial class AuthenticatePage
     public IProfileImporter<MicrosoftImportProfile> ProfileImporter { get; set; }
 
 
+    private string? _profilePhoto;
+    private IReadOnlyCollection<string>? _photos;
+
     protected override async Task OnInitializedAsync()
     {
         await base.OnInitializedAsync();
