@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components;
+using Malarkey.Application.ProfileImport;
+using Malarkey.Domain.ProfileImport;
 
 namespace Malarkey.UI.Pages.Authenticate;
 
@@ -7,6 +9,9 @@ public partial class AuthenticatePage
 {
     [Inject]
     public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
+
+    [Inject]
+    public IProfileImporter<MicrosoftImportProfile> ProfileImporter { get; set; }
 
 
     protected override async Task OnInitializedAsync()
@@ -17,6 +22,7 @@ public partial class AuthenticatePage
         {
             var user = authState.User;
             var identity = user.Identity;
+            var profile = await ProfileImporter.LoadForImport();
         }
 
     }

@@ -1,7 +1,10 @@
 ﻿@page "/authenticate"
 @using Malarkey.Integration
 @using Microsoft.AspNetCore.Authorization
+@using Microsoft.Identity.Web
+@using Scops = Malarkey.Integration.Microsoft.MicrosoftEntraIdConstants.GraphScopes;
 @attribute [Authorize(Policy = IntegrationConstants.AuthorizationPolicies.IsAuthenticatedName)]
+@attribute [AuthorizeForScopes(Scopes = [Scops.OpenId, Scops.ReadContacts, Scops.ReadUser, Scops.Profile])]
 
 
 <div>
