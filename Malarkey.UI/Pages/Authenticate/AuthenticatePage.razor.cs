@@ -15,7 +15,7 @@ public partial class AuthenticatePage
 
 
     private string? _profilePhoto;
-    private IReadOnlyCollection<string>? _photos;
+    private IReadOnlyCollection<ImportImage> _images = [];
 
     protected override async Task OnInitializedAsync()
     {
@@ -26,6 +26,9 @@ public partial class AuthenticatePage
             var user = authState.User;
             var identity = user.Identity;
             var profile = await ProfileImporter.LoadForImport();
+            if(profile?.Images != null)
+               _images = profile.Images.ToList();
+            await InvokeAsync(StateHasChanged);
         }
 
     }

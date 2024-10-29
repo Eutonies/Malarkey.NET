@@ -59,16 +59,23 @@ internal class MicrosoftProfileImporter : IProfileImporter<MicrosoftImportProfil
 
     private async Task<ImportImage?> ReadImage(ProfilePhoto? photo)
     {
-        if (photo == null)
+        try
+        {
+            if (photo == null)
+                return null;
+            await using var stream = await _graphClient.Me.Photos[photo.Id].Content.GetAsync();
+            if (stream == null)
+                return null;
+            using var memStream = new MemoryStream();
+            await stream.CopyToAsync(memStream);
+            var bytes = memStream.ToArray();
+            var returnee = new ImportImage(Data: bytes, FileType: photo.OdataType!);
+            return returnee;
+        }
+        catch (Exception ex)
+        {
             return null;
-        await using var stream = await _graphClient.Me.Photos[photo.Id].Content.GetAsync();
-        if(stream == null)
-            return null; 
-        using var memStream = new MemoryStream();
-        await stream.CopyToAsync(memStream);
-        var bytes = memStream.ToArray();
-        var returnee = new ImportImage(Data: bytes, FileType: photo.OdataType!);
-        return returnee;
+        }
     }
 
 

@@ -9,7 +9,11 @@
 
 <div>
     <p>
-        If you are here, you must be authenticated I suppose
+
     </p>
+    @foreach(var img in _images)
+    {
+        <img src="@(img.AsImageDataAttribute)" />
+    }
 </div>
 
