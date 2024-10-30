@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Service", "Malarke
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.UI", "Malarkey.UI\Malarkey.UI.csproj", "{46C12AA0-B232-4B98-80DE-FF7149FCC9D0}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Integration.Facebook", "Malarkey.Integration.Facebook\Malarkey.Integration.Facebook.csproj", "{C2FA1D3C-2DB3-4F6E-8CDE-BED9737E7677}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration.Facebook", "Malarkey.Integration.Facebook\Malarkey.Integration.Facebook.csproj", "{C2FA1D3C-2DB3-4F6E-8CDE-BED9737E7677}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -1,19 +1,14 @@
 ﻿@page "/authenticate"
-@using Malarkey.Integration
-@using Microsoft.AspNetCore.Authorization
-@using Microsoft.Identity.Web
-@using Scops = Malarkey.Integration.Microsoft.MicrosoftEntraIdConstants.GraphScopes;
-@attribute [Authorize(Policy = IntegrationConstants.AuthorizationPolicies.IsAuthenticatedName)]
-@attribute [AuthorizeForScopes(Scopes = [Scops.OpenId, Scops.ReadContacts, Scops.ReadUser, Scops.Profile])]
 
+<div class="malarkey-authenticate-page-bg">
+    <div class="malarkey-authenticate-page-container container-fluid">
+        <div class="row malarkey-authenticate-page-top-row">
+            <div class="col-md-4"></div>
+            <div class="col-md-4 col-12">
+                <h1 class="malarkey-authenticate-page-header">Sign in with</h1>
+            </div>
+            <div class="col-md-4"></div>
 
-<div>
-    <p>
-
-    </p>
-    @foreach(var img in _images)
-    {
-        <img src="@(img.AsImageDataAttribute)" />
-    }
+        </div>
+    </div>
 </div>
-

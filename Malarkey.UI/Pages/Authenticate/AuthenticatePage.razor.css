@@ -1,0 +1,56 @@
+﻿@media only screen and (max-width: 600px) {
+    .malarkey-authenticate-page-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: url('images/authenticate/background.webp');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
+
+@media only screen and (min-width: 600px) {
+    .malarkey-authenticate-page-bg {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background-image: url('images/authenticate/background-wide.webp');
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+}
+
+
+
+.malarkey-authenticate-page-container {
+    position: absolute;
+    margin-left: 30px;
+    margin-top: 50px;
+    border-radius: 5px;
+    padding-left: 20px;
+    box-shadow: 5px 5px rgba(30,30,30,0.5);
+    background-color: rgba(233,233,233,0.7);
+    max-width: 1000px;
+}
+
+.malarkey-authenticate-page-container ::before {
+    position: absolute;
+    top:0px;
+    left:0px;
+    width:100%;
+    height:100%;
+}
+
+.malarkey-authenticate-page-top-row{
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.malarkey-authenticate-page-header {
+    display: flex;
+    justify-content: center;
+    font-family: 'Papyrus';
+    font-size: 30px;
+    font-weight: 900;
+    color: black;
+}
