@@ -12,6 +12,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Malarkey.Integration.Microsoft\Malarkey.Integration.Microsoft.csproj" />
+    <ProjectReference Include="..\Malarkey.Integration.Facebook\Malarkey.Integration.Facebook.csproj" />
   </ItemGroup>
 
   <ItemGroup>

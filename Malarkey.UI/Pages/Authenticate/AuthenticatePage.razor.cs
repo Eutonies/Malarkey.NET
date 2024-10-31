@@ -21,7 +21,8 @@ public partial class AuthenticatePage
 
     public void OnFacebookClick(MouseEventArgs e)
     {
-        NavManager.NavigateTo("authenticate-microsoft");
+        NavManager.NavigateTo("authenticate-facebook");
+        NavManager.Refresh(forceReload: true);
     }
 
 }

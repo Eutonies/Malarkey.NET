@@ -1,4 +1,5 @@
 ﻿using Malarkey.Integration;
+using Malarkey.Integration.Facebook;
 using Malarkey.Integration.Microsoft;
 using Malarkey.UI.Pages;
 using Microsoft.Identity.Web;
@@ -12,6 +13,7 @@ public static class DependencyInjection
     {
         builder.Configuration.AddJsonFile("appsettings.json");
         builder.Configuration.AddJsonFile("appsettings.local.json", optional: true);
+        builder.AddFacebookConfiguration();
         return builder;
     }
 
@@ -25,6 +27,7 @@ public static class DependencyInjection
             .AddMvcOptions(_ => { })
             .AddMicrosoftIdentityUI();
         builder.Services.AddAppEntraIdIdentityProvider(builder.Configuration);
+        builder.AddFacebookIdentityProvider();
         builder.Services.AddAuthenticatedAuthorizationPolicy();
         builder.Services.AddAntiforgery();
         builder.Services.AddCascadingAuthenticationState();

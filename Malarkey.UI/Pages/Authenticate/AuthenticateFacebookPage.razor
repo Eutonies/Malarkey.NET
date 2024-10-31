@@ -1,0 +1,16 @@
+﻿@page "/authenticate-facebook"
+@using Malarkey.Integration
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Identity.Web
+@using Malarkey.Integration.Facebook;
+@using Scops = Malarkey.Integration.Facebook.FacebookIntegrationConstants.Scopes;
+@attribute [Authorize(Policy = IntegrationConstants.AuthorizationPolicies.IsAuthenticatedName)]
+@attribute [AuthorizeForScopes(Scopes = [Scops.PublicProfile, Scops.Email])]
+
+
+<div>
+    <p>
+
+    </p>
+</div>
+

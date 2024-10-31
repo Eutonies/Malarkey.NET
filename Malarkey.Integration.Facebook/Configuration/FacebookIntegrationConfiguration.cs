@@ -7,9 +7,7 @@ using System.Threading.Tasks;
 namespace Malarkey.Integration.Facebook.Configuration;
 public class FacebookIntegrationConfiguration
 {
-    public string ClientId { get; set; }
-    public string ClientSecret { get; set; }
-    public string CallbackPath { get; set; }
 
+    public FacebookIntegrationIdentityConfiguration Identity { get; set; }
 
 }
