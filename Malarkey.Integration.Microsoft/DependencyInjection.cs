@@ -29,8 +29,8 @@ public static class DependencyInjection
     public static IServiceCollection AddAppEntraIdIdentityProvider(this IServiceCollection services, IConfiguration config)
     {
         var withAuth = services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme);
-
-        var withIdentityWebApp = withAuth.AddMicrosoftIdentityWebApp(config.GetSection(MicrosoftEntraIdConstants.AzureAdConfigurationName));
+        var azureAdConfig = config.GetSection(MicrosoftEntraIdConstants.AzureAdConfigurationName);
+        var withIdentityWebApp = withAuth.AddMicrosoftIdentityWebApp(azureAdConfig);
             
             /*services.AddMicrosoftIdentityWebAppAuthentication(
             configuration: config.GetSection(MicrosoftEntraIdConstants.MicrosoftConfigurationName),

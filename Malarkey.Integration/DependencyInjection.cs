@@ -15,7 +15,12 @@ public static class DependencyInjection
         {
             opts.AddPolicy(IntegrationConstants.AuthorizationPolicies.IsAuthenticatedName, pol =>
             {
-                pol.RequireAuthenticatedUser();
+                pol.RequireAssertion(cont =>
+                {
+                    var identities = cont.User.Identities;
+                    var returnee = cont.User.Identities.Any(_ => _.IsAuthenticated);
+                    return returnee;
+                });
             });
         });
         return services;
