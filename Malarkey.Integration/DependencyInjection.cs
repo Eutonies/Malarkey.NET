@@ -13,13 +13,25 @@ public static class DependencyInjection
     {
         services.AddAuthorization(opts =>
         {
-            opts.AddPolicy(IntegrationConstants.AuthorizationPolicies.IsAuthenticatedName, pol =>
+            opts.AddPolicy(IntegrationConstants.AuthorizationPolicies.MicrosoftIsAuthenticatedPolicyName, pol =>
             {
                 pol.RequireAssertion(cont =>
                 {
-                    var identities = cont.User.Identities;
-                    var returnee = cont.User.Identities.Any(_ => _.IsAuthenticated);
-                    return returnee;
+                    foreach(var identity in cont.User.Identities)
+                    {
+                        foreach(var claim in identity.Claims.Where(_ => _.Type.ToLower().StartsWith(IntegrationConstants.IdProviders.MicrosoftSchemaClaimName)))
+                        {
+                            return identity.IsAuthenticated;
+                        }
+                    }
+                    return false;
+                });
+            });
+            opts.AddPolicy(IntegrationConstants.AuthorizationPolicies.FacebookIsAuthenticatedPolicyName, pol =>
+            {
+                pol.RequireAssertion(cont =>
+                {
+                    return false;
                 });
             });
         });

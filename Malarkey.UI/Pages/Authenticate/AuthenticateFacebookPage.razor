@@ -4,7 +4,9 @@
 @using Microsoft.Identity.Web
 @using Malarkey.Integration.Facebook;
 @using Scops = Malarkey.Integration.Facebook.FacebookIntegrationConstants.Scopes;
-@attribute [Authorize(Policy = IntegrationConstants.AuthorizationPolicies.IsAuthenticatedName)]
+@attribute [Authorize( 
+    AuthenticationSchemes = IntegrationConstants.IdProviders.FacebookAuthenticationSchemeName,
+    Policy = IntegrationConstants.AuthorizationPolicies.FacebookIsAuthenticatedPolicyName)]
 @attribute [AuthorizeForScopes(Scopes = [Scops.PublicProfile, Scops.Email])]
 
 

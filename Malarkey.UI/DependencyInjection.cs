@@ -2,6 +2,8 @@
 using Malarkey.Integration.Facebook;
 using Malarkey.Integration.Microsoft;
 using Malarkey.UI.Pages;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 
@@ -26,8 +28,12 @@ public static class DependencyInjection
         builder.Services.AddRazorPages()
             .AddMvcOptions(_ => { })
             .AddMicrosoftIdentityUI();
-        builder.Services.AddAppEntraIdIdentityProvider(builder.Configuration);
-        builder.AddFacebookIdentityProvider();
+        builder.Services.AddAuthentication(opts =>
+        {
+            opts.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+        })
+            .AddMicrsoftIdentityProvider(builder.Configuration)
+            .AddFacebookIdentityProvider(builder.Configuration);
         builder.Services.AddAuthenticatedAuthorizationPolicy();
         builder.Services.AddAntiforgery();
         builder.Services.AddCascadingAuthenticationState();

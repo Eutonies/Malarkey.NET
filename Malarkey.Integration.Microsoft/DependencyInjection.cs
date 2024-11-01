@@ -1,6 +1,8 @@
 ﻿using Malarkey.Application.ProfileImport;
 using Malarkey.Domain.ProfileImport;
+using Malarkey.Integration.Microsoft.Configuration;
 using Malarkey.Integration.Microsoft.ProfileImport;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
@@ -26,9 +28,25 @@ public static class DependencyInjection
         return services;
     }
 
+    public static AuthenticationBuilder AddMicrsoftIdentityProvider(this AuthenticationBuilder builder, IConfiguration config)
+    {
+        var microConf = config.Parse();
+        var azConf = microConf.AzureAd;
+        builder.AddMicrosoftAccount(IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName, opts =>
+        {
+            opts.ClientId = azConf.ClientId;
+            opts.ClientSecret = azConf.ClientSecret;
+            opts.CallbackPath = azConf.CallbackPath;
+        });
+        return builder;
+    }
+
+
     public static IServiceCollection AddAppEntraIdIdentityProvider(this IServiceCollection services, IConfiguration config)
     {
-        var withAuth = services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme);
+        var withAuth = services.AddAuthentication(opts =>
+        {
+        });
         var azureAdConfig = config.GetSection(MicrosoftEntraIdConstants.AzureAdConfigurationName);
         var withIdentityWebApp = withAuth.AddMicrosoftIdentityWebApp(azureAdConfig);
             
@@ -48,5 +66,13 @@ public static class DependencyInjection
         services.AddScoped<IProfileImporter<MicrosoftImportProfile>, MicrosoftProfileImporter>();
         return services;
     }
+
+    private static MicrosoftIntegrationConfiguration Parse(this IConfiguration config)
+    {
+        var returnee = new MicrosoftIntegrationConfiguration();
+        config.Bind(MicrosoftIntegrationConfiguration.ConfigurationElementName, returnee);
+        return returnee;
+    }
+
 
 }

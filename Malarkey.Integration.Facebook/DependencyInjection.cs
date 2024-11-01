@@ -31,7 +31,7 @@ public static class DependencyInjection
     public static AuthenticationBuilder AddFacebookIdentityProvider(this AuthenticationBuilder builder, IConfiguration config)
     {
         var conf = config.FacebookConfig();
-        builder.AddFacebook(opts =>
+        builder.AddFacebook(IntegrationConstants.IdProviders.FacebookAuthenticationSchemeName, opts =>
         {
             opts.AppId = conf.Identity.AppId;
             opts.AppSecret = conf.Identity.ClientSecret;
