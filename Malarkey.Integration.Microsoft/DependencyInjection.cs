@@ -37,7 +37,16 @@ public static class DependencyInjection
             opts.ClientId = azConf.ClientId;
             opts.ClientSecret = azConf.ClientSecret;
             opts.CallbackPath = azConf.CallbackPath;
+            opts.CorrelationCookie.Name = "microsoft-auth";
+            opts.TokenEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
+            opts.AuthorizationEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
         });
+        var azureAdConfig = config.GetSection(MicrosoftEntraIdConstants.AzureAdConfigurationName);
+        var withIdentityWebApp = builder.AddMicrosoftIdentityWebApp(azureAdConfig, cookieScheme: "azure-ad-cookies");
+        var withDownstream = withIdentityWebApp.EnableTokenAcquisitionToCallDownstreamApi(MicrosoftEntraIdConstants.GraphScopes.All);
+        var withGraph = withDownstream.AddMicrosoftGraph(config.GetSection(MicrosoftEntraIdConstants.GraphApiConfigurationName));
+        var withCache = withGraph.AddInMemoryTokenCaches();
+        builder.Services.AddServices();
         return builder;
     }
 
@@ -57,7 +66,6 @@ public static class DependencyInjection
         var withDownstream = withIdentityWebApp.EnableTokenAcquisitionToCallDownstreamApi(MicrosoftEntraIdConstants.GraphScopes.All);
         var withGraph = withDownstream.AddMicrosoftGraph(config.GetSection(MicrosoftEntraIdConstants.GraphApiConfigurationName));
         var withCache = withGraph.AddInMemoryTokenCaches();
-        services.AddServices();
         return services;
     }
 

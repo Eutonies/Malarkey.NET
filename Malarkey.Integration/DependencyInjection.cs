@@ -17,12 +17,11 @@ public static class DependencyInjection
             {
                 pol.RequireAssertion(cont =>
                 {
-                    foreach(var identity in cont.User.Identities)
+                    foreach(var ident in cont.User.Identities)
                     {
-                        foreach(var claim in identity.Claims.Where(_ => _.Type.ToLower().StartsWith(IntegrationConstants.IdProviders.MicrosoftSchemaClaimName)))
-                        {
-                            return identity.IsAuthenticated;
-                        }
+                        if (ident.AuthenticationType == IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName && ident.IsAuthenticated)
+                            return true;
+
                     }
                     return false;
                 });
@@ -31,6 +30,11 @@ public static class DependencyInjection
             {
                 pol.RequireAssertion(cont =>
                 {
+                    foreach(var ident in cont.User.Identities)
+                    {
+                        if (ident.AuthenticationType == IntegrationConstants.IdProviders.FacebookAuthenticationSchemeName && ident.IsAuthenticated)
+                            return true;
+                    }
                     return false;
                 });
             });

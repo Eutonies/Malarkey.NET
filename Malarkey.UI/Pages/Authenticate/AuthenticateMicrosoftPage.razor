@@ -3,7 +3,10 @@
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.Identity.Web
 @using Scops = Malarkey.Integration.Microsoft.MicrosoftEntraIdConstants.GraphScopes;
-@attribute [Authorize(Policy = IntegrationConstants.AuthorizationPolicies.MicrosoftIsAuthenticatedPolicyName)]
+@attribute [Authorize(
+    AuthenticationSchemes = IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName,    
+    Policy = IntegrationConstants.AuthorizationPolicies.MicrosoftIsAuthenticatedPolicyName)
+]
 @attribute [AuthorizeForScopes(Scopes = [Scops.OpenId, Scops.ReadContacts, Scops.ReadUser, Scops.Profile])]
 
 

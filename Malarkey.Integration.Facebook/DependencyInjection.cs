@@ -35,7 +35,11 @@ public static class DependencyInjection
         {
             opts.AppId = conf.Identity.AppId;
             opts.AppSecret = conf.Identity.ClientSecret;
-            opts.AuthorizationEndpoint = conf.Identity.CallbackPath;
+            opts.CallbackPath = conf.Identity.CallbackPath;
+            opts.CorrelationCookie.Name = "facebook-auth";
+            opts.AccessDeniedPath = "/authentication";
+            opts.Scope.Add(FacebookIntegrationConstants.Scopes.Email);
+            opts.Scope.Add(FacebookIntegrationConstants.Scopes.PublicProfile);
         });
 
         return builder;
