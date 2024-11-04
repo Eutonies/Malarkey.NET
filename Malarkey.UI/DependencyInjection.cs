@@ -34,11 +34,9 @@ public static class DependencyInjection
             opts.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
             opts.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
         })
-            .AddCookie(opts =>
-            {
-            })
             .AddMicrsoftIdentityProvider(builder.Configuration)
-            .AddFacebookIdentityProvider(builder.Configuration);
+            .AddFacebookIdentityProvider(builder.Configuration)
+            .AddCookie();
         builder.Services.AddAuthenticatedAuthorizationPolicy();
         builder.Services.AddAntiforgery();
         builder.Services.AddCascadingAuthenticationState();

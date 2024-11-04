@@ -10,6 +10,6 @@ public class MicrosoftIntegrationConfiguration
     public const string ConfigurationElementName = $"{IntegrationConstants.IntegrationConfigurationName}:Microsoft";
 
     public MicrosoftIdentityProviderConfiguration AzureAd { get; set; }
-
+    public MicrosoftDownstreamApisConfiguration DownstreamApis { get; set; }
 
 }

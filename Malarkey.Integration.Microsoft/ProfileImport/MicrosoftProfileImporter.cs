@@ -16,7 +16,9 @@ internal class MicrosoftProfileImporter : IProfileImporter<MicrosoftImportProfil
 
     public async Task<MicrosoftImportProfile?> LoadForImport()
     {
-        var user = await _graphClient.Me.GetAsync();
+        var user = await _graphClient.Me.GetAsync(opts => { 
+        
+        });
         var userPhoto = await _graphClient.Me.Photo.GetAsync();
         var photos = await _graphClient.Me.Photos.GetAsync();
         var contacts = await _graphClient.Me.Contacts.GetAsync();
