@@ -28,18 +28,10 @@ public static class DependencyInjection
         var microConf = config.Parse();
         var azConf = microConf.AzureAd;
         var graphConf = microConf.DownstreamApis.MicrosoftGraph;
-        builder.AddMicrosoftAccount(IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName, opts =>
-        {
-            opts.ClientId = azConf.ClientId;
-            opts.ClientSecret = azConf.ClientSecret;
-            opts.CallbackPath = azConf.CallbackPath;
-            opts.CorrelationCookie.Name = "microsoft-auth";
-            opts.TokenEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
-            opts.AuthorizationEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
-        });
         var azureAdConfig = config.GetSection(MicrosoftEntraIdConstants.MicrosoftConfigurationName);
         var withIdentityWebApp = builder.AddMicrosoftIdentityWebApp(azureAdConfig, 
             configSectionName: "AzureAd",
+            openIdConnectScheme: IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName,
             cookieScheme: IntegrationConstants.IdProviders.MicrosoftIdCookieName);
         var withDownstream = withIdentityWebApp.EnableTokenAcquisitionToCallDownstreamApi(
             opts => { 
@@ -53,7 +45,11 @@ public static class DependencyInjection
         var withCache = withDownstream.AddInMemoryTokenCaches();
         var withGraph = withCache.AddMicrosoftGraph((IAuthenticationProvider provider) =>
         {
-            var sharedTokenCacheCredential = new SharedTokenCacheCredential();
+            var sharedTokenCacheCredential = new SharedTokenCacheCredential(new SharedTokenCacheCredentialOptions
+            {
+                ClientId = azConf.ClientId,
+                TenantId = azConf.TenantId
+            });
             var client = new GraphServiceClient(sharedTokenCacheCredential, scopes: graphConf.Scopes, baseUrl: graphConf.BaseUrl);
             return client;
         }, graphConf.Scopes);

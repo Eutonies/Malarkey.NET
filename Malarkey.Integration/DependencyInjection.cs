@@ -19,7 +19,7 @@ public static class DependencyInjection
                 {
                     foreach(var ident in cont.User.Identities)
                     {
-                        if (ident.AuthenticationType == IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName && ident.IsAuthenticated)
+                        if (ident.Claims.Any(_ => _.Issuer.Contains("login.microsoftonline.com") && ident.IsAuthenticated))
                             return true;
 
                     }
