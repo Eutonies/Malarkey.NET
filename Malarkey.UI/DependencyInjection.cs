@@ -29,14 +29,9 @@ public static class DependencyInjection
         builder.Services.AddRazorPages()
             .AddMvcOptions(_ => { })
             .AddMicrosoftIdentityUI();
-        builder.Services.AddAuthentication(opts =>
-        {
-            opts.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-            opts.DefaultChallengeScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-        })
-            .AddMicrsoftIdentityProvider(builder.Configuration)
-            .AddFacebookIdentityProvider(builder.Configuration)
-            .AddCookie();
+        builder
+            .AddMicrsoftIdentityProvider()
+            .AddFacebookIdentityProvider();
         builder.Services.AddAuthenticatedAuthorizationPolicy();
         builder.Services.AddAntiforgery();
         builder.Services.AddCascadingAuthenticationState();

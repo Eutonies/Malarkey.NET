@@ -45,6 +45,27 @@ public static class DependencyInjection
         return builder;
     }
 
+
+    public static WebApplicationBuilder AddFacebookIdentityProvider(this WebApplicationBuilder builder, IConfiguration config)
+    {
+        var conf = config.FacebookConfig();
+        builder.Services
+            .AddAuthentication()
+            .AddFacebook(IntegrationConstants.IdProviders.FacebookAuthenticationSchemeName, opts =>
+        {
+            opts.AppId = conf.Identity.AppId;
+            opts.AppSecret = conf.Identity.ClientSecret;
+            opts.CallbackPath = conf.Identity.CallbackPath;
+            opts.CorrelationCookie.Name = "facebook-auth";
+            opts.AccessDeniedPath = "/authentication";
+            opts.Scope.Add(FacebookIntegrationConstants.Scopes.Email);
+            opts.Scope.Add(FacebookIntegrationConstants.Scopes.PublicProfile);
+        });
+
+        return builder;
+    }
+
+
     private static FacebookIntegrationConfiguration FacebookConfig(this IConfiguration conf)
     {
         var returnee = new FacebookIntegrationConfiguration();

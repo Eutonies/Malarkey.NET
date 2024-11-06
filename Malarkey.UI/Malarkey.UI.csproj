@@ -8,8 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="8.0.10" />
-    <PackageReference Include="Microsoft.Identity.Web.Certificate" Version="3.3.0" />
-    <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.2.2" />
+    <PackageReference Include="Microsoft.Identity.Web.Certificate" Version="3.3.1" />
+    <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.3.1" />
   </ItemGroup>
 
   <ItemGroup>
