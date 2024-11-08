@@ -1,5 +1,6 @@
 ﻿using Malarkey.Integration;
 using Malarkey.Integration.Facebook;
+using Malarkey.Integration.Google;
 using Malarkey.Integration.Microsoft;
 using Malarkey.UI.Pages;
 using Microsoft.AspNetCore.Authentication;
@@ -31,7 +32,8 @@ public static class DependencyInjection
             .AddMicrosoftIdentityUI();
         builder
             .AddMicrsoftIdentityProvider()
-            .AddFacebookIdentityProvider();
+            .AddFacebookIdentityProvider()
+            .AddGoogleIdentityProvider();
         builder.Services.AddAuthenticatedAuthorizationPolicy();
         builder.Services.AddAntiforgery();
         builder.Services.AddCascadingAuthenticationState();
@@ -40,6 +42,7 @@ public static class DependencyInjection
 
     public static WebApplication UseUiServices(this WebApplication app)
     {
+        app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
 

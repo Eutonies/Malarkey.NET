@@ -22,6 +22,14 @@ public static class DependencyInjectionIntegration
             {
                 pol.RequireAssertion(cont => cont.User.IsAuthenticatedFacebookUser());
             });
+            opts.AddPolicy(IntegrationConstants.AuthorizationPolicies.GoogleIsAuthenticatedPolicyName, pol =>
+            {
+                pol.RequireAssertion(cont =>
+                {
+                    var tess = cont.User;
+                    return true;
+                });
+            });
         });
         return services;
     }

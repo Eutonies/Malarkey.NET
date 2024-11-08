@@ -16,7 +16,8 @@ public partial class AuthenticatePage
 
     public void OnGoogleClick(MouseEventArgs e)
     {
-        NavManager.NavigateTo("authenticate-microsoft");
+        NavManager.NavigateTo("authenticate-google");
+        NavManager.Refresh(forceReload: true);
     }
 
     public void OnFacebookClick(MouseEventArgs e)

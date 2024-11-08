@@ -1,0 +1,21 @@
+﻿@page "/authenticate-google"
+@using Malarkey.Integration
+@using Microsoft.AspNetCore.Authorization
+@using Microsoft.Identity.Web
+@using Scops = Malarkey.Integration.Google.GoogleIntegrationConstants.Scopes;
+@attribute [Authorize( 
+    AuthenticationSchemes = IntegrationConstants.IdProviders.GoogleAuthenticationSchemeName,
+    Policy = IntegrationConstants.AuthorizationPolicies.GoogleIsAuthenticatedPolicyName)
+]
+@attribute [AuthorizeForScopes(
+    AuthenticationScheme = IntegrationConstants.IdProviders.GoogleAuthenticationSchemeName,
+    Scopes = [Scops.UserProfile, Scops.Email])
+]
+
+
+<div>
+    <p>
+
+    </p>
+</div>
+
