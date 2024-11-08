@@ -12,4 +12,11 @@ public class MicrosoftIntegrationConfiguration
     public MicrosoftIdentityProviderConfiguration AzureAd { get; set; }
     public MicrosoftDownstreamApisConfiguration DownstreamApis { get; set; }
 
+    public void WriteTo(MicrosoftIntegrationConfiguration other)
+    {
+        other.AzureAd = AzureAd;
+        other.DownstreamApis = DownstreamApis;
+    }
+
+
 }

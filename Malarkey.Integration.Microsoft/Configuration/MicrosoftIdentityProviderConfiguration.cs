@@ -11,7 +11,7 @@ public class MicrosoftIdentityProviderConfiguration : IdentityProviderConfigurat
     public string Instance { get; set; }
     public string TenantId { get; set; }
     public string[] ClientCapabilities { get; set; }
-    public MicrsoftClientCertificateConfiguration[] ClientCertificates { get; set; }
+    public MicrosoftClientCertificateConfiguration[] ClientCertificates { get; set; }
 
 
 

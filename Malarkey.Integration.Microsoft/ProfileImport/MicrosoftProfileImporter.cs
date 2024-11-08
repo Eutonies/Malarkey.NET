@@ -1,8 +1,17 @@
-﻿using Malarkey.Application.ProfileImport;
+﻿using Azure.Identity;
+using Malarkey.Application.ProfileImport;
 using Malarkey.Domain.ProfileImport;
+using Malarkey.Integration.Microsoft.Configuration;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using Microsoft.Graph;
 using Microsoft.Graph.Models;
+using Microsoft.Identity.Web;
+using Microsoft.IdentityModel.Tokens;
 using Microsoft.Kiota.Abstractions.Serialization;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Malarkey.Integration.Microsoft.ProfileImport;
 internal class MicrosoftProfileImporter : IProfileImporter<MicrosoftImportProfile>
@@ -78,6 +87,54 @@ internal class MicrosoftProfileImporter : IProfileImporter<MicrosoftImportProfil
         {
             return null;
         }
+    }
+}
+
+
+public static class MicrosoftProfileImporterFactory
+{
+    public static async Task<IProfileImporter<MicrosoftImportProfile>?> Create(
+        this IServiceProvider serviceProvider,
+        AuthenticationStateProvider authenticationStateProvider,
+        HttpContext httpContext)
+    {
+        var currentUser = (await authenticationStateProvider.GetAuthenticationStateAsync())?.User;
+        if(currentUser == null || !currentUser.IsAuthenticatedMicrosoftUser())
+            return null;
+        var microConf = serviceProvider.GetRequiredService<IOptions<MicrosoftIntegrationConfiguration>>().Value;
+        var azConf = microConf.AzureAd;
+
+
+        var tokenAqcuisition = serviceProvider.GetRequiredService<ITokenAcquisition>();
+        var graphConf = microConf.DownstreamApis.MicrosoftGraph;
+        var accessToken = await tokenAqcuisition.GetAccessTokenForUserAsync(
+            scopes: [],
+            authenticationScheme: IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName,
+            tenantId: azConf.TenantId,
+            user: currentUser);
+        Console.WriteLine(accessToken);
+        var jwtToken  = new JwtSecurityTokenHandler().ReadToken(accessToken);
+        Console.WriteLine("\r\n\r\n" + jwtToken.UnsafeToString());
+
+        var credential = new OnBehalfOfCredential(
+            tenantId: azConf.TenantId,
+            clientId: azConf.ClientId,
+            clientCertificate: azConf.ClientCertificates.First().AsCertificate,
+            userAssertion: jwtToken.ToString());
+
+        var client = new GraphServiceClient(credential, graphConf.Scopes);
+        var returnee = new MicrosoftProfileImporter(client);
+        return returnee;
+
+    }
+
+
+    private static void TryParseToken(string input)
+    {
+        var providers = new List<SecurityTokenHandler>
+        {
+            new JwtSecurityTokenHandler()
+        };
     }
 
 

@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Components;
 using Malarkey.Application.ProfileImport;
 using Malarkey.Domain.ProfileImport;
+using Malarkey.Integration.Microsoft.ProfileImport;
 
 namespace Malarkey.UI.Pages.Authenticate;
 
@@ -11,8 +12,10 @@ public partial class AuthenticateMicrosoftPage
     public AuthenticationStateProvider AuthenticationStateProvider { get; set; }
 
     [Inject]
-    public IProfileImporter<MicrosoftImportProfile> ProfileImporter { get; set; }
+    public IServiceScopeFactory ScopeFactory { get; set; }
 
+    [Inject]
+    public IHttpContextAccessor ContextAccessor { get; set; }
 
     private string? _profilePhoto;
     private IReadOnlyCollection<ImportImage> _images = [];
@@ -25,10 +28,15 @@ public partial class AuthenticateMicrosoftPage
         {
             var user = authState.User;
             var identity = user.Identity;
-            var profile = await ProfileImporter.LoadForImport();
-            if(profile?.Images != null)
-               _images = profile.Images.ToList();
-            await InvokeAsync(StateHasChanged);
+            using var scope = ScopeFactory.CreateScope();
+            var profileService = await scope.ServiceProvider.Create(AuthenticationStateProvider, ContextAccessor.HttpContext!);
+            if (profileService != null)
+            {
+                var profile = await profileService.LoadForImport();
+                if (profile?.Images != null)
+                    _images = profile.Images.ToList();
+                await InvokeAsync(StateHasChanged);
+            }
         }
 
     }
