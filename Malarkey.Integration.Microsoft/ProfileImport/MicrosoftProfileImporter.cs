@@ -120,7 +120,6 @@ public static class MicrosoftProfileImporterFactory
             authenticationScheme: IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName,
             tenantId: azConf.TenantId,
             user: currentUser);
-        TryParseToken(accessToken, microConf);
         var jwtToken  = new JwtSecurityTokenHandler().ReadToken(accessToken);
 
         var credential = new OnBehalfOfCredential(
@@ -134,40 +133,5 @@ public static class MicrosoftProfileImporterFactory
         return returnee;
 
     }
-
-
-    private static void TryParseToken(string input, MicrosoftIntegrationConfiguration conf)
-    {
-        Console.WriteLine(input);
-        var bytes = Convert.FromBase64String(input);
-        var stringVal = Encoding.ASCII.GetString(bytes);
-
-        var cert = conf.AzureAd.ClientCertificates.First().AsCertificate;
-        var key = cert.GetRSAPrivateKey()!;
-
-        var paddings = new List<RSAEncryptionPadding>();
-        var typ = typeof(RSAEncryptionPadding);
-        var props = typ.GetProperties().ToList();
-        var statics = props.ToList();
-        var padders = statics.Where(_ => _.PropertyType == typeof(RSAEncryptionPadding)).ToList();
-        foreach (var fld in padders)
-            paddings.Add(fld.GetValue(null) as RSAEncryptionPadding);
-        foreach(var padd in paddings)
-        {
-            try
-            {
-                var decrypted = key.Decrypt(bytes, padd);
-                var tess = "";
-
-            }
-            catch (Exception ex) {
-            }
-
-        }
-
-
-    }
-
-
 
 }
