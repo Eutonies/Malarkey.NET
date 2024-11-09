@@ -1,4 +1,5 @@
 ﻿using Malarkey.Integration.Google.Configuration;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
@@ -15,11 +16,18 @@ public static class DependencyInjectionIntegrationGoogle
 
     public static WebApplicationBuilder AddGoogleIdentityProvider(this WebApplicationBuilder builder)
     {
-        var googleConf = builder.Configuration.Parse();
+        builder.Services
+            .AddAuthentication()
+            .AddGoogleIdentityProvider(builder.Configuration);
+        return builder;
+    }
+
+
+    public static AuthenticationBuilder AddGoogleIdentityProvider(this AuthenticationBuilder builder, IConfiguration config)
+    {
+        var googleConf = config.Parse();
         var idConf = googleConf.Identity;
-        var withAuth = builder.Services
-            .AddAuthentication();
-        var withGoogle = withAuth
+        var withGoogle = builder
             .AddGoogle(
                authenticationScheme: IntegrationConstants.IdProviders.GoogleAuthenticationSchemeName,
                configureOptions: opts =>
@@ -29,13 +37,15 @@ public static class DependencyInjectionIntegrationGoogle
                    opts.ClientSecret = idConf.ClientSecret;
                    opts.AuthorizationEndpoint = idConf.AuthenticationUri;
                    opts.TokenEndpoint = idConf.TokenUri;
-                   foreach(var scop in idConf.Scopes)
-                      opts.Scope.Add(scop);
+                   foreach (var scop in idConf.Scopes)
+                       opts.Scope.Add(scop);
                }
             );
         builder.Services.AddServices();
         return builder;
     }
+
+
 
 
     private static IServiceCollection AddServices(this IServiceCollection services)

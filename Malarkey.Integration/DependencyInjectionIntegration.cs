@@ -24,11 +24,7 @@ public static class DependencyInjectionIntegration
             });
             opts.AddPolicy(IntegrationConstants.AuthorizationPolicies.GoogleIsAuthenticatedPolicyName, pol =>
             {
-                pol.RequireAssertion(cont =>
-                {
-                    var tess = cont.User;
-                    return true;
-                });
+                pol.RequireAssertion(cont => cont.User.IsAuthenticatedGoogleUser());
             });
         });
         return services;

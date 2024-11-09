@@ -1,7 +1,10 @@
-﻿using Azure.Identity;
+﻿using Azure.Core;
+using Azure.Identity;
 using Malarkey.Application.ProfileImport;
 using Malarkey.Domain.ProfileImport;
 using Malarkey.Integration.Microsoft.Configuration;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -12,6 +15,10 @@ using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Kiota.Abstractions.Serialization;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Text.Unicode;
 
 namespace Malarkey.Integration.Microsoft.ProfileImport;
 internal class MicrosoftProfileImporter : IProfileImporter<MicrosoftImportProfile>
@@ -107,14 +114,14 @@ public static class MicrosoftProfileImporterFactory
 
         var tokenAqcuisition = serviceProvider.GetRequiredService<ITokenAcquisition>();
         var graphConf = microConf.DownstreamApis.MicrosoftGraph;
+        var acqOptions = new TokenAcquisitionOptions { };
         var accessToken = await tokenAqcuisition.GetAccessTokenForUserAsync(
             scopes: [],
             authenticationScheme: IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName,
             tenantId: azConf.TenantId,
             user: currentUser);
-        Console.WriteLine(accessToken);
+        TryParseToken(accessToken, microConf);
         var jwtToken  = new JwtSecurityTokenHandler().ReadToken(accessToken);
-        Console.WriteLine("\r\n\r\n" + jwtToken.UnsafeToString());
 
         var credential = new OnBehalfOfCredential(
             tenantId: azConf.TenantId,
@@ -129,12 +136,36 @@ public static class MicrosoftProfileImporterFactory
     }
 
 
-    private static void TryParseToken(string input)
+    private static void TryParseToken(string input, MicrosoftIntegrationConfiguration conf)
     {
-        var providers = new List<SecurityTokenHandler>
+        Console.WriteLine(input);
+        var bytes = Convert.FromBase64String(input);
+        var stringVal = Encoding.ASCII.GetString(bytes);
+
+        var cert = conf.AzureAd.ClientCertificates.First().AsCertificate;
+        var key = cert.GetRSAPrivateKey()!;
+
+        var paddings = new List<RSAEncryptionPadding>();
+        var typ = typeof(RSAEncryptionPadding);
+        var props = typ.GetProperties().ToList();
+        var statics = props.ToList();
+        var padders = statics.Where(_ => _.PropertyType == typeof(RSAEncryptionPadding)).ToList();
+        foreach (var fld in padders)
+            paddings.Add(fld.GetValue(null) as RSAEncryptionPadding);
+        foreach(var padd in paddings)
         {
-            new JwtSecurityTokenHandler()
-        };
+            try
+            {
+                var decrypted = key.Decrypt(bytes, padd);
+                var tess = "";
+
+            }
+            catch (Exception ex) {
+            }
+
+        }
+
+
     }
 
 

@@ -4,6 +4,7 @@ using Malarkey.Domain.ProfileImport;
 using Malarkey.Integration.Microsoft.Configuration;
 using Malarkey.Integration.Microsoft.ProfileImport;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
@@ -21,59 +22,70 @@ namespace Malarkey.Integration.Microsoft;
 public static class DependencyInjectionIntegrationMicrosoft
 {
 
-    /*public static AuthenticationBuilder AddMicrsoftIdentityProvider(this AuthenticationBuilder builder, IConfiguration config)
+    public static AuthenticationBuilder AddMicrosoftIdentityProvider(this AuthenticationBuilder builder, IConfiguration config)
     {
         JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+
         var microConf = config.Parse();
         var azConf = microConf.AzureAd;
         var graphConf = microConf.DownstreamApis.MicrosoftGraph;
         var azureAdConfig = config.GetSection(MicrosoftEntraIdConstants.MicrosoftConfigurationName);
-        var withIdentityWebApp = builder.AddMicrosoftIdentityWebApp(azureAdConfig, 
-            configSectionName: "AzureAd",
-            openIdConnectScheme: IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName,
-            cookieScheme: IntegrationConstants.IdProviders.MicrosoftIdCookieName);
-        var withDownstream = withIdentityWebApp.EnableTokenAcquisitionToCallDownstreamApi(MicrosoftEntraIdConstants.GraphScopes.All);
-        var withCache = withDownstream.AddInMemoryTokenCaches();
-        var withGraph = withCache.AddMicrosoftGraph((IAuthenticationProvider prov) => 
-        {
-            var returnee = new GraphServiceClient(prov);
-            return returnee;
-        }, graphConf.Scopes);
-        builder.Services.Configure<GraphServiceClientOptions>(opts =>
-        {
-            var tessa = opts;
-        });
-        builder.Services.AddServices();
-        return builder;
-    }*/
-
-    public static WebApplicationBuilder AddMicrsoftIdentityProvider(this WebApplicationBuilder builder)
-    {
-        JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
-
-        var config = builder.Configuration;
-        var microConf = config.Parse();
-        var azConf = microConf.AzureAd;
-        var graphConf = microConf.DownstreamApis.MicrosoftGraph;
-        var azureAdConfig = config.GetSection(MicrosoftEntraIdConstants.MicrosoftConfigurationName);
-        var withAuth = builder.Services
-            .AddAuthentication();
-        var withIdentityWebApp = withAuth
+        var withIdentityWebApp = builder
             .AddMicrosoftIdentityWebApp(azureAdConfig,
-            configSectionName: "AzureAd",
-            openIdConnectScheme: IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName,
-            cookieScheme: IntegrationConstants.IdProviders.MicrosoftIdCookieName);
+                configSectionName: "AzureAd",
+                openIdConnectScheme: IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName,
+                cookieScheme: IntegrationConstants.IdProviders.MicrosoftIdCookieName,
+                subscribeToOpenIdConnectMiddlewareDiagnosticsEvents: true);
 
+        var acqOpts = new TokenAcquisitionOptions { };
+        //acqOpts.ExtraQueryParameters.Add("response_type", "code id_token");
         var withDownstream = withIdentityWebApp.EnableTokenAcquisitionToCallDownstreamApi(
             configureConfidentialClientApplicationOptions: opts =>
             {
                 opts.EnablePiiLogging = true;
                 opts.LegacyCacheCompatibilityEnabled = false;
-            },
-            []);
+            },            
+            ["openid", "profile", "offline_access"]);
+        builder.Services.AddMicrosoftIdentityConsentHandler();
         var withCache = withDownstream.AddInMemoryTokenCaches();
         builder.Services.Configure<MicrosoftIntegrationConfiguration>(configureOptions: microConf.WriteTo);
         builder.Services.AddServices();
+        return builder;
+    }
+    public static AuthenticationBuilder AddMicrosoftIdentityProviderYO(this AuthenticationBuilder builder, IConfiguration config)
+    {
+        JwtSecurityTokenHandler.DefaultMapInboundClaims = false;
+
+        var microConf = config.Parse();
+        var azConf = microConf.AzureAd;
+        var graphConf = microConf.DownstreamApis.MicrosoftGraph;
+        var azureAdConfig = config.GetSection(MicrosoftEntraIdConstants.MicrosoftConfigurationName);
+        var withMicrosoft = builder
+            .AddMicrosoftAccount(
+               authenticationScheme: IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName,
+               opts =>
+               {
+                   opts.SignInScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                   opts.ClientId = azConf.ClientId;
+                   opts.ClientSecret = azConf.ClientSecret;
+                   opts.CallbackPath = azConf.CallbackPath;
+                   opts.AuthorizationEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/authorize";
+                   opts.TokenEndpoint = "https://login.microsoftonline.com/consumers/oauth2/v2.0/token";
+               });
+        builder.Services.AddMicrosoftIdentityConsentHandler();
+
+        builder.Services.Configure<MicrosoftIntegrationConfiguration>(configureOptions: microConf.WriteTo);
+        builder.Services.AddServices();
+        return builder;
+    }
+
+
+
+    public static WebApplicationBuilder AddMicrosoftIdentityProvider(this WebApplicationBuilder builder)
+    {
+        builder.Services
+            .AddAuthentication()
+            .AddMicrosoftIdentityProvider(builder.Configuration);
         return builder;
     }
 
