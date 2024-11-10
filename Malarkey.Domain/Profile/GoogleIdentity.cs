@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Domain.Profile;
-public sealed record FacebookIdentity(
+public sealed record GoogleIdentity(
     long InternalProfileId,
-    string FacebookId,
+    string GoogleId,
     string Name,
     string? MiddleNames,
     string? LastName

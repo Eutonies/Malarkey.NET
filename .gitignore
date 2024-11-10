@@ -399,3 +399,4 @@ FodyWeavers.xsd
 /resources/certificate/malarkey.key
 /Malarkey.Service/appsettings.local.json
 /Malarkey.UI/appsettings.local.json
+/resources/certificate/malarkey-token.key
