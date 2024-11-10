@@ -6,13 +6,14 @@ using System.Threading.Tasks;
 
 namespace Malarkey.Domain.Profile;
 public sealed record GoogleIdentity(
-    long InternalProfileId,
+    Guid ProfileId,
     string GoogleId,
     string Name,
     string? MiddleNames,
     string? LastName
     ) : ProfileIdentity(
-        InternalProfileId,
+        ProfileId,
+        GoogleId,
         Name,
         MiddleNames,
         LastName

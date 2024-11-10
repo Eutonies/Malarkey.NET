@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 
 namespace Malarkey.Domain.Profile;
 public sealed record MalarkeyProfile(
-    long InternalProfileId,
     Guid ProfileId,
     string ProfileName
     );

@@ -1,6 +1,0 @@
-@Malarkey.Service_HostAddress = http://localhost:5188
-
-GET {{Malarkey.Service_HostAddress}}/weatherforecast/
-Accept: application/json
-
-###

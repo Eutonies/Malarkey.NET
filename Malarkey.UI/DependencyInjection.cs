@@ -3,13 +3,9 @@ using Malarkey.Integration.Facebook;
 using Malarkey.Integration.Google;
 using Malarkey.Integration.Microsoft;
 using Malarkey.UI.Pages;
-using Microsoft.AspNetCore.Authentication;
+using Malarkey.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Authentication.OpenIdConnect;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.Resource;
 using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
 
@@ -46,6 +42,7 @@ public static class DependencyInjection
         builder.Services.AddAuthenticatedAuthorizationPolicy();
         builder.Services.AddAntiforgery();
         builder.Services.AddCascadingAuthenticationState();
+        builder.AddSecurity();
         return builder;
     }
 

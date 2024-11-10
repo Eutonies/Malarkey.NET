@@ -13,8 +13,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Application", "Mal
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration", "Malarkey.Integration\Malarkey.Integration.csproj", "{D8CE544E-293F-4ACF-A680-515532AA6F64}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Service", "Malarkey.Service\Malarkey.Service.csproj", "{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.UI", "Malarkey.UI\Malarkey.UI.csproj", "{46C12AA0-B232-4B98-80DE-FF7149FCC9D0}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration.Facebook", "Malarkey.Integration.Facebook\Malarkey.Integration.Facebook.csproj", "{C2FA1D3C-2DB3-4F6E-8CDE-BED9737E7677}"
@@ -51,10 +49,6 @@ Global
 		{D8CE544E-293F-4ACF-A680-515532AA6F64}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D8CE544E-293F-4ACF-A680-515532AA6F64}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D8CE544E-293F-4ACF-A680-515532AA6F64}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FA66B4BF-69AF-4591-8FAE-8F045CFF0852}.Release|Any CPU.Build.0 = Release|Any CPU
 		{46C12AA0-B232-4B98-80DE-FF7149FCC9D0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{46C12AA0-B232-4B98-80DE-FF7149FCC9D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46C12AA0-B232-4B98-80DE-FF7149FCC9D0}.Release|Any CPU.ActiveCfg = Release|Any CPU

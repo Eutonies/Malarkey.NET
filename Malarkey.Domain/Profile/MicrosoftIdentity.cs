@@ -7,14 +7,15 @@ using System.Threading.Tasks;
 namespace Malarkey.Domain.Profile;
 
 public sealed record MicrosoftIdentity(
-    long InternalProfileId,
+    Guid ProfileId,
     string MicrosoftId,
     string PreferredName,
     string Name,
     string? MiddleNames,
     string? LastName
     ) : ProfileIdentity(
-        InternalProfileId,
+        ProfileId,
+        MicrosoftId,
         Name,
         MiddleNames,
         LastName

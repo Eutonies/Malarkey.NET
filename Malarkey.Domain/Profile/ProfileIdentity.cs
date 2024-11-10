@@ -8,19 +8,22 @@ namespace Malarkey.Domain.Profile;
 public abstract record ProfileIdentity
 {
     internal ProfileIdentity(
-        long internalProfileId,
+        Guid profileId,
+        string providerId,
         string firstName,
         string? middleNames,
         string? lastName
         )
     {
-        InternalProfileId = internalProfileId;
+        ProviderId = providerId;
+        ProfileId = profileId;
         FirstName = firstName;
         MiddleNames = middleNames;
         LastName = lastName;
     }
+    public string ProviderId { get; private set; }
 
-    public long InternalProfileId { get; private set; }
+    public Guid ProfileId { get; private set; }
     public string FirstName { get; private set; }
     public string? MiddleNames { get; private set; }
     public string? LastName { get; private set; }
