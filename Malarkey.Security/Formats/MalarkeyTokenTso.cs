@@ -119,7 +119,8 @@ internal static class MalarkeyTokenTsoExtensions
     internal static TPart DeserializeToTokenPart<TPart>(this string str) =>
         JsonSerializer.Deserialize<TPart>(str.FromBase64())!;
 
-    internal static string FromBase64(this string str) => Encoding.UTF8.GetString(Convert.FromBase64String(str));
+    internal static string FromBase64(this string str) => 
+        Encoding.UTF8.GetString(Convert.FromBase64String(str));
 
 
     internal static MalarkeyTokenTso DeserializeToMalarkeyToken(this string str) => str.Split('.') switch
@@ -131,7 +132,7 @@ internal static class MalarkeyTokenTsoExtensions
             )
     };
 
-    internal static DateTime ParseJwtTime(this string str) => DateTime.UnixEpoch.AddSeconds(long.Parse(str));
+    internal static DateTime ParseJwtTime(this string str) => DateTime.UnixEpoch.AddSeconds(long.Parse(str)).ToUniversalTime();
 
     internal static long ToJwtTime(this DateTime tim) => (long) (tim - DateTime.UnixEpoch).TotalSeconds;
 
@@ -147,7 +148,7 @@ internal static class MalarkeyTokenTsoExtensions
         string receiver, 
         DateTime expiresAt,
         Guid tokenId) => new MalarkeyTokenPayloadTso(
-                iat: DateTime.Now.ToJwtTime().ToString(),
+                iat: MalarkeySecurityConstants.Now.ToJwtTime().ToString(),
                 sub: profile.ProfileId.ToString(),
                 aud: receiver,
                 name: profile.ProfileName,
@@ -161,7 +162,7 @@ internal static class MalarkeyTokenTsoExtensions
         DateTime expiresAt,
         Guid tokenId
         ) =>  new MalarkeyTokenPayloadTso(
-                iat: DateTime.Now.ToJwtTime().ToString(),
+                iat: MalarkeySecurityConstants.Now.ToJwtTime().ToString(),
                 sub: ident.ProfileId.ToString(),
                 aud: receiver,
                 name: ident.FirstName,

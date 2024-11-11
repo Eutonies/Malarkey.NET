@@ -3,6 +3,7 @@ using Malarkey.Domain.Profile;
 using Malarkey.Domain.Token;
 using Malarkey.Security.Configuration;
 using Malarkey.Security.Formats;
+using Malarkey.Security.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -38,12 +39,13 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     }
     public async Task<(MalarkeyProfileToken Token, string TokenString)> IssueToken(MalarkeyProfile profile, string receiverPublicKey)
     {
+        receiverPublicKey = receiverPublicKey.CleanCertificate();
         await Task.CompletedTask;
         var token = new MalarkeyProfileToken(
             TokenId: Guid.NewGuid(),
             IssuedTo: receiverPublicKey,
-            IssuedAt: DateTime.Now,
-            ValidUntil: DateTime.Now + MalarkeySecurityConstants.TokenLifeTime,
+            IssuedAt: MalarkeySecurityConstants.Now,
+            ValidUntil: MalarkeySecurityConstants.Now + MalarkeySecurityConstants.TokenLifeTime,
             Profile: profile
             );
         var payload = profile.ToPayloadTso(receiverPublicKey, expiresAt: token.ValidUntil, token.TokenId);
@@ -54,12 +56,13 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
 
     public async Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(ProfileIdentity identity, string receiverPublicKey)
     {
+        receiverPublicKey = receiverPublicKey.CleanCertificate();
         await Task.CompletedTask;
         var token = new MalarkeyIdentityToken(
             TokenId: Guid.NewGuid(),
             IssuedTo: receiverPublicKey,
-            IssuedAt: DateTime.Now,
-            ValidUntil: DateTime.Now + MalarkeySecurityConstants.TokenLifeTime,
+            IssuedAt: MalarkeySecurityConstants.Now,
+            ValidUntil: MalarkeySecurityConstants.Now + MalarkeySecurityConstants.TokenLifeTime,
         Identity: identity
             );
         var payload = identity.ToPayloadTso(receiverPublicKey, expiresAt: token.ValidUntil, token.TokenId);
@@ -95,6 +98,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     {
         try
         {
+            receiver= receiver.CleanCertificate();
             var result = await _tokenHandler.ValidateTokenAsync(token, new TokenValidationParameters
             {
                 ValidIssuer = MalarkeySecurityConstants.TokenIssuer,

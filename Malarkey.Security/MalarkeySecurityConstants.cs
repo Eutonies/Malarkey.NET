@@ -11,6 +11,6 @@ internal static class MalarkeySecurityConstants
     internal const string TokenAlgorithm = "RS256";
     internal const string TokenType = "JWT";
     internal static readonly TimeSpan TokenLifeTime = TimeSpan.FromHours(1);
-
+    internal static DateTime Now => DateTime.Now.ToUniversalTime();
 
 }

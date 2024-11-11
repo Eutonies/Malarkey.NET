@@ -23,7 +23,7 @@
         "dotnetRunMessages": true,
         "launchBrowser": true,
         "applicationUrl": "https://localhost/",
-        "launchUrl": "authenticate",
+        "launchUrl": "profile/token",
         "environmentVariables": {
           "ASPNETCORE_ENVIRONMENT": "Development"
         }
