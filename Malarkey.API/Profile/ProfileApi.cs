@@ -1,11 +1,18 @@
 ﻿using Malarkey.API.Common;
 using Malarkey.API.Profile.Model;
+using Malarkey.Application.Profile;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Security.Cryptography.Xml;
+
+
 using System.Text;
 using System.Threading.Tasks;
+using Malarkey.Application.Common;
+using Malarkey.Domain.Profile;
 
 namespace Malarkey.API.Profile;
 internal static class ProfileApi
@@ -14,6 +21,7 @@ internal static class ProfileApi
 
     private static ApiEndpointGroup? _group;
     public static ApiEndpointGroup Group => _group ??= CreateGroup();
+    private static string _sampleReceiver = RSA.Create(2048).ExportRSAPublicKeyPem();
 
     private static ApiEndpointGroup CreateGroup() => new ApiEndpointGroup(
         Name: "profile",
@@ -25,6 +33,13 @@ internal static class ProfileApi
                 Method: ApiHttpMethod.Get,
                 Delegate: GetProfile,
                 Description: "Loads profile"
+                ),
+            new ApiEndpoint(
+                Name: "sample-token",
+                Pattern: "token",
+                Method: ApiHttpMethod.Get,
+                Delegate: GetSampleToken,
+                Description: "creates a token"
                 )
             ]
 
@@ -38,6 +53,20 @@ internal static class ProfileApi
     {
         return new ProfileDto(Guid.Empty, "", "", "", []);
     };
+
+    private static readonly Delegate GetSampleToken = async (
+        [FromServices] IProfileService profileService
+        ) =>
+    {
+        var token = await profileService.IssueSampleProfileToken(_sampleReceiver);
+        return token switch
+        {
+            SuccessActionResult<string> succ => (object) succ.Result,
+            _ => token
+        };
+        
+    };
+
 
 
 

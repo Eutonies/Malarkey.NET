@@ -14,9 +14,9 @@ internal interface IMalarkeyTokenHandler
 
     public Task RecallToken(string tokenString);
 
-    public Task<IReadOnlyCollection<TokenValidationResult>> ValidateTokens(IEnumerable<string> tokens);
+    public Task<IReadOnlyCollection<MalarkeyTokenValidationResult>> ValidateTokens(IEnumerable<(string Token, string ReceiverPublicKey)> tokens);
 
-    public async Task<TokenValidationResult> ValidateToken(string token) => (await ValidateTokens([token])).First();
+    public async Task<MalarkeyTokenValidationResult> ValidateToken(string token, string receiverPublicKey) => (await ValidateTokens([(token, receiverPublicKey)])).First();
 
 
 }

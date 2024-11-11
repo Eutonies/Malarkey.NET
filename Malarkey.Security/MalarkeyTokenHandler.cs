@@ -5,14 +5,10 @@ using Malarkey.Security.Configuration;
 using Malarkey.Security.Formats;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Security;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using Microsoft.IdentityModel.JsonWebTokens;
+using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Malarkey.Security;
 internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
@@ -20,21 +16,29 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly SecurityConfiguration _securityConfiguration;
     private readonly X509Certificate2 _certificate;
+    private readonly RsaSecurityKey _rsaPublicKey;
+    private readonly RsaSecurityKey _rsaPrivateKey;
+    private readonly JsonWebTokenHandler _tokenHandler;
+    private readonly SigningCredentials _credentials;
+
 
     public MalarkeyTokenHandler(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
         using var scope = scopeFactory.CreateScope();
         _securityConfiguration = scope.ServiceProvider.GetRequiredService<IOptions<SecurityConfiguration>>().Value;
-        _certificate = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+        _certificate = new X509Certificate2(
             fileName: _securityConfiguration.TokenCertificate,
             password: _securityConfiguration.TokenCertificatePassword
             );
+        _rsaPublicKey = new RsaSecurityKey(_certificate.GetRSAPublicKey());
+        _rsaPrivateKey = new RsaSecurityKey(_certificate.GetRSAPrivateKey());
+        _tokenHandler = new JsonWebTokenHandler();
+        _credentials = new SigningCredentials(_rsaPrivateKey, SecurityAlgorithms.RsaSsaPssSha256);
     }
     public async Task<(MalarkeyProfileToken Token, string TokenString)> IssueToken(MalarkeyProfile profile, string receiverPublicKey)
     {
         await Task.CompletedTask;
-        using var scope = _scopeFactory.CreateScope();
         var token = new MalarkeyProfileToken(
             TokenId: Guid.NewGuid(),
             IssuedTo: receiverPublicKey,
@@ -42,35 +46,122 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
             ValidUntil: DateTime.Now + MalarkeySecurityConstants.TokenLifeTime,
             Profile: profile
             );
-        var header = token.ToHeaderTso();
         var payload = profile.ToPayloadTso(receiverPublicKey, expiresAt: token.ValidUntil, token.TokenId);
-        var headerString = header.Serialize();
-        var payloadString = payload.Serialize();
-        var toSign = $"{headerString}.{payloadString}";
-        var signature = "";
-        var tokenTso = new MalarkeyTokenTso(header, payload, signature);
-        var tokenString = tokenTso.ToString();
+        var tokenString = CreateTokenString(token, payload);
         return (token,  tokenString);
     }
 
 
-    public Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(ProfileIdentity identity, string receiverPublicKey)
+    public async Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(ProfileIdentity identity, string receiverPublicKey)
     {
-        throw new NotImplementedException();
+        await Task.CompletedTask;
+        var token = new MalarkeyIdentityToken(
+            TokenId: Guid.NewGuid(),
+            IssuedTo: receiverPublicKey,
+            IssuedAt: DateTime.Now,
+            ValidUntil: DateTime.Now + MalarkeySecurityConstants.TokenLifeTime,
+        Identity: identity
+            );
+        var payload = identity.ToPayloadTso(receiverPublicKey, expiresAt: token.ValidUntil, token.TokenId);
+        var tokenString = CreateTokenString(token, payload);
+        return (token, tokenString);
     }
+
+
+    private string CreateTokenString(MalarkeyToken token, MalarkeyTokenPayloadTso payload)
+    {
+            var header = token.ToHeaderTso();
+            var tokenString = _tokenHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
+            return tokenString;
+    }
+
 
     public Task RecallToken(string tokenString)
     {
         throw new NotImplementedException();
     }
 
-    public Task<IReadOnlyCollection<TokenValidationResult>> ValidateTokens(IEnumerable<string> tokens)
+    public async Task<IReadOnlyCollection<MalarkeyTokenValidationResult>> ValidateTokens(IEnumerable<(string Token, string ReceiverPublicKey)> tokens)
     {
-        throw new NotImplementedException();
+        var tasks = tokens
+            .Select(async tokPar => await CheckToken(tokPar.Token, tokPar.ReceiverPublicKey))
+            .ToList();
+        var returnee = await Task.WhenAll(tasks);
+        return returnee;
+
+    }
+
+    private async Task<MalarkeyTokenValidationResult> CheckToken(string token, string receiver)
+    {
+        try
+        {
+            var result = await _tokenHandler.ValidateTokenAsync(token, new TokenValidationParameters
+            {
+                ValidIssuer = MalarkeySecurityConstants.TokenIssuer,
+                ValidAudience = receiver,
+                IssuerSigningKey = _rsaPublicKey
+            });
+            if (result.IsValid)
+            {
+                var readToken = _tokenHandler.ReadToken(token);
+                var tokenTso = readToken.ToMalarkeyTokenTso();
+                var returnToken = tokenTso.ToDomain();
+                return new MalarkeyTokenValidationSuccessResult(returnToken);
+            }
+            return new MalarkeyTokenValidationExceptionResult(result.Exception);
+        }
+        catch (Exception ex)
+        {
+            return new MalarkeyTokenValidationExceptionResult(ex);
+        }
+
     }
 
 
 
+}
+
+internal static class MalarkeyTokenHandlerExtensions
+{
+
+    internal static MalarkeyTokenTso ToMalarkeyTokenTso(this SecurityToken tok) => tok switch
+    {
+        JsonWebToken jwt => jwt.EncodedToken.DeserializeToMalarkeyToken(),
+        _ => throw new Exception("")
+    };
+        
+    internal static SecurityTokenDescriptor ToTokenDescriptor(this MalarkeyTokenPayloadTso payload, MalarkeyTokenHeaderTso header, SigningCredentials signingCredentials) => new SecurityTokenDescriptor
+    {
+        Issuer = payload.iss,
+        Audience = payload.aud,
+        IssuedAt = payload.iat.ParseJwtTime(),
+        NotBefore = payload.iat.ParseJwtTime(),
+        Expires = payload.exp.ParseJwtTime(),
+        Subject = new ClaimsIdentity(payload.ExtractAdditionalClaims().Prepend(new Claim("sub", payload.sub))),
+        SigningCredentials = signingCredentials,
+        AdditionalHeaderClaims = header.ExtractAdditionalHeaderClaims()
+    };
+
+
+    internal static IReadOnlyCollection<Claim> ExtractAdditionalClaims(this MalarkeyTokenPayloadTso payload) => new List<(string, string?)>
+    {
+        (nameof(payload.identid), payload.identid),
+        (nameof(payload.identtyp), payload.identtyp),
+        (nameof(payload.jti), payload.jti),
+        (nameof(payload.name), payload.name),
+        (nameof(payload.midnames), payload.midnames),
+        (nameof(payload.lastname), payload.lastname),
+        (nameof(payload.prefname), payload.prefname)
+    }.Where(_ => _.Item2 != null)
+        .Select(_ => new Claim(_.Item1, _.Item2!))
+        .ToList();
+
+    internal static IDictionary<string, object> ExtractAdditionalHeaderClaims(this MalarkeyTokenHeaderTso header) => new List<(string, object?)>
+    {
+        (nameof(header.toktyp), header.toktyp)
+    }.Where(_ => _.Item2 != null)
+        .ToDictionary(_ => _.Item1, _ => _.Item2!);
 
 
 }
+

@@ -14,8 +14,8 @@ public sealed record SuccessActionResult<TRes>(
     TRes Result
     ) : ActionResult<TRes>;
 
-public abstract record ErrorActionResult
-    : ActionResult<object?>
+public abstract record ErrorActionResult<TRes>
+    : ActionResult<TRes>
 {
     public string ErrorMessage { get; private set; }
     internal ErrorActionResult(
@@ -26,10 +26,10 @@ public abstract record ErrorActionResult
     }
 }
 
-public sealed record UnauthorizedActionResult(
+public sealed record UnauthorizedActionResult<TRes>(
     string ErrorMessage
-    ) : ErrorActionResult(ErrorMessage);
+    ) : ErrorActionResult<TRes>(ErrorMessage);
 
-public sealed record ExceptionActionResult(
+public sealed record ExceptionActionResult<TRes>(
     Exception Exception
-    ) : ErrorActionResult(Exception.Message);
+    ) : ErrorActionResult<TRes>(Exception.Message);

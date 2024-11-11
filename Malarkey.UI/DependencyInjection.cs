@@ -2,6 +2,8 @@
 using Malarkey.Integration.Facebook;
 using Malarkey.Integration.Google;
 using Malarkey.Integration.Microsoft;
+using Malarkey.Application;
+using Malarkey.API;
 using Malarkey.UI.Pages;
 using Malarkey.Security;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -38,6 +40,7 @@ public static class DependencyInjection
             .AddGoogleIdentityProvider(builder.Configuration)
             .AddJwtBearer()
             .AddCookie();
+        builder.AddApplication();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddAuthenticatedAuthorizationPolicy();
         builder.Services.AddAntiforgery();
@@ -51,6 +54,7 @@ public static class DependencyInjection
         app.UseRouting();
         app.UseAuthentication();
         app.UseAuthorization();
+        app.UseApi();
 
         app.UseHttpsRedirection();
 

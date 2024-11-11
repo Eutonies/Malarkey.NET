@@ -28,7 +28,6 @@ public static class DependencyInjectionIntegrationMicrosoft
 
         var microConf = config.Parse();
         var azConf = microConf.AzureAd;
-        var graphConf = microConf.DownstreamApis.MicrosoftGraph;
         var azureAdConfig = config.GetSection(MicrosoftEntraIdConstants.MicrosoftConfigurationName);
         var withIdentityWebApp = builder
             .AddMicrosoftIdentityWebApp(azureAdConfig,
@@ -38,7 +37,6 @@ public static class DependencyInjectionIntegrationMicrosoft
                 subscribeToOpenIdConnectMiddlewareDiagnosticsEvents: true);
 
         var acqOpts = new TokenAcquisitionOptions { };
-        //acqOpts.ExtraQueryParameters.Add("response_type", "code id_token");
         var withDownstream = withIdentityWebApp.EnableTokenAcquisitionToCallDownstreamApi(
             configureConfidentialClientApplicationOptions: opts =>
             {

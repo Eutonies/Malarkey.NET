@@ -7,7 +7,6 @@ var builder = WebApplication.CreateBuilder(args)
 
 builder.AddUiServices();
 
-
 var app = builder.Build();
 app.UseUiServices();
 
