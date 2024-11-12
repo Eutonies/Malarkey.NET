@@ -1,7 +1,9 @@
 ﻿using Malarkey.Domain.Profile;
 using Malarkey.Domain.Token;
+using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
@@ -71,11 +73,11 @@ internal record MalarkeyTokenHeaderTso(
     );
 
 internal record MalarkeyTokenPayloadTso(
-    string iat,
+    long iat,
     string sub,
     string aud,
     string name,
-    string exp,
+    long exp,
     string jti,
     string? identtyp = null,
     string? identid = null,
@@ -112,27 +114,33 @@ internal static class MalarkeyTokenTsoExtensions
 
     internal static string Serialize(this object obj) => JsonSerializer.Serialize(obj, _serializationOptions).InBase64();
 
-    internal static string InBase64(this string str) => Convert.ToBase64String(
-            Encoding.UTF8.GetBytes(str)
-        );
+    internal static string InBase64(this string str) => Base64UrlEncoder.Encode(str);
 
     internal static TPart DeserializeToTokenPart<TPart>(this string str) =>
         JsonSerializer.Deserialize<TPart>(str.FromBase64())!;
 
-    internal static string FromBase64(this string str) => 
-        Encoding.UTF8.GetString(Convert.FromBase64String(str));
+    internal static string FromBase64(this string str) => Base64UrlEncoder.Decode(str);
 
 
-    internal static MalarkeyTokenTso DeserializeToMalarkeyToken(this string str) => str.Split('.') switch
+    internal static MalarkeyTokenTso DeserializeToMalarkeyToken(this string str)
     {
-        string[] parts => new MalarkeyTokenTso(
-            Header: parts[0].DeserializeToTokenPart<MalarkeyTokenHeaderTso>(),
-            Payload: parts[1].DeserializeToTokenPart<MalarkeyTokenPayloadTso>(),
-            Signature: parts[2].FromBase64()
-            )
-    };
+        var parts = str.Split('.');
+        var utf8parts = parts
+           .Select(_ => _.FromBase64())
+           .ToArray();
+        var header = parts[0].DeserializeToTokenPart<MalarkeyTokenHeaderTso>();
+        var payload = parts[1].DeserializeToTokenPart<MalarkeyTokenPayloadTso>();
+        var signatur = parts[2].FromBase64();
 
-    internal static DateTime ParseJwtTime(this string str) => DateTime.UnixEpoch.AddSeconds(long.Parse(str)).ToUniversalTime();
+        var returnee = new MalarkeyTokenTso(header, payload, signatur);
+        return returnee;
+
+    }
+
+
+
+
+    internal static DateTime ParseJwtTime(this long lo) => DateTime.UnixEpoch.AddSeconds(lo).ToUniversalTime();
 
     internal static long ToJwtTime(this DateTime tim) => (long) (tim - DateTime.UnixEpoch).TotalSeconds;
 
@@ -148,11 +156,11 @@ internal static class MalarkeyTokenTsoExtensions
         string receiver, 
         DateTime expiresAt,
         Guid tokenId) => new MalarkeyTokenPayloadTso(
-                iat: MalarkeySecurityConstants.Now.ToJwtTime().ToString(),
+                iat: MalarkeySecurityConstants.Now.ToJwtTime(),
                 sub: profile.ProfileId.ToString(),
                 aud: receiver,
                 name: profile.ProfileName,
-                exp: expiresAt.ToJwtTime().ToString(),
+                exp: expiresAt.ToJwtTime(),
                 jti: tokenId.ToString()
                 );
 
@@ -162,11 +170,11 @@ internal static class MalarkeyTokenTsoExtensions
         DateTime expiresAt,
         Guid tokenId
         ) =>  new MalarkeyTokenPayloadTso(
-                iat: MalarkeySecurityConstants.Now.ToJwtTime().ToString(),
+                iat: MalarkeySecurityConstants.Now.ToJwtTime(),
                 sub: ident.ProfileId.ToString(),
                 aud: receiver,
                 name: ident.FirstName,
-                exp: expiresAt.ToJwtTime().ToString(),
+                exp: expiresAt.ToJwtTime(),
                 jti: tokenId.ToString(),
                 identtyp: ident.IdentityProviderType(),
                 identid: ident.ProviderId,
