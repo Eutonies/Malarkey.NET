@@ -5,8 +5,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace Malarkey.Security.Util;
-internal static class StringExtensions
+namespace Malarkey.Application.Util;
+public static class StringExtensions
 {
 
     private static readonly Regex MetaRegex = new Regex(@"^-{5}((BEGIN)|(END)).*");

@@ -6,10 +6,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Application.Security;
-internal abstract record MalarkeyTokenValidationResult(MalarkeyToken? Token = null);
+public abstract record MalarkeyTokenValidationResult(MalarkeyToken? Token = null);
 
-internal sealed record MalarkeyTokenValidationSuccessResult(MalarkeyToken ValidToken) : MalarkeyTokenValidationResult(ValidToken);
-internal sealed record MalarkeyTokenValidationExceptionResult(Exception Exception) : MalarkeyTokenValidationResult();
+public sealed record MalarkeyTokenValidationSuccessResult(MalarkeyToken ValidToken) : MalarkeyTokenValidationResult(ValidToken);
+public sealed record MalarkeyTokenValidationExceptionResult(Exception Exception) : MalarkeyTokenValidationResult();
 
-internal sealed record MalarkeyTokenValidationErrorResult(string ErrorMessage): MalarkeyTokenValidationResult();
+public sealed record MalarkeyTokenValidationErrorResult(string ErrorMessage): MalarkeyTokenValidationResult();
 

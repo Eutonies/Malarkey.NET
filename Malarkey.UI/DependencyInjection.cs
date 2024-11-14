@@ -71,18 +71,6 @@ public static class DependencyInjection
             .AddInteractiveServerRenderMode();
         app.MapRazorPages();
 
-        /*var middware = app.Services.GetRequiredService<OpenIdConnectMiddlewareDiagnostics>();
-        middware.Subscribe(new OpenIdConnectEvents()
-        {
-            OnTokenValidated = async ctx =>
-            {
-                var resp = ctx.TokenEndpointResponse;
-            }
-
-
-        });*/
-
-
         return app;
     }
 

@@ -1,7 +1,7 @@
 ﻿using Malarkey.Application.Security;
 using Malarkey.Domain.Profile;
 using Malarkey.Domain.Token;
-using Malarkey.Security.Configuration;
+using Malarkey.Application.Configuration;
 using Malarkey.Security.Formats;
 using Malarkey.Security.Util;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,23 +15,21 @@ namespace Malarkey.Security;
 internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
 {
     private readonly IServiceScopeFactory _scopeFactory;
-    private readonly SecurityConfiguration _securityConfiguration;
+    private readonly MalarkeyApplicationConfiguration _securityConfiguration;
     private readonly X509Certificate2 _certificate;
     private readonly RsaSecurityKey _rsaPublicKey;
     private readonly RsaSecurityKey _rsaPrivateKey;
     private readonly JsonWebTokenHandler _tokenHandler;
     private readonly SigningCredentials _credentials;
 
+    public IServiceScopeFactory ServiceScopeFactory => _scopeFactory;
 
     public MalarkeyTokenHandler(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
         using var scope = scopeFactory.CreateScope();
-        _securityConfiguration = scope.ServiceProvider.GetRequiredService<IOptions<SecurityConfiguration>>().Value;
-        _certificate = new X509Certificate2(
-            fileName: _securityConfiguration.TokenCertificate,
-            password: _securityConfiguration.TokenCertificatePassword
-            );
+        _securityConfiguration = scope.ServiceProvider.GetRequiredService<IOptions<MalarkeyApplicationConfiguration>>().Value;
+        _certificate = _securityConfiguration.SigningCertificate.AsCertificate;
         _rsaPublicKey = new RsaSecurityKey(_certificate.GetRSAPublicKey());
         _rsaPrivateKey = new RsaSecurityKey(_certificate.GetRSAPrivateKey());
         _tokenHandler = new JsonWebTokenHandler();
