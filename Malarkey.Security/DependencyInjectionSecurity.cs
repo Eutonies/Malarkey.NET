@@ -3,9 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Malarkey.Application;
 using Malarkey.Application.Security;
-using Malarkey.Security.Configuration;
 using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -20,5 +21,17 @@ public static class DependencyInjectionSecurity
         builder.Services.AddSingleton<IMalarkeyTokenHandler, MalarkeyTokenHandler>();
         return builder;
     }
+
+    public static AuthenticationBuilder AddMalarkeyToken(this AuthenticationBuilder builder)
+    {
+        builder.AddScheme<MalarkeyAuthenticationOptions, MalarkeyAuthenticationHandler>(
+            authenticationScheme: MalarkeyApplicationConstants.MalarkeyCookieSchemeName,
+            configureOptions: opts =>
+            {
+
+            });
+        return builder;
+    }
+
 
 }

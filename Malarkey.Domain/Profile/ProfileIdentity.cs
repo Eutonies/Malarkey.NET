@@ -21,6 +21,8 @@ public abstract record ProfileIdentity
         MiddleNames = middleNames;
         LastName = lastName;
     }
+    public abstract string IdentityType { get; }
+
     public string ProviderId { get; private set; }
 
     public Guid ProfileId { get; private set; }

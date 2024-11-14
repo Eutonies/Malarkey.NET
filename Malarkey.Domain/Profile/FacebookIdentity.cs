@@ -17,4 +17,7 @@ public sealed record FacebookIdentity(
         Name,
         MiddleNames,
         LastName
-        );
+        )
+{
+    public override string IdentityType => "facebook";
+}

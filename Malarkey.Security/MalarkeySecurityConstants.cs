@@ -13,4 +13,5 @@ internal static class MalarkeySecurityConstants
     internal static readonly TimeSpan TokenLifeTime = TimeSpan.FromHours(1);
     internal static DateTime Now => DateTime.Now.ToUniversalTime();
 
+
 }

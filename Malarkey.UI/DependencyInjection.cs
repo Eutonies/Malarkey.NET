@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Identity.Web;
 using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
+using Microsoft.AspNetCore.Authentication;
 
 namespace Malarkey.UI;
 
@@ -20,7 +21,7 @@ public static class DependencyInjection
     {
         builder.Configuration.AddJsonFile("appsettings.json");
         builder.Configuration.AddJsonFile("appsettings.local.json", optional: true);
-        builder.AddSecurityConfiguration();
+        builder.AddApplicationConfiguration();
         builder.AddFacebookConfiguration();
         return builder;
     }
@@ -41,7 +42,8 @@ public static class DependencyInjection
             .AddFacebookIdentityProvider(builder.Configuration)
             .AddGoogleIdentityProvider(builder.Configuration)
             .AddJwtBearer()
-            .AddCookie();
+            .AddCookie()
+            .AddMalarkeyToken();
         builder.AddApplication();
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddAuthorization(opts =>

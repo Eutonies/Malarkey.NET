@@ -3,13 +3,13 @@ using Malarkey.Domain.Profile;
 using Malarkey.Domain.Token;
 using Malarkey.Application.Configuration;
 using Malarkey.Security.Formats;
-using Malarkey.Security.Util;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
+using Malarkey.Application.Util;
 
 namespace Malarkey.Security;
 internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
@@ -108,13 +108,13 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
                 var readToken = _tokenHandler.ReadToken(token);
                 var tokenTso = readToken.ToMalarkeyTokenTso();
                 var returnToken = tokenTso.ToDomain();
-                return new MalarkeyTokenValidationSuccessResult(returnToken);
+                return new MalarkeyTokenValidationSuccessResult(token, returnToken);
             }
-            return new MalarkeyTokenValidationExceptionResult(result.Exception);
+            return new MalarkeyTokenValidationExceptionResult(token, result.Exception);
         }
         catch (Exception ex)
         {
-            return new MalarkeyTokenValidationExceptionResult(ex);
+            return new MalarkeyTokenValidationExceptionResult(token, ex);
         }
 
     }

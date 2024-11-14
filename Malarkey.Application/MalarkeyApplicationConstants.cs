@@ -9,6 +9,6 @@ public static class MalarkeyApplicationConstants
 {
     public const string MalarkeyProfileCookieName = "MalarkeyProfile";
     public const string MalarkeyIdentityCookieBaseName = "MalarkeyIdentity";
-
+    public const string MalarkeyCookieSchemeName = "MalarkeyCookieAuthentication";
 
 }

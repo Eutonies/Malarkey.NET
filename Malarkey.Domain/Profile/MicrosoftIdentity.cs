@@ -19,4 +19,7 @@ public sealed record MicrosoftIdentity(
         Name,
         MiddleNames,
         LastName
-        );
+        )
+{
+    public override string IdentityType => "microsoft";
+}

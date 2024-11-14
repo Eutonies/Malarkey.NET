@@ -17,4 +17,7 @@ public sealed record GoogleIdentity(
         Name,
         MiddleNames,
         LastName
-        );
+        )
+{
+    public override string IdentityType => "google";
+}
