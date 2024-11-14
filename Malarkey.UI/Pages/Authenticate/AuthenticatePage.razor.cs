@@ -8,6 +8,8 @@ public partial class AuthenticatePage
     [Inject]
     public NavigationManager NavManager { get; set; }
 
+
+
     public void OnMicrosoftClick(MouseEventArgs e)
     {
         NavManager.NavigateTo("authenticate-microsoft");

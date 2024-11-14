@@ -15,6 +15,21 @@ public interface IMalarkeyTokenHandler
     public Task RecallToken(string tokenString);
     public Task<IReadOnlyCollection<MalarkeyTokenValidationResult>> ValidateTokens(IEnumerable<(string Token, string ReceiverPublicKey)> tokens);
     public async Task<MalarkeyTokenValidationResult> ValidateToken(string token, string receiverPublicKey) => (await ValidateTokens([(token, receiverPublicKey)])).First();
+
+
+    public async Task<MalarkeyProfileAndIdentities?> ExtractProfileAndIdentities(HttpContext context) => (await ValidateProfileToken(context)) switch
+    {
+        MalarkeyTokenValidationSuccessResult succ when succ.Token is MalarkeyProfileToken profTok => new MalarkeyProfileAndIdentities(
+            Profile: profTok.Profile,
+            Identities: (await ValidateIdentityTokens(context)).Results
+               .Select(_ => _.Token)
+               .OfType<MalarkeyIdentityToken>()
+               .Select(_ => _.Identity)
+               .ToList()
+
+            ),
+        _ => null
+    };
     public async Task<MalarkeyTokenValidationResult?> ValidateProfileToken(HttpContext context)
     {
         using var scope = ServiceScopeFactory.CreateScope();
