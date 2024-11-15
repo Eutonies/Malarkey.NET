@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Malarkey.Application.Profile.Persistence;
+using Malarkey.Domain.Profile;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -17,5 +19,15 @@ internal class MalarkeyIdentityDbo
     public string? PreferredName { get; set; }
     public string? MiddleNames { get; set; }
     public string? LastName { get; set; }
+
+
+    public ProfileIdentity ToDomain() => Enum.Parse<MalarkeyIdentityProviderDbo>(Provider) switch
+    {
+        MalarkeyIdentityProviderDbo.Microsoft => new MicrosoftIdentity(IdentityId, ProfileId, ProviderId, PreferredName!, IdentityName, MiddleNames, LastName),
+        MalarkeyIdentityProviderDbo.Google => new GoogleIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName),
+        MalarkeyIdentityProviderDbo.Facebook => new FacebookIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName),
+        _ => throw new NotImplementedException()
+    };
+
 
 }

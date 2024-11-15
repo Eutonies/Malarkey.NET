@@ -4,6 +4,11 @@ services:
     build:
       context: .
       dockerfile: Malarkey.UI/Dockerfile
+    depends_on:
+      - malarkey.postgres
+    environment:
+    - Persistence__Db__ConnectionString=Host=malarkey.postgres;Port=5432;Database=malarkey;Username=malarkeyuser;Password=23rednjesc432rt8hujwdqashnFDCFSWWASFD3r+039r
+
 
   malarkey.postgres:
     profiles: ["all"]
@@ -28,3 +33,10 @@ services:
     volumes:
       - ./Malarkey.Persistence/db-init:/docker-entrypoint-initdb.d
       - ./Malarkey.Persistence/db-volume:/var/lib/postgresql/data
+
+  malarkey.postgres.adminer:
+    profiles: ["all"]
+    image: adminer
+    restart: always
+    ports:
+      - 8431:8080

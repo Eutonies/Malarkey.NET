@@ -29,7 +29,7 @@ internal class ProfileService : IProfileService
 
     public async Task<ActionResult<string>> IssueSampleProfileToken(string receiverCertificate)
     {
-        var profile = new MalarkeyProfile(Guid.NewGuid(), "Sample profile");
+        var profile = new MalarkeyProfile(Guid.NewGuid(), "Sample profile", DateTime.Now, null);
         var (token, tokenString) = await _tokenHandler.IssueToken(profile, receiverCertificate);
         return new SuccessActionResult<string>(tokenString);
     }

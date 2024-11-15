@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Malarkey.Domain.Profile;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -13,5 +14,13 @@ internal class MalarkeyProfileDbo
     public string ProfileName { get; set; }
     public DateTime CreatedAt { get; set; }
     public Guid? AbsorbedBy { get; set; }
+
+    public MalarkeyProfile ToDomain() => new MalarkeyProfile(
+        ProfileId,
+        ProfileName,
+        CreatedAt,
+        AbsorbedBy
+        );
+
 
 }
