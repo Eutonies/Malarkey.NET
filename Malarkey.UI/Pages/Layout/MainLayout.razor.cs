@@ -1,22 +1,25 @@
 ﻿using Malarkey.UI.Session;
+using Microsoft.AspNetCore.Components;
 
 namespace Malarkey.UI.Pages.Layout;
 
 public partial class MainLayout
 {
-    private readonly MalarkeySessionState _sessionState;
-    private readonly IHttpContextAccessor _contextAccessor;
+    private MalarkeySessionState? _sessionState;
 
-    public MainLayout(IServiceScopeFactory serviceScopeFactory, IHttpContextAccessor contextAccessor)
+    [Inject]
+    public IServiceScopeFactory ScopeFactory { get; set; }
+
+    [Inject]
+    public IHttpContextAccessor ContextAccessor { get; set; } 
+
+    protected override async Task OnInitializedAsync()
     {
-        _sessionState = new MalarkeySessionState(
-            serviceScopeFactory, 
-            onUpdate: () => InvokeAsync(StateHasChanged)
-            );
-        _contextAccessor = contextAccessor;
+        _sessionState = new MalarkeySessionState(ScopeFactory, onUpdate: () => InvokeAsync(StateHasChanged));
+        await _sessionState.UpdateUserFromContext(context: ContextAccessor.HttpContext!);
     }
 
-    protected override async Task OnInitializedAsync() => await _sessionState.UpdateUserFromContext(context: _contextAccessor.HttpContext!);
+
 
 
 

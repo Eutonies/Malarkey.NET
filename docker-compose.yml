@@ -1,5 +1,6 @@
 services:
   malarkey.ui:
+    profiles: ["all"]
     image: ${DOCKER_REGISTRY-}malarkeyui
     build:
       context: .

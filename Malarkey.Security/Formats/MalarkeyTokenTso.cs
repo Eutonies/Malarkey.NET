@@ -3,6 +3,7 @@ using Malarkey.Domain.Token;
 using Microsoft.IdentityModel.Tokens;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -16,6 +17,8 @@ internal record MalarkeyTokenTso(
     string Signature
     )
 {
+    private static readonly CultureInfo EnUs = new CultureInfo("en-US");
+
     public override string ToString() => $"{Header.Serialize()}.{Payload.Serialize()}.{Signature.InBase64()}";
 
     public MalarkeyToken ToDomain() => Enum.Parse<MalarkeyTokenTypeTso>(Header.toktyp) switch
@@ -27,7 +30,9 @@ internal record MalarkeyTokenTso(
             ValidUntil: Payload.exp.ParseJwtTime(),
             Profile: new MalarkeyProfile(
                 ProfileId: Guid.Parse(Payload.sub),
-                ProfileName: Payload.name
+                ProfileName: Payload.name,
+                CreatedAt: DateTime.UnixEpoch + TimeSpan.FromSeconds(Payload.crets!.Value),
+                AbsorbedBy: Payload.absby == null ? null : Guid.Parse(Payload.absby)
                 )
             ),
         _ => new MalarkeyIdentityToken(
@@ -38,6 +43,7 @@ internal record MalarkeyTokenTso(
             Identity: Enum.Parse<MalarkeyTokenIdentityTypeTso>(Payload.identtyp!) switch
             {
                 MalarkeyTokenIdentityTypeTso.Microsoft => new MicrosoftIdentity(
+                    IdentityId: Guid.Parse(Payload.id),
                     ProfileId: Guid.Parse(Payload.sub),
                     MicrosoftId: Payload.identid!,
                     PreferredName: Payload.prefname!,
@@ -46,6 +52,7 @@ internal record MalarkeyTokenTso(
                     LastName: Payload.lastname
                     ),
                 MalarkeyTokenIdentityTypeTso.Google => new GoogleIdentity(
+                    IdentityId: Guid.Parse(Payload.id),
                     ProfileId: Guid.Parse(Payload.sub),
                     GoogleId: Payload.identid!,
                     Name: Payload.name,
@@ -53,6 +60,7 @@ internal record MalarkeyTokenTso(
                     LastName: Payload.lastname
                     ),
                 _ => new FacebookIdentity(
+                    IdentityId: Guid.Parse(Payload.id),
                     ProfileId: Guid.Parse(Payload.sub),
                     FacebookId: Payload.identid!,
                     Name: Payload.name,
@@ -79,12 +87,15 @@ internal record MalarkeyTokenPayloadTso(
     string name,
     long exp,
     string jti,
+    string id,
     string? identtyp = null,
     string? identid = null,
     string? prefname = null,
     string? midnames = null,
     string? lastname = null,
-    string iss = MalarkeySecurityConstants.TokenIssuer
+    string iss = MalarkeySecurityConstants.TokenIssuer,
+    long? crets = null,
+    string? absby = null
     )
 {
 
@@ -161,7 +172,10 @@ internal static class MalarkeyTokenTsoExtensions
                 aud: receiver,
                 name: profile.ProfileName,
                 exp: expiresAt.ToJwtTime(),
-                jti: tokenId.ToString()
+                jti: tokenId.ToString(),
+                id: profile.ProfileId.ToString(),
+                crets: (long) (profile.CreatedAt - DateTime.UnixEpoch).TotalSeconds,
+                absby: profile.AbsorbedBy?.ToString()
                 );
 
     internal static MalarkeyTokenPayloadTso ToPayloadTso(
@@ -176,6 +190,7 @@ internal static class MalarkeyTokenTsoExtensions
                 name: ident.FirstName,
                 exp: expiresAt.ToJwtTime(),
                 jti: tokenId.ToString(),
+                id: ident.IdentityId.ToString(),
                 identtyp: ident.IdentityProviderType(),
                 identid: ident.ProviderId,
                 prefname: (ident as MicrosoftIdentity)?.PreferredName,

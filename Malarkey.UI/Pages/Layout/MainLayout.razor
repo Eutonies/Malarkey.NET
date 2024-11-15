@@ -1,6 +1,8 @@
 ﻿@inherits LayoutComponentBase
 
-<CascadingValue Value="_sessionState">
-    @Body
-</CascadingValue>
-
+@if(_sessionState != null)
+{
+    <CascadingValue Value="_sessionState">
+        @Body
+    </CascadingValue>
+}

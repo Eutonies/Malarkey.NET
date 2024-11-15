@@ -32,7 +32,6 @@ public class AuthenticatedProviderPage : ComponentBase
 
     protected async Task CaptureMicrosoft(ClaimsIdentity ident)
     {
-        var identity = new MicrosoftIdentity()
     }
 
     protected async Task CaptureGoogle(ClaimsIdentity ident)

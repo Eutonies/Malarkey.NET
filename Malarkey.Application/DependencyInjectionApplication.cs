@@ -1,13 +1,8 @@
-﻿using Malarkey.Application.Profile;
-using Malarkey.Security.Configuration;
+﻿using Malarkey.Application.Configuration;
+using Malarkey.Application.Profile;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Malarkey.Application;
 public static class DependencyInjectionApplication
