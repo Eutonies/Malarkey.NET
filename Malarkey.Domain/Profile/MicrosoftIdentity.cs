@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 namespace Malarkey.Domain.Profile;
 
 public sealed record MicrosoftIdentity(
+    Guid IdentityId,
     Guid ProfileId,
     string MicrosoftId,
     string PreferredName,
@@ -14,6 +15,7 @@ public sealed record MicrosoftIdentity(
     string? MiddleNames,
     string? LastName
     ) : ProfileIdentity(
+        IdentityId,
         ProfileId,
         MicrosoftId,
         Name,

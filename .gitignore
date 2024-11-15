@@ -400,3 +400,4 @@ FodyWeavers.xsd
 /Malarkey.Service/appsettings.local.json
 /Malarkey.UI/appsettings.local.json
 /resources/certificate/malarkey-token.key
+/Malarkey.Persistence/db-volume/

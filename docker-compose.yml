@@ -1,0 +1,30 @@
+services:
+  malarkey.ui:
+    image: ${DOCKER_REGISTRY-}malarkeyui
+    build:
+      context: .
+      dockerfile: Malarkey.UI/Dockerfile
+
+  malarkey.postgres:
+    profiles: ["all"]
+    container_name: malarkey.db.postgres
+    image: postgres
+    restart: always
+    # set shared memory limit when using docker-compose
+    shm_size: 128mb
+    # or set shared memory limit when deploy via swarm stack
+    #volumes:
+    #  - type: tmpfs
+    #    target: /dev/shm
+    #    tmpfs:
+    #      size: 134217728 # 128*2^20 bytes = 128Mb
+
+    environment:
+      POSTGRES_PASSWORD: 23rednjesc432rt8hujwdqashnFDCFSWWASFD3r+039r
+      POSTGRES_DB: malarkey
+      POSTGRES_USER: malarkeyuser
+    ports:
+      - 8432:5432
+    volumes:
+      - ./Malarkey.Persistence/db-init:/docker-entrypoint-initdb.d
+      - ./Malarkey.Persistence/db-volume:/var/lib/postgresql/data

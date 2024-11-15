@@ -7,5 +7,7 @@ using System.Threading.Tasks;
 namespace Malarkey.Domain.Profile;
 public sealed record MalarkeyProfile(
     Guid ProfileId,
-    string ProfileName
+    string ProfileName,
+    DateTime CreatedAt,
+    Guid? AbsorbedBy
     );

@@ -6,12 +6,14 @@ using System.Threading.Tasks;
 
 namespace Malarkey.Domain.Profile;
 public sealed record FacebookIdentity(
+    Guid IdentityId,
     Guid ProfileId,
     string FacebookId,
     string Name,
     string? MiddleNames,
     string? LastName
     ) : ProfileIdentity(
+        IdentityId,
         ProfileId,
         FacebookId,
         Name,
