@@ -29,6 +29,13 @@ internal static class ProfileApi
         AuthorizationPolicy: DefaultAuthorizationPolicy,
         Endpoints: [
             new ApiEndpoint(
+                Name: "Certificate public key",
+                Pattern: "certificate-public-key",
+                Method: ApiHttpMethod.Get,
+                Delegate: ([FromServices] IMalarkeyTokenHandler tokenHandler) => tokenHandler.PublicKey,
+                Description: "Public key of certificate used to sign JWT's"
+                ),
+            new ApiEndpoint(
                 Name: "sample-token",
                 Pattern: "token",
                 Method: ApiHttpMethod.Get,

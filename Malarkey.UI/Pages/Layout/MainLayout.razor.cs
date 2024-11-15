@@ -9,7 +9,10 @@ public partial class MainLayout
 
     public MainLayout(IServiceScopeFactory serviceScopeFactory, IHttpContextAccessor contextAccessor)
     {
-        _sessionState = new MalarkeySessionState(serviceScopeFactory);
+        _sessionState = new MalarkeySessionState(
+            serviceScopeFactory, 
+            onUpdate: () => InvokeAsync(StateHasChanged)
+            );
         _contextAccessor = contextAccessor;
     }
 

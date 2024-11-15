@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Components;
+﻿using Malarkey.UI.Session;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
 namespace Malarkey.UI.Pages.Authenticate;
@@ -8,7 +9,10 @@ public partial class AuthenticatePage
     [Inject]
     public NavigationManager NavManager { get; set; }
 
+    [CascadingParameter]
+    public MalarkeySessionState SessionState { get; set; }
 
+    private bool IsAuthenticated => SessionState.User != null;
 
     public void OnMicrosoftClick(MouseEventArgs e)
     {

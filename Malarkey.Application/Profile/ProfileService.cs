@@ -33,4 +33,9 @@ internal class ProfileService : IProfileService
         var (token, tokenString) = await _tokenHandler.IssueToken(profile, receiverCertificate);
         return new SuccessActionResult<string>(tokenString);
     }
+
+    public Task<ActionResult<MalarkeyProfileAndIdentities>> LoadOrCreateProfile(ProfileIdentity identity)
+    {
+        throw new NotImplementedException();
+    }
 }

@@ -21,7 +21,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration.Google
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.API", "Malarkey.API\Malarkey.API.csproj", "{6E632400-8A19-4402-B499-5FD988733918}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Security", "Malarkey.Security\Malarkey.Security.csproj", "{D9B1BB14-FF9B-4416-B321-B9F100C6510E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Security", "Malarkey.Security\Malarkey.Security.csproj", "{D9B1BB14-FF9B-4416-B321-B9F100C6510E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

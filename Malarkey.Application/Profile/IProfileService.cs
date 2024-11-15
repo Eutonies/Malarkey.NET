@@ -11,6 +11,5 @@ public interface IProfileService
 {
     Task<ActionResult<string>> IssueSampleProfileToken(string receiverCertificate);
     Task<ActionResult<MalarkeyProfile>> ExtractProfileFromToken(string token, string receiverCertificate);
-
-
+    Task<ActionResult<MalarkeyProfileAndIdentities>> LoadOrCreateProfile(ProfileIdentity identity);
 }

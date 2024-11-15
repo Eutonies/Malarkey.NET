@@ -24,6 +24,8 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
 
     public IServiceScopeFactory ServiceScopeFactory => _scopeFactory;
 
+    public string PublicKey => _rsaPublicKey.Rsa.ExportRSAPrivateKeyPem();
+
     public MalarkeyTokenHandler(IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;

@@ -10,6 +10,8 @@ using Microsoft.Extensions.Options;
 namespace Malarkey.Application.Security;
 public interface IMalarkeyTokenHandler
 {
+    public string PublicKey { get; } 
+
     public Task<(MalarkeyProfileToken Token, string TokenString)> IssueToken(MalarkeyProfile profile, string receiverPublicKey);
     public Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(ProfileIdentity identity, string receiverPublicKey);
     public Task RecallToken(string tokenString);
@@ -87,7 +89,7 @@ public interface IMalarkeyTokenHandler
         }
     }
 
-    IServiceScopeFactory ServiceScopeFactory { get; }
+    protected IServiceScopeFactory ServiceScopeFactory { get; }
 
     private string? ExtractPublicKey(HttpContext context, IServiceScope scope)
     {

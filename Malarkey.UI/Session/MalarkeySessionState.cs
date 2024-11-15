@@ -5,10 +5,12 @@ namespace Malarkey.UI.Session;
 public class MalarkeySessionState
 {
     private readonly IServiceScopeFactory _scopeFactory;
+    private readonly Action _onUpdate;
 
-    public MalarkeySessionState(IServiceScopeFactory scopeFactory)
+    public MalarkeySessionState(IServiceScopeFactory scopeFactory, Action onUpdate)
     {
         _scopeFactory = scopeFactory;
+        _onUpdate = onUpdate;
     }
 
     public MalarkeyUser? User { get; private set; }
@@ -27,6 +29,7 @@ public class MalarkeySessionState
                 Profile: profileAndIdentities.Profile,
                 Identities: profileAndIdentities.Identities
                 );
+            _onUpdate();
         }
     }
 
