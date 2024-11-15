@@ -19,7 +19,8 @@ public class MalarkeyCertificateConfiguration
 
     private X509Certificate2 Create()
     {
-        var bytes = File.ReadAllBytes(CertificateFileToUse());
+        var fileToUse = CertificateFileToUse();
+        var bytes = File.ReadAllBytes(fileToUse);
         var returnee = new X509Certificate2(bytes, CertificatePasswordToUse());
         return returnee;
     }
