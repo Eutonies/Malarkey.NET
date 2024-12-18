@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Microsoft.Configuration;
-public class MicrosoftIdentityProviderConfiguration : IdentityProviderConfiguration
+public class MicrosoftIdentityProviderConfiguration : MalarkeyIdentityProviderConfiguration
 {
     public string Instance { get; set; }
     public string TenantId { get; set; }

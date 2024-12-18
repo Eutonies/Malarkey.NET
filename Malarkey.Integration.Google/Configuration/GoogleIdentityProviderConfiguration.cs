@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Google.Configuration;
-public class GoogleIdentityProviderConfiguration : IdentityProviderConfiguration
+public class GoogleIdentityProviderConfiguration : MalarkeyIdentityProviderConfiguration
 {
     public string ProjectId { get; set; }
     public string AuthenticationUri { get; set; }

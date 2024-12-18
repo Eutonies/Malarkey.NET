@@ -1,4 +1,5 @@
 ﻿using Malarkey.Application.Common;
+using Malarkey.Application.Profile.Persistence;
 using Malarkey.Domain.Profile;
 using System;
 using System.Collections.Generic;
@@ -11,5 +12,5 @@ public interface IProfileService
 {
     Task<ActionResult<string>> IssueSampleProfileToken(string receiverCertificate);
     Task<ActionResult<MalarkeyProfile>> ExtractProfileFromToken(string token, string receiverCertificate);
-    Task<ActionResult<MalarkeyProfileAndIdentities>> LoadOrCreateProfile(ProfileIdentity identity);
+    Task<ActionResult<MalarkeyProfileAndIdentities>> LoadOrCreateProfile(MalarkeyIdentityProviderDbo provider, string providerId);
 }

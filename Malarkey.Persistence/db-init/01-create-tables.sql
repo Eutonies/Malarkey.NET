@@ -7,7 +7,7 @@ create table profile (
 );
 
 create type provider_type as 
-enum('Microsoft','Google', 'Facebook');
+enum('Microsoft','Google', 'Facebook', 'Spotify');
 
 
 create table profile_identity (

@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Facebook.Configuration;
-public class FacebookIntegrationIdentityConfiguration : IdentityProviderConfiguration
+public class FacebookIntegrationIdentityConfiguration : MalarkeyIdentityProviderConfiguration
 {
     public string AppId { get; set; }
 

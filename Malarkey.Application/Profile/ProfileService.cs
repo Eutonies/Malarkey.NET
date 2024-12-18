@@ -1,4 +1,5 @@
 ﻿using Malarkey.Application.Common;
+using Malarkey.Application.Profile.Persistence;
 using Malarkey.Application.Security;
 using Malarkey.Domain.Profile;
 using Malarkey.Domain.Token;
@@ -13,10 +14,12 @@ internal class ProfileService : IProfileService
 {
 
     private readonly IMalarkeyTokenHandler _tokenHandler;
+    private readonly IMalarkeyProfileRepository _profileRepository;
 
-    public ProfileService(IMalarkeyTokenHandler tokenHandler)
+    public ProfileService(IMalarkeyTokenHandler tokenHandler, IMalarkeyProfileRepository profileRepository)
     {
         _tokenHandler = tokenHandler;
+        _profileRepository = profileRepository;
     }
 
     public async Task<ActionResult<MalarkeyProfile>> ExtractProfileFromToken(string token, string receiverCertificate) =>
@@ -34,8 +37,8 @@ internal class ProfileService : IProfileService
         return new SuccessActionResult<string>(tokenString);
     }
 
-    public Task<ActionResult<MalarkeyProfileAndIdentities>> LoadOrCreateProfile(ProfileIdentity identity)
+    public async Task<ActionResult<MalarkeyProfileAndIdentities>> LoadOrCreateProfile(MalarkeyIdentityProviderDbo provider, string providerId)
     {
-        throw new NotImplementedException();
+        var loaded = await _profileRepository.
     }
 }

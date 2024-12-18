@@ -9,5 +9,8 @@ public class MalarkeyApplicationConfiguration
 {
     public const string ConfigurationElementName = "Application";
     public MalarkeyCertificateConfiguration SigningCertificate { get; set; }
+
+    public MalarkeyCertificateConfiguration HostingCertificate { get; set; }
+
 }
 
