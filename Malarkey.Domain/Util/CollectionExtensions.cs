@@ -21,5 +21,8 @@ public static class CollectionExtensions
         Func<TInp, TKey> keyExtract
         ) where TKey : notnull => inputs.ToDictionarySafe(keyExtract, _ => _);
 
+    public static string MakeString(this IEnumerable<object> input, string separator = ",", string? start = null, string? end = null) =>
+        $"{(start == null ? "" : start)}{string.Join(separator, input)}{(end == null ? "" : end)}";
+
 
 }

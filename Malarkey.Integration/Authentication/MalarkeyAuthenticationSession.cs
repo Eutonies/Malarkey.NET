@@ -9,6 +9,7 @@ public record MalarkeyAuthenticationSession(
     long SessionId,
     string State,
     MalarkeyOAuthIdentityProvider IdProvider,
+    string? Nonce,
     string? Forwarder,
     string CodeChallenge,
     string CodeVerifier

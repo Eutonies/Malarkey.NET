@@ -7,17 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Infrastructure", "
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Domain", "Malarkey.Domain\Malarkey.Domain.csproj", "{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration.Microsoft", "Malarkey.Integration.Microsoft\Malarkey.Integration.Microsoft.csproj", "{E006AE6A-0CC5-49CD-AC0C-31F02BFA41BD}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Application", "Malarkey.Application\Malarkey.Application.csproj", "{D7087605-2585-4E4B-A504-C53C19FAB089}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration", "Malarkey.Integration\Malarkey.Integration.csproj", "{D8CE544E-293F-4ACF-A680-515532AA6F64}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.UI", "Malarkey.UI\Malarkey.UI.csproj", "{46C12AA0-B232-4B98-80DE-FF7149FCC9D0}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration.Facebook", "Malarkey.Integration.Facebook\Malarkey.Integration.Facebook.csproj", "{C2FA1D3C-2DB3-4F6E-8CDE-BED9737E7677}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Integration.Google", "Malarkey.Integration.Google\Malarkey.Integration.Google.csproj", "{447CADA2-4032-4789-BA47-3AC0BEF8EC7F}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.API", "Malarkey.API\Malarkey.API.csproj", "{6E632400-8A19-4402-B499-5FD988733918}"
 EndProject
@@ -41,10 +35,6 @@ Global
 		{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}.Release|Any CPU.Build.0 = Release|Any CPU
-		{E006AE6A-0CC5-49CD-AC0C-31F02BFA41BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{E006AE6A-0CC5-49CD-AC0C-31F02BFA41BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{E006AE6A-0CC5-49CD-AC0C-31F02BFA41BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{E006AE6A-0CC5-49CD-AC0C-31F02BFA41BD}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D7087605-2585-4E4B-A504-C53C19FAB089}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D7087605-2585-4E4B-A504-C53C19FAB089}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7087605-2585-4E4B-A504-C53C19FAB089}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -57,14 +47,6 @@ Global
 		{46C12AA0-B232-4B98-80DE-FF7149FCC9D0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{46C12AA0-B232-4B98-80DE-FF7149FCC9D0}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{46C12AA0-B232-4B98-80DE-FF7149FCC9D0}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C2FA1D3C-2DB3-4F6E-8CDE-BED9737E7677}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2FA1D3C-2DB3-4F6E-8CDE-BED9737E7677}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C2FA1D3C-2DB3-4F6E-8CDE-BED9737E7677}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C2FA1D3C-2DB3-4F6E-8CDE-BED9737E7677}.Release|Any CPU.Build.0 = Release|Any CPU
-		{447CADA2-4032-4789-BA47-3AC0BEF8EC7F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{447CADA2-4032-4789-BA47-3AC0BEF8EC7F}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{447CADA2-4032-4789-BA47-3AC0BEF8EC7F}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{447CADA2-4032-4789-BA47-3AC0BEF8EC7F}.Release|Any CPU.Build.0 = Release|Any CPU
 		{6E632400-8A19-4402-B499-5FD988733918}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6E632400-8A19-4402-B499-5FD988733918}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E632400-8A19-4402-B499-5FD988733918}.Release|Any CPU.ActiveCfg = Release|Any CPU

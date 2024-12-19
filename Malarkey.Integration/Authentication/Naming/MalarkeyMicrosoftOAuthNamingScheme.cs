@@ -18,6 +18,7 @@ internal static class MalarkeyMicrosoftOAuthNamingScheme
             ResponseMode = "response_mode",
             Scope = "scope",
             State = "state",
+            Nonce = "nonce",
             CodeChallenge = "code_challenge",
             CodeChallengeMethod = "code_challenge_method",
 

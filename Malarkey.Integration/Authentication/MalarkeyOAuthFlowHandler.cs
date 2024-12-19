@@ -1,6 +1,8 @@
-﻿using Malarkey.Integration.Authentication.Naming;
+﻿using Malarkey.Domain.Util;
+using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
 using System;
 using System.Collections.Generic;
@@ -13,12 +15,17 @@ internal abstract class MalarkeyOAuthFlowHandler
 {
     private readonly MalarkeyOAuthNamingScheme _namingScheme;
     private readonly MalarkeyIdentityProviderConfiguration _conf;
+    private readonly MalarkeyIntegrationConfiguration _intConf;
 
+    protected virtual string[] DefaultScopes => ["openid"];
+    protected virtual string DefaultResponseType => "code";
+    protected virtual string DefaultCodeChallengeMethod => "S256";
 
-    public MalarkeyOAuthFlowHandler(IConfiguration configuration)
+    public MalarkeyOAuthFlowHandler( IConfiguration configuration, MalarkeyIntegrationConfiguration intConf)
     {
         _namingScheme = ProduceNamingScheme();
         _conf = ProduceConfiguration(configuration);
+        _intConf = intConf;
     }
     public string AuthorizationEndpoint { get; }
 
@@ -26,21 +33,46 @@ internal abstract class MalarkeyOAuthFlowHandler
     protected abstract MalarkeyIdentityProviderConfiguration ProduceConfiguration(IConfiguration configuration);
     
 
+    public virtual RedirectHttpResult ProduceRedirect(MalarkeyAuthenticationSession session)
+    {
+        var url = ProduceAuthorizationUrl(session);
+        var res = TypedResults.Redirect(url);
+        return res;
+    }
 
 
-    public virtual IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(HttpClient client, MalarkeyAuthenticationSession session)
+
+    public virtual IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session)
     {
         var returnee = new Dictionary<string, string>();
         returnee[_namingScheme.ClientId] = _conf.ClientId;
         returnee[_namingScheme.ClientSecret] = _conf.ClientSecret;
         returnee[_namingScheme.ResponseType] = _conf.ResponseType!;
-        returnee[_namingScheme.ClientId] = _conf.ClientId;
-        returnee[_namingScheme.ClientId] = _conf.ClientId;
-        returnee[_namingScheme.ClientId] = _conf.ClientId;
-
+        returnee[_namingScheme.RedirectUri] = _intConf.AuthenticationUrl;
+        returnee[_namingScheme.Scope] = (_conf.Scopes ?? DefaultScopes)
+            .MakeString()
+            .UrlEncoded();
+        if (session.Nonce != null)
+            returnee[_namingScheme.Nonce] = session.Nonce;
+        returnee[_namingScheme.CodeChallenge] = session.CodeChallenge;
+        returnee[_namingScheme.CodeChallengeMethod] = DefaultCodeChallengeMethod;
+        returnee[_namingScheme.State] = session.State;
         return returnee;
     }
+    public virtual string ProduceAuthorizationRequestQueryString(IReadOnlyDictionary<string, string> queryParameters) => queryParameters
+        .Select(p => $"{p.Key}={p.Value}")
+        .MakeString("&");
+        
 
+
+    public virtual string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session)
+    {
+        var queryParameters = ProduceRequestQueryParameters(session);
+        var queryString = ProduceAuthorizationRequestQueryString(queryParameters);
+        var baseUrl = _conf.AuthorizationEndpointTemplate;
+        var returnee = $"{baseUrl}?{queryString}";
+        return returnee;
+    }
 
 }
 
