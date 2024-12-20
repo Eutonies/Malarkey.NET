@@ -21,6 +21,12 @@ Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-co
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Persistence", "Malarkey.Persistence\Malarkey.Persistence.csproj", "{16BFABE8-A02B-4D45-9B90-935C8A66273B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "K8S", "K8S", "{51D360FB-7621-46F1-9C36-0D6E30BB9C09}"
+	ProjectSection(SolutionItems) = preProject
+		.k8s\malarkey.deployment.yaml = .k8s\malarkey.deployment.yaml
+		.k8s\malarkey.service.yaml = .k8s\malarkey.service.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

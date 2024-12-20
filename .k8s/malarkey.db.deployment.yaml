@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: malarkey-postgres
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: malarkey
+  template:
+    metadata:
+      labels:
+        app: malarkey
+    spec:
+      containers:
+        - name: malarkey-postgres
+          image: postgres
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: malarkey-db-config
+          volumeMounts:
+            - mountPath: /var/lib/malarkey/postgresql/data
+              name: malarkey-db-volume
+      volumes:
+        - name: postgresdata
+          persistentVolumeClaim:
+            claimName: malarkey-db-volume-claim
