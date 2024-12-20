@@ -12,7 +12,7 @@ services:
 
 
   malarkey.postgres:
-    profiles: ["all"]
+    profiles: ["all", "db"]
     container_name: malarkey.db.postgres
     image: postgres
     restart: always
@@ -36,7 +36,7 @@ services:
       - ./Malarkey.Persistence/db-volume:/var/lib/postgresql/data
 
   malarkey.postgres.adminer:
-    profiles: ["all"]
+    profiles: ["all", "db"]
     image: adminer
     restart: always
     ports:

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Malarkey.Domain.Authentication;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -22,6 +23,21 @@ internal class MalarkeyAuthenticationSessionDbo
     public DateTime? AuthenticatedTime { get; set; }
     public string? ProfileTokenId { get; set; }
     public string? IdentityTokenId { get; set; }
+
+
+    public MalarkeyAuthenticationSession ToDomain() => new MalarkeyAuthenticationSession(
+        SessionId: SessionId,
+        State: State,
+        IdProvider: Enum.Parse<MalarkeyOAuthIdentityProvider>(IdProvider),
+        Nonce: Nonce,
+        Forwarder: Forwarder,
+        CodeChallenge: CodeChallenge,
+        CodeVerifier: CodeVerifier,
+        InitTime: InitTime,
+        AuthenticatedTime: AuthenticatedTime,
+        ProfileTokenId: ProfileTokenId == null ? null : Guid.Parse(ProfileTokenId),
+        IdentityTokenId: IdentityTokenId == null ? null : Guid.Parse(IdentityTokenId)
+    );
 
 
 

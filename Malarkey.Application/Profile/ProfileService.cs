@@ -39,6 +39,6 @@ internal class ProfileService : IProfileService
 
     public async Task<ActionResult<MalarkeyProfileAndIdentities>> LoadOrCreateProfile(MalarkeyIdentityProviderDbo provider, string providerId)
     {
-        var loaded = await _profileRepository.
+        throw new Exception("");
     }
 }

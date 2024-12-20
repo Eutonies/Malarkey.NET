@@ -44,7 +44,6 @@ public static class DependencyInjection
         builder.Services.AddHttpContextAccessor();
         builder.Services.AddAuthorization(opts =>
         {
-            opts.RegisterIdProviderIsAuthenticatedPolicies();
             opts.RegisterIsAuthenticatedPolicy();
         });
         builder.Services.AddAntiforgery();
@@ -72,9 +71,6 @@ public static class DependencyInjection
         return app;
     }
 
-    private static string? SelectScheme(HttpContext cont)
-    {
-        return IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName;
-    }
+    private static string? SelectScheme(HttpContext cont) => null;
 
 }

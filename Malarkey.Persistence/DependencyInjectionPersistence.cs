@@ -1,5 +1,9 @@
-﻿using Malarkey.Persistence.Configuration;
+﻿using Malarkey.Application.Profile.Persistence;
+using Malarkey.Persistence.Authentication;
+using Malarkey.Persistence.Configuration;
 using Malarkey.Persistence.Context;
+using Malarkey.Persistence.Profile;
+using Malarkey.Security.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -23,7 +27,9 @@ public static class DependencyInjectionPersistence
     public static WebApplicationBuilder AddPersistence(this WebApplicationBuilder builder)
     {
         builder.Services.AddDbContextFactory<MalarkeyDbContext>(ConfigureDb, lifetime: ServiceLifetime.Singleton);
-        builder.Services.AddDbContextFactory<MalarkeyDbContext>(ConfigureDb, lifetime: ServiceLifetime.Scoped);
+        builder.Services.AddDbContext<MalarkeyDbContext>(ConfigureDb, contextLifetime : ServiceLifetime.Scoped);
+        builder.Services.AddSingleton<IMalarkeySessionRepository, MalarkeyAuthenticationSessionRepository>();
+        builder.Services.AddSingleton<IMalarkeyProfileRepository, MalarkeyProfileRepository>();
         return builder;
     }
 

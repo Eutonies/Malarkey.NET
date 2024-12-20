@@ -2,7 +2,6 @@
 using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
-using Microsoft.IdentityModel.Tokens;
 
 namespace Malarkey.UI.Pages.Authenticate;
 

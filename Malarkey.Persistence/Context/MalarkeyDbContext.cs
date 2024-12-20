@@ -22,6 +22,13 @@ internal class MalarkeyDbContext : DbContext
 
     public DbSet<MalarkeyAuthenticationSessionDbo> AuthenticationSessions { get; set; }
 
+    public MalarkeyDbContext(DbContextOptions opts) : base(opts)
+    {
+
+
+    }
+
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);

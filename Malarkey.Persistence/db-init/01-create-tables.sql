@@ -45,7 +45,7 @@ create table token (
 
 
 create table authentication_session (
-    session_id number(20) primary key generated always as identity,
+    session_id bigint primary key generated always as identity,
     state uuid default gen_random_uuid(),
     id_provider provider_type not null,
     nonce varchar(200),
