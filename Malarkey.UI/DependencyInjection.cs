@@ -1,8 +1,4 @@
-﻿using Malarkey.Integration;
-using Malarkey.Integration.Facebook;
-using Malarkey.Integration.Google;
-using Malarkey.Integration.Microsoft;
-using Malarkey.Application;
+﻿using Malarkey.Application;
 using Malarkey.Application.Security;
 using Malarkey.API;
 using Malarkey.UI.Pages;
@@ -24,7 +20,6 @@ public static class DependencyInjection
         builder.Configuration.AddJsonFile("appsettings.local.json", optional: true);
         builder.Configuration.AddEnvironmentVariables();
         builder.AddApplicationConfiguration();
-        builder.AddFacebookConfiguration();
         builder.AddPersistenceConfiguration();
         return builder;
     }
@@ -41,9 +36,6 @@ public static class DependencyInjection
             .AddMicrosoftIdentityUI();
         builder.Services
             .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddMicrosoftIdentityProvider(builder.Configuration)
-            .AddFacebookIdentityProvider(builder.Configuration)
-            .AddGoogleIdentityProvider(builder.Configuration)
             .AddJwtBearer()
             .AddCookie()
             .AddMalarkeyToken();

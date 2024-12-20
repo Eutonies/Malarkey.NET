@@ -24,5 +24,7 @@ public static class CollectionExtensions
     public static string MakeString(this IEnumerable<object> input, string separator = ",", string? start = null, string? end = null) =>
         $"{(start == null ? "" : start)}{string.Join(separator, input)}{(end == null ? "" : end)}";
 
+    public static string MakeString<TVal>(this IEnumerable<TVal> input, string separator = ",", string? start = null, string? end = null) where TVal : struct =>
+        $"{(start == null ? "" : start)}{string.Join(separator, input)}{(end == null ? "" : end)}";
 
 }

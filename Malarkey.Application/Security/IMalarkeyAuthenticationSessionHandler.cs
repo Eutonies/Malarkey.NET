@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace Malarkey.Application.Security;
 public interface IMalarkeyAuthenticationSessionHandler
 {
-    Task<MalarkeyAuthenticationSession> InitSession(HttpContext context);
+    Task<MalarkeyAuthenticationSession> InitSession(MalarkeyOAuthIdentityProvider idProvider, string? forwarder);
     Task<MalarkeyAuthenticationSession?> SessionForState(string state);
 
 }
