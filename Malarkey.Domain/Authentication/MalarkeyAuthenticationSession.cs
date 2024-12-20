@@ -12,5 +12,9 @@ public record MalarkeyAuthenticationSession(
     string? Nonce,
     string? Forwarder,
     string CodeChallenge,
-    string CodeVerifier
+    string CodeVerifier,
+    DateTime InitTime,
+    DateTime? AuthenticatedTime,
+    Guid? ProfileTokenId,
+    Guid? IdentityTokenId
     );

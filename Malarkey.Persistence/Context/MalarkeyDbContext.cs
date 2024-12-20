@@ -1,4 +1,5 @@
-﻿using Malarkey.Persistence.Profile.Model;
+﻿using Malarkey.Persistence.Authentication;
+using Malarkey.Persistence.Profile.Model;
 using Malarkey.Persistence.Token.Model;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -17,6 +18,9 @@ internal class MalarkeyDbContext : DbContext
 
     public DbSet<MalarkeyIdentityDbo> Identities { get; set; }
     public DbSet<MalarkeyTokenDbo> Tokens { get; set; }
+
+
+    public DbSet<MalarkeyAuthenticationSessionDbo> AuthenticationSessions { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {

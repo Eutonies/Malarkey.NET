@@ -40,4 +40,25 @@ create table token (
   valid_until timestamp not null,
   revoked_at timestamp,
   constraint pk_token primary key (token_id)
-)
+);
+
+
+
+create table authentication_session (
+    session_id number(20) primary key generated always as identity,
+    state uuid default gen_random_uuid(),
+    id_provider provider_type not null,
+    nonce varchar(200),
+    forwarder varchar(2000),
+    code_challenge varchar(2000) not null,
+    code_verifier varchar(2000) not null,
+    init_time timestamp not null,
+    authenticated_time timestamp,
+    profile_token_id uuid ,
+    identity_token_id uuid ,
+    unique(state)
+);
+
+
+
+
