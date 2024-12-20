@@ -11,5 +11,5 @@ public sealed record MalarkeyIdentityToken(
     string IssuedTo,
     DateTime IssuedAt,
     DateTime ValidUntil,
-    ProfileIdentity Identity
+    MalarkeyProfileIdentity Identity
     ) : MalarkeyToken(TokenId, IssuedTo, IssuedAt, ValidUntil);

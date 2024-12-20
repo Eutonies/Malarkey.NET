@@ -54,7 +54,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     }
 
 
-    public async Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(ProfileIdentity identity, string receiverPublicKey)
+    public async Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(MalarkeyProfileIdentity identity, string receiverPublicKey)
     {
         receiverPublicKey = receiverPublicKey.CleanCertificate();
         await Task.CompletedTask;

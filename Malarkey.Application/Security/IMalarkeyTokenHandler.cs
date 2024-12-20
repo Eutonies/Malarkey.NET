@@ -13,7 +13,7 @@ public interface IMalarkeyTokenHandler
     public string PublicKey { get; } 
 
     public Task<(MalarkeyProfileToken Token, string TokenString)> IssueToken(MalarkeyProfile profile, string receiverPublicKey);
-    public Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(ProfileIdentity identity, string receiverPublicKey);
+    public Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(MalarkeyProfileIdentity identity, string receiverPublicKey);
     public Task RecallToken(string tokenString);
     public Task<IReadOnlyCollection<MalarkeyTokenValidationResult>> ValidateTokens(IEnumerable<(string Token, string ReceiverPublicKey)> tokens);
     public async Task<MalarkeyTokenValidationResult> ValidateToken(string token, string receiverPublicKey) => (await ValidateTokens([(token, receiverPublicKey)])).First();
@@ -73,7 +73,7 @@ public interface IMalarkeyTokenHandler
     }
 
 
-    public async Task BakeCookies(HttpContext context, MalarkeyProfile profile, IReadOnlyCollection<ProfileIdentity> identities)
+    public async Task BakeCookies(HttpContext context, MalarkeyProfile profile, IReadOnlyCollection<MalarkeyProfileIdentity> identities)
     {
         using var scope = ServiceScopeFactory.CreateScope();
         var publicKeyString = ExtractPublicKey(context, scope);

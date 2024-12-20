@@ -179,7 +179,7 @@ internal static class MalarkeyTokenTsoExtensions
                 );
 
     internal static MalarkeyTokenPayloadTso ToPayloadTso(
-        this ProfileIdentity ident,
+        this MalarkeyProfileIdentity ident,
         string receiver,
         DateTime expiresAt,
         Guid tokenId
@@ -212,7 +212,7 @@ internal static class MalarkeyTokenTsoExtensions
     );
 
 
-    internal static string IdentityProviderType(this ProfileIdentity ident) => ident switch
+    internal static string IdentityProviderType(this MalarkeyProfileIdentity ident) => ident switch
     {
         MicrosoftIdentity _ => MalarkeyTokenIdentityTypeTso.Microsoft.ToString(),
         GoogleIdentity _ => MalarkeyTokenIdentityTypeTso.Google.ToString(),

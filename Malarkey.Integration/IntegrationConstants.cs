@@ -9,6 +9,8 @@ public static class IntegrationConstants
 {
     public const string IntegrationConfigurationName = "Integration";
 
+    public const string MalarkeyAuthenticationScheme = "Malarkey.Session";
+
     public static class IdProviders 
     {
         public const string FacebookAuthenticationSchemeName = "facebook";

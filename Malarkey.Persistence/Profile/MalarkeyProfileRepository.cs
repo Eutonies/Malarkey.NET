@@ -19,7 +19,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         _dbContextFactory = dbContextFactory;
     }
 
-    public async Task<MalarkeyProfileAndIdentities?> CreateByIdentity(ProfileIdentity identity)
+    public async Task<MalarkeyProfileAndIdentities?> CreateByIdentity(MalarkeyProfileIdentity identity)
     {
         await using var cont = await _dbContextFactory.CreateDbContextAsync();
         var provider = ProviderFor(identity);
@@ -88,7 +88,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
     }
 
 
-    private MalarkeyIdentityProviderDbo ProviderFor(ProfileIdentity ident) => ident switch
+    private MalarkeyIdentityProviderDbo ProviderFor(MalarkeyProfileIdentity ident) => ident switch
     {
         MicrosoftIdentity _ => MalarkeyIdentityProviderDbo.Microsoft,
         GoogleIdentity _ => MalarkeyIdentityProviderDbo.Google,

@@ -14,7 +14,7 @@ public sealed record MicrosoftIdentity(
     string Name,
     string? MiddleNames,
     string? LastName
-    ) : ProfileIdentity(
+    ) : MalarkeyProfileIdentity(
         IdentityId,
         ProfileId,
         MicrosoftId,

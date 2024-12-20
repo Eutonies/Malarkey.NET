@@ -8,6 +8,6 @@ namespace Malarkey.Domain.Profile;
 
 public record MalarkeyProfileAndIdentities(
     MalarkeyProfile Profile,
-    IReadOnlyCollection<ProfileIdentity> Identities,
+    IReadOnlyCollection<MalarkeyProfileIdentity> Identities,
     IReadOnlyCollection<Guid>? Absorbees = null
     );

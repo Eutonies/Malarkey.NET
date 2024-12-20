@@ -1,4 +1,5 @@
-﻿using Malarkey.Domain.Util;
+﻿using Malarkey.Domain.Authentication;
+using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;

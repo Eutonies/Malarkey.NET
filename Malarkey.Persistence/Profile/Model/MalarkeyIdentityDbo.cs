@@ -21,7 +21,7 @@ internal class MalarkeyIdentityDbo
     public string? LastName { get; set; }
 
 
-    public ProfileIdentity ToDomain() => Enum.Parse<MalarkeyIdentityProviderDbo>(Provider) switch
+    public MalarkeyProfileIdentity ToDomain() => Enum.Parse<MalarkeyIdentityProviderDbo>(Provider) switch
     {
         MalarkeyIdentityProviderDbo.Microsoft => new MicrosoftIdentity(IdentityId, ProfileId, ProviderId, PreferredName!, IdentityName, MiddleNames, LastName),
         MalarkeyIdentityProviderDbo.Google => new GoogleIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName),

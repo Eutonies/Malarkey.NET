@@ -5,7 +5,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Security;
+namespace Malarkey.Application.Security;
 public class MalarkeyClaimsIdentity : ClaimsIdentity
 {
     public MalarkeyClaimsIdentity(IEnumerable<Claim> claims) : base(

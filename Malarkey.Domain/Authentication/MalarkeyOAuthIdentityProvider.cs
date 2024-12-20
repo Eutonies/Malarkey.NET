@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Integration.Authentication;
+namespace Malarkey.Domain.Authentication;
 public enum MalarkeyOAuthIdentityProvider
 {
     Microsoft = 1,

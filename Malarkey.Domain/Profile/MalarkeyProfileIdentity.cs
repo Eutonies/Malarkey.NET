@@ -5,9 +5,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Domain.Profile;
-public abstract record ProfileIdentity
+public abstract record MalarkeyProfileIdentity
 {
-    internal ProfileIdentity(
+    internal MalarkeyProfileIdentity(
         Guid identityId,
         Guid profileId,
         string providerId,

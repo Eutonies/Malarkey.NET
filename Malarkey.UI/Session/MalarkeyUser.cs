@@ -5,5 +5,5 @@ namespace Malarkey.UI.Session;
 
 public record MalarkeyUser(
     MalarkeyProfile Profile,
-    IReadOnlyCollection<ProfileIdentity> Identities
+    IReadOnlyCollection<MalarkeyProfileIdentity> Identities
     );

@@ -12,7 +12,7 @@ public sealed record GoogleIdentity(
     string Name,
     string? MiddleNames,
     string? LastName
-    ) : ProfileIdentity(
+    ) : MalarkeyProfileIdentity(
         IdentityId,
         ProfileId,
         GoogleId,

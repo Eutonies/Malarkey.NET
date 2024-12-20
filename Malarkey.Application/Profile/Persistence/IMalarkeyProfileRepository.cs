@@ -20,9 +20,9 @@ public interface IMalarkeyProfileRepository
         await LoadByProviderId(MalarkeyIdentityProviderDbo.Facebook, facebookId);
 
 
-    Task<MalarkeyProfileAndIdentities?> CreateByIdentity(ProfileIdentity identity);
+    Task<MalarkeyProfileAndIdentities?> CreateByIdentity(MalarkeyProfileIdentity identity);
 
-    async Task<MalarkeyProfileAndIdentities?> LoadOrCreateByIdentity(ProfileIdentity identity) => identity switch
+    async Task<MalarkeyProfileAndIdentities?> LoadOrCreateByIdentity(MalarkeyProfileIdentity identity) => identity switch
     {
         MicrosoftIdentity micr => await LoadByMicrosoft(micr.MicrosoftId),
         GoogleIdentity goog => await LoadByGoogle(goog.GoogleId),

@@ -12,7 +12,7 @@ public sealed record FacebookIdentity(
     string Name,
     string? MiddleNames,
     string? LastName
-    ) : ProfileIdentity(
+    ) : MalarkeyProfileIdentity(
         IdentityId,
         ProfileId,
         FacebookId,
