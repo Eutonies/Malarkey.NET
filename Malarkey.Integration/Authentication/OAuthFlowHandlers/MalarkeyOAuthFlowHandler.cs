@@ -1,4 +1,5 @@
 ﻿using Malarkey.Domain.Authentication;
+using Malarkey.Domain.Profile;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
@@ -76,6 +77,14 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
         return returnee;
     }
 
+    public virtual string? StateFrom(HttpRequest request) => request.Headers.TryGetValue("state", out var vals) ? 
+            vals.ToString() :
+            null;
+
+    public Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, HttpRequest callbackRequest)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 

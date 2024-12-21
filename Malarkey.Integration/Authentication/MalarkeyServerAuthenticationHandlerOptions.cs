@@ -9,5 +9,6 @@ namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationHandlerOptions : AuthenticationSchemeOptions
 {
     public string AccessDeniedUrl { get; set; }
+    public string PublicKey { get; set; }
 
 }

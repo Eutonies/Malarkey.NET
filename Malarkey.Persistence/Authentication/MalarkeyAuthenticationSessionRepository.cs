@@ -19,7 +19,14 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
         _contectFactory = contectFactory;
     }
 
-    public async Task<MalarkeyAuthenticationSession> InitNewSession(MalarkeyOAuthIdentityProvider idProvider, string nonce, string? forwarder, string codeChallenge, string codeVerifier, DateTime initTime)
+    public async Task<MalarkeyAuthenticationSession> InitNewSession(
+        MalarkeyOAuthIdentityProvider idProvider, 
+        string nonce, 
+        string? forwarder, 
+        string codeChallenge, 
+        string codeVerifier, 
+        DateTime initTime,
+        string audience)
     {
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var insertee = new MalarkeyAuthenticationSessionDbo
@@ -29,7 +36,8 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
             Forwarder = forwarder,
             CodeVerifier = codeVerifier,
             CodeChallenge = codeChallenge,
-            InitTime = initTime
+            InitTime = initTime,
+            Audience = audience
         };
         cont.Add(insertee);
         await cont.SaveChangesAsync();

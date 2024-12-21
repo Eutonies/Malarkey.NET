@@ -7,14 +7,18 @@ using Malarkey.Domain.Profile;
 using Malarkey.Domain.Authentication;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
+using Malarkey.Application.Profile.Persistence;
 
 namespace Malarkey.Integration.Authentication;
-public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>
+public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
 {
     private readonly IMalarkeyTokenHandler _tokenHandler;
     private readonly IMalarkeyAuthenticationSessionHandler _sessionHandler;
     private readonly MalarkeyServerAuthenticationHandlerOptions _options;
     private readonly IReadOnlyDictionary<MalarkeyOAuthIdentityProvider, IMalarkeyOAuthFlowHandler> _flowHandlers;
+    private readonly IMalarkeyProfileRepository _profileRepo;
 
     /// <summary>
     /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
@@ -27,19 +31,21 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     }
 
     public MalarkeyServerAuthenticationHandler(
-        IOptionsMonitor<MalarkeyServerAuthenticationHandlerOptions> options, 
-        ILoggerFactory logger, 
+        IOptionsMonitor<MalarkeyServerAuthenticationHandlerOptions> options,
+        ILoggerFactory logger,
         UrlEncoder encoder,
         IMalarkeyTokenHandler tokenHandler,
         IMalarkeyAuthenticationSessionHandler sessionHandler,
         IEnumerable<IMalarkeyOAuthFlowHandler> flowHandlers
-        ) : base(options, logger, encoder)
+,
+        IMalarkeyProfileRepository profileRepo) : base(options, logger, encoder)
     {
         _tokenHandler = tokenHandler;
         _sessionHandler = sessionHandler;
         _options = options.CurrentValue;
         _flowHandlers = flowHandlers
             .ToDictionarySafe(_ => _.HandlerFor);
+        _profileRepo = profileRepo;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync() => (await _tokenHandler.ExtractProfileAndIdentities(Context)) switch
@@ -56,6 +62,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
         var requestedUrl = OriginalPath;
+        var audience = ExtractPublicKeyOfReceiver();
         var idp = Request.Headers.TryGetValue(IntegrationConstants.IdProviderHeaderName, out var idpString) ? (idpString.ToString() switch
         {
             IntegrationConstants.MalarkeyIdProviders.Microsoft => (MalarkeyOAuthIdentityProvider?)MalarkeyOAuthIdentityProvider.Microsoft,
@@ -77,7 +84,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         }
         else
         {
-            var session = await _sessionHandler.InitSession(idp.Value, requestedUrl);
+            var session = await _sessionHandler.InitSession(idp.Value, requestedUrl, audience);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(session);
             var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
                 context: Context,
@@ -91,8 +98,45 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     }
 
+    public async Task<MalarkeyServerAuthenticationResult> HandleCallback(HttpRequest request)
+    {
+        string? state = null;
+        foreach(var handler in _flowHandlers.Values)
+        {
+            state = handler.StateFrom(request);
+            if (!string.IsNullOrWhiteSpace(state))
+                break;
+        }
+        if (string.IsNullOrWhiteSpace(state))
+            return new MalarkeyServerAuthenticationFailureResult("Could not extract state");
+        var session = await _sessionHandler.SessionForState(state);
+        if(session == null)
+            return new MalarkeyServerAuthenticationFailureResult($"Could not find session for state={state}");
+        var flowHandler = _flowHandlers[session.IdProvider];
+        var identity = await flowHandler.ResolveIdentity(session, request);
+        if (identity == null)
+            return new MalarkeyServerAuthenticationFailureResult($"Could not resolve identity by {session.IdProvider} for callback request with URL={request.GetDisplayUrl()}");
+        var profileAndIdentities = await _profileRepo.LoadOrCreateByIdentity(identity);
+        if (profileAndIdentities == null)
+            return new MalarkeyServerAuthenticationFailureResult($"Could not locate profile identity: {identity.ProfileId} by {session.IdProvider}");
+        identity = profileAndIdentities.Identities
+            .Where(_ => _.ProviderId == identity.ProviderId)
+            .First();
+        var (profileToken, profileTokenString) = await _tokenHandler.IssueToken(profileAndIdentities.Profile, session.Audience);
+        var (identityToken, identityTokenString) = await _tokenHandler.IssueToken(identity, session.Audience);
+        await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
 
 
+
+    }
+
+
+    private string ExtractPublicKeyOfReceiver()
+    {
+        if (!Request.Headers.TryGetValue(IntegrationConstants.TokenReceiverHeaderName, out var pubKey))
+            return _options.PublicKey;
+        return pubKey.ToString();
+    }
 
 
 }

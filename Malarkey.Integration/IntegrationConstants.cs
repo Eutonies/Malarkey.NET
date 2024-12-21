@@ -13,6 +13,8 @@ public static class IntegrationConstants
 
     public const string IdProviderHeaderName = "Malarkey.IDP";
 
+    public const string TokenReceiverHeaderName = "Malarkey.Token.Audience";
+
     public static class MalarkeyIdProviders 
     {
         public const string Facebook = "facebook";

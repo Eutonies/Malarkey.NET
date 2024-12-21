@@ -24,6 +24,8 @@ internal class MalarkeyAuthenticationSessionDbo
     public string? ProfileTokenId { get; set; }
     public string? IdentityTokenId { get; set; }
 
+    public string Audience { get; set; }
+
 
     public MalarkeyAuthenticationSession ToDomain() => new MalarkeyAuthenticationSession(
         SessionId: SessionId,
@@ -36,7 +38,8 @@ internal class MalarkeyAuthenticationSessionDbo
         InitTime: InitTime,
         AuthenticatedTime: AuthenticatedTime,
         ProfileTokenId: ProfileTokenId == null ? null : Guid.Parse(ProfileTokenId),
-        IdentityTokenId: IdentityTokenId == null ? null : Guid.Parse(IdentityTokenId)
+        IdentityTokenId: IdentityTokenId == null ? null : Guid.Parse(IdentityTokenId),
+        Audience: Audience
     );
 
 

@@ -56,6 +56,7 @@ create table authentication_session (
     authenticated_time timestamp,
     profile_token_id uuid ,
     identity_token_id uuid ,
+    audience varchar(2000) not null,
     unique(state)
 );
 

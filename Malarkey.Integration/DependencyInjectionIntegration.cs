@@ -30,6 +30,7 @@ public static class DependencyInjectionIntegration
                configureOptions: opts =>
                {
                    opts.AccessDeniedUrl = conf.AccessDeniedUrl;
+                   opts.PublicKey = conf.PublicKey;
                });
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyMicrosoftOAuthFlowHandler>();
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyGoogleOAuthFlowHandler>();

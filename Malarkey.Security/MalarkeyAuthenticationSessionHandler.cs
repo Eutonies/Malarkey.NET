@@ -1,5 +1,6 @@
 ﻿using Malarkey.Application.Security;
 using Malarkey.Domain.Authentication;
+using Malarkey.Domain.Token;
 using Malarkey.Domain.Util;
 using Malarkey.Security.Persistence;
 using Microsoft.AspNetCore.Http;
@@ -23,7 +24,7 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         _repo = repo;
     }
 
-    public async Task<MalarkeyAuthenticationSession> InitSession(MalarkeyOAuthIdentityProvider idProvider, string? forwarder)
+    public async Task<MalarkeyAuthenticationSession> InitSession(MalarkeyOAuthIdentityProvider idProvider, string? forwarder, string audiencePublicKey)
     {
         var nonce = GenerateNonce();
         var (verifier, challenge) = GenerateChallengeAndVerifier();
@@ -33,7 +34,8 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
             forwarder: forwarder,
             codeChallenge: challenge,
             codeVerifier: verifier,
-            initTime: DateTime.Now
+            initTime: DateTime.Now,
+            audience: audiencePublicKey
         );
         return session;
     }
@@ -66,5 +68,9 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         return (verifier, challenge);
     }
 
-
+    public async Task<MalarkeyAuthenticationSession> UpdateSessionWithTokenInfo(
+        MalarkeyAuthenticationSession session,
+        MalarkeyProfileToken profileToken, 
+        MalarkeyIdentityToken identityToken) => 
+            (await _repo.UpdateWithAuthenticationInfo(session.State, DateTime.Now, profileToken.TokenId.ToString(), identityToken.TokenId.ToString()))!;
 }

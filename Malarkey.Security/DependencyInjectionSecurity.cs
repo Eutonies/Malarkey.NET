@@ -24,12 +24,6 @@ public static class DependencyInjectionSecurity
 
     public static AuthenticationBuilder AddMalarkeyToken(this AuthenticationBuilder builder)
     {
-        builder.AddScheme<MalarkeyAuthenticationOptions, MalarkeyAuthenticationHandler>(
-            authenticationScheme: MalarkeyApplicationConstants.MalarkeyCookieSchemeName,
-            configureOptions: opts =>
-            {
-
-            });
         return builder;
     }
 

@@ -9,11 +9,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Malarkey.Domain.Profile;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 public interface IMalarkeyOAuthFlowHandler
 {
     public MalarkeyOAuthIdentityProvider HandlerFor { get; }
     public string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session);
+
+    public string? StateFrom(HttpRequest request);
+
+    public Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, HttpRequest callbackRequest);
 
 }
