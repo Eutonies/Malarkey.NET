@@ -11,12 +11,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="9.0.0" />
-    <PackageReference Include="Microsoft.Identity.Web.Certificate" Version="3.3.1" />
-    <PackageReference Include="Microsoft.Identity.Web.UI" Version="3.3.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.21.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Malarkey.Integration\Malarkey.Integration.csproj" />
     <ProjectReference Include="..\Malarkey.Persistence\Malarkey.Persistence.csproj" />
     <ProjectReference Include="..\Malarkey.Security\Malarkey.Security.csproj" />
     <ProjectReference Include="..\Malarkey.API\Malarkey.API.csproj" />

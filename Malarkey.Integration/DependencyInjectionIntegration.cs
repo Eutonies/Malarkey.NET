@@ -3,6 +3,8 @@ using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -37,6 +39,23 @@ public static class DependencyInjectionIntegration
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyFacebookOAuthFlowHandler>();
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeySpotifyOAuthFlowHandler>();
         return builder;
+    }
+
+
+    public static WebApplication UseIntegration(this WebApplication app)
+    {
+        var conf = app.Configuration.IntegrationConfig();
+        app.UseAuthentication();
+        app.UseAuthorization();
+        app.MapGet(conf.RedirectUrl, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
+        {
+            await authHandler.HandleCallback(request);
+        });
+        app.MapPost(conf.RedirectUrl, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
+        {
+            await authHandler.HandleCallback(request);
+        });
+        return app;
     }
 
 

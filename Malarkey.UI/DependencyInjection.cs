@@ -3,12 +3,10 @@ using Malarkey.Application.Security;
 using Malarkey.API;
 using Malarkey.UI.Pages;
 using Malarkey.Security;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.Identity.Web;
-using Microsoft.Identity.Web.UI;
 using Microsoft.IdentityModel.Logging;
-using Microsoft.AspNetCore.Authentication;
 using Malarkey.Persistence;
+using Malarkey.Integration;
 
 namespace Malarkey.UI;
 
@@ -21,6 +19,7 @@ public static class DependencyInjection
         builder.Configuration.AddEnvironmentVariables();
         builder.AddApplicationConfiguration();
         builder.AddPersistenceConfiguration();
+        builder.AddIntegrationConfiguration();
         return builder;
     }
 
@@ -32,13 +31,8 @@ public static class DependencyInjection
             .AddInteractiveServerComponents()
             .AddMicrosoftIdentityConsentHandler();
         builder.Services.AddRazorPages()
-            .AddMvcOptions(_ => { })
-            .AddMicrosoftIdentityUI();
-        builder.Services
-            .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-            .AddJwtBearer()
-            .AddCookie()
-            .AddMalarkeyToken();
+            .AddMvcOptions(_ => { });
+        builder.AddIntegrationServices();
         builder.AddApplication();
         builder.AddPersistence();
         builder.Services.AddHttpContextAccessor();
@@ -55,13 +49,13 @@ public static class DependencyInjection
     public static WebApplication UseUiServices(this WebApplication app)
     {
         app.UseRouting();
-        app.UseAuthentication();
-        app.UseAuthorization();
+        app.UseStaticFiles();
+        app.UseIntegration();
+        app.UseApi();
         app.UseApi();
 
         app.UseHttpsRedirection();
 
-        app.UseStaticFiles();
         app.UseAntiforgery();
 
         app.MapRazorComponents<App>()
@@ -70,7 +64,5 @@ public static class DependencyInjection
 
         return app;
     }
-
-    private static string? SelectScheme(HttpContext cont) => null;
 
 }

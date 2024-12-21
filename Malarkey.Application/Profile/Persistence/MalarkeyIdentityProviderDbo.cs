@@ -9,5 +9,6 @@ public enum MalarkeyIdentityProviderDbo
 {
     Microsoft = 10,
     Google = 20,
-    Facebook = 30
+    Facebook = 30,
+    Spotify = 40
 }

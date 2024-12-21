@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.ViewFeatures;
+using Microsoft.AspNetCore.Http;
 
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyAuthenticationEvents
@@ -21,7 +23,6 @@ public class MalarkeyAuthenticationEvents
         return Task.CompletedTask;
     };
 
-
     /// <summary>
     /// Invoked when the client needs to be redirected to the access denied url.
     /// </summary>
@@ -31,6 +32,25 @@ public class MalarkeyAuthenticationEvents
         context.Response.Redirect(context.RedirectUri);
         return Task.CompletedTask;
     };
+
+
+    /// <summary>
+    /// Invoked when the client needs to be redirected to the access denied url.
+    /// </summary>
+    public Func<RedirectContext<MalarkeyServerAuthenticationHandlerOptions>, string, Task> OnFailure { get; set; } = async (context, error) =>
+    {
+        context.Response.StatusCode = 403;
+        await context.Response.WriteAsync(error);
+    };
+
+
+    public Func<RedirectContext<MalarkeyServerAuthenticationHandlerOptions>, Task> OnRedirectUponCompletion { get; set; } = context =>
+    {
+        context.Response.StatusCode = 302; 
+        context.Response.Redirect(context.RedirectUri);
+        return Task.CompletedTask;
+    };
+
 
 
 

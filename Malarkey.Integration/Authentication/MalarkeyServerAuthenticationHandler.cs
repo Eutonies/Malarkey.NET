@@ -10,6 +10,7 @@ using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Malarkey.Application.Profile.Persistence;
+using Malarkey.Integration.Configuration;
 
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
@@ -19,6 +20,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly MalarkeyServerAuthenticationHandlerOptions _options;
     private readonly IReadOnlyDictionary<MalarkeyOAuthIdentityProvider, IMalarkeyOAuthFlowHandler> _flowHandlers;
     private readonly IMalarkeyProfileRepository _profileRepo;
+    private readonly MalarkeyIntegrationConfiguration _intConf;
 
     /// <summary>
     /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
@@ -36,10 +38,12 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         UrlEncoder encoder,
         IMalarkeyTokenHandler tokenHandler,
         IMalarkeyAuthenticationSessionHandler sessionHandler,
-        IEnumerable<IMalarkeyOAuthFlowHandler> flowHandlers
-,
-        IMalarkeyProfileRepository profileRepo) : base(options, logger, encoder)
+        IEnumerable<IMalarkeyOAuthFlowHandler> flowHandlers,
+        IMalarkeyProfileRepository profileRepo,
+        IOptions<MalarkeyIntegrationConfiguration> intConf
+        ) : base(options, logger, encoder)
     {
+        _intConf = intConf.Value;
         _tokenHandler = tokenHandler;
         _sessionHandler = sessionHandler;
         _options = options.CurrentValue;
@@ -125,8 +129,10 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var (profileToken, profileTokenString) = await _tokenHandler.IssueToken(profileAndIdentities.Profile, session.Audience);
         var (identityToken, identityTokenString) = await _tokenHandler.IssueToken(identity, session.Audience);
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
-
-
+        var redirectUrl = session.Forwarder ?? $"{_intConf.ServerBasePath}/";
+        var props = new AuthenticationProperties();
+        var redirectContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(Context, Scheme, _options, props, redirectUrl);
+        await Events.OnRedirectUponCompletion(redirectContext);
 
     }
 
