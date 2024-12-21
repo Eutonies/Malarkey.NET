@@ -40,7 +40,6 @@ https://accounts.google.com/o/oauth2/v2/auth?
     &response_type=code
     &redirect_uri=http%3A%2F%2Flocalhost%2Fmyapp%2F
     &response_mode=query
-    &scope=https%3A%2F%2Fgraph.microsoft.com%2Fmail.read
     &state=12345
     &nonce=0394852-3190485-2490358&
     &code_challenge=YTFjNjI1OWYzMzA3MTI4ZDY2Njg5M2RkNmVjNDE5YmEyZGRhOGYyM2IzNjdmZWFhMTQ1ODg3NDcxY2Nl

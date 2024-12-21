@@ -1,16 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
-using Malarkey.Security;
 using Malarkey.Application.Security;
 using Malarkey.Domain.Profile;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Malarkey.Domain.Authentication;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
@@ -21,7 +14,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly IMalarkeyTokenHandler _tokenHandler;
     private readonly IMalarkeyAuthenticationSessionHandler _sessionHandler;
     private readonly MalarkeyServerAuthenticationHandlerOptions _options;
-    private readonly IReadOnlyDictionary<MalarkeyOAuthIdentityProvider, MalarkeyOAuthFlowHandler> _flowHandlers;
+    private readonly IReadOnlyDictionary<MalarkeyOAuthIdentityProvider, IMalarkeyOAuthFlowHandler> _flowHandlers;
 
     /// <summary>
     /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
@@ -39,7 +32,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         UrlEncoder encoder,
         IMalarkeyTokenHandler tokenHandler,
         IMalarkeyAuthenticationSessionHandler sessionHandler,
-        IEnumerable<MalarkeyOAuthFlowHandler> flowHandlers
+        IEnumerable<IMalarkeyOAuthFlowHandler> flowHandlers
         ) : base(options, logger, encoder)
     {
         _tokenHandler = tokenHandler;
