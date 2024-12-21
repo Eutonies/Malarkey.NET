@@ -13,5 +13,9 @@ public class MalarkeyServerAuthenticationHandlerOptions : AuthenticationSchemeOp
     public bool EnableFacebook { get; set; }
     public bool EnableSpotify { get; set; }
 
+    public string AccessDeniedUrl { get; set; }
+
+
+
 
 }

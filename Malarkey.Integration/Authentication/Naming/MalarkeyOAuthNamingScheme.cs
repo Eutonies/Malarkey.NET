@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Authentication.Naming;
-internal class MalarkeyOAuthNamingScheme
+public class MalarkeyOAuthNamingScheme
 {
     public string ClientId { get; set; }
     public string ClientSecret { get; set; }

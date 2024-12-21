@@ -10,15 +10,15 @@ namespace Malarkey.Integration;
 public static class IntegrationExtensions
 {
     public static bool IsAuthenticatedMicrosoftIdentity(this ClaimsIdentity ident) =>
-        (ident.AuthenticationType == IntegrationConstants.IdProviders.MicrosoftAuthenticationSchemeName ||
+        (ident.AuthenticationType == IntegrationConstants.MalarkeyIdProviders.Microsoft ||
         ident.Claims.Any(_ => _.Issuer.Contains("login.microsoftonline.com")))
         && ident.IsAuthenticated;
 
     public static bool IsAuthenticatedFacebookIdentity(this ClaimsIdentity ident) =>
-        ident.AuthenticationType == IntegrationConstants.IdProviders.FacebookAuthenticationSchemeName && ident.IsAuthenticated;
+        ident.AuthenticationType == IntegrationConstants.MalarkeyIdProviders.Facebook && ident.IsAuthenticated;
 
     public static bool IsAuthenticatedGoogleIdentity(this ClaimsIdentity ident) =>
-        ident.AuthenticationType == IntegrationConstants.IdProviders.GoogleAuthenticationSchemeName && ident.IsAuthenticated;
+        ident.AuthenticationType == IntegrationConstants.MalarkeyIdProviders.Google && ident.IsAuthenticated;
 
     public static bool IsAuthenticatedMicrosoftUser(this ClaimsPrincipal usr) =>
         usr.Identities.Any(_ => _.IsAuthenticatedMicrosoftIdentity());

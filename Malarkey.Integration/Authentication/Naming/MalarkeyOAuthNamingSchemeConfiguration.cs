@@ -14,6 +14,7 @@ public class MalarkeyOAuthNamingSchemeConfiguration
     public string? ResponseMode { get; set; }
     public string? Scope { get; set; }
     public string? State { get; set; }
+    public string? Nonce { get; set; }
     public string? CodeChallenge { get; set; }
     public string? CodeChallengeMethod { get; set; }
 

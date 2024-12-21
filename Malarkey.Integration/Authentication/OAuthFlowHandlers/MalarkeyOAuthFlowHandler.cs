@@ -11,28 +11,30 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Integration.Authentication;
-internal abstract class MalarkeyOAuthFlowHandler
+namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
+public abstract class MalarkeyOAuthFlowHandler
 {
-    private readonly MalarkeyOAuthNamingScheme _namingScheme;
-    private readonly MalarkeyIdentityProviderConfiguration _conf;
-    private readonly MalarkeyIntegrationConfiguration _intConf;
+    protected readonly MalarkeyOAuthNamingScheme _namingScheme;
+    protected readonly MalarkeyIdentityProviderConfiguration _conf;
+    protected readonly MalarkeyIntegrationConfiguration _intConf;
+
+    public abstract MalarkeyOAuthIdentityProvider HandlerFor { get; }
 
     protected virtual string[] DefaultScopes => ["openid"];
     protected virtual string DefaultResponseType => "code";
     protected virtual string DefaultCodeChallengeMethod => "S256";
 
-    public MalarkeyOAuthFlowHandler( IConfiguration configuration, MalarkeyIntegrationConfiguration intConf)
+    public MalarkeyOAuthFlowHandler(MalarkeyIntegrationConfiguration intConf)
     {
-        _namingScheme = ProduceNamingScheme();
-        _conf = ProduceConfiguration(configuration);
         _intConf = intConf;
+        _namingScheme = ProduceNamingScheme();
+        _conf = ProduceConfiguration();
     }
-    public string AuthorizationEndpoint { get; }
+    public abstract string AuthorizationEndpoint { get; }
 
     protected abstract MalarkeyOAuthNamingScheme ProduceNamingScheme();
-    protected abstract MalarkeyIdentityProviderConfiguration ProduceConfiguration(IConfiguration configuration);
-    
+    protected abstract MalarkeyIdentityProviderConfiguration ProduceConfiguration();
+
 
     public virtual RedirectHttpResult ProduceRedirect(MalarkeyAuthenticationSession session)
     {
@@ -47,9 +49,8 @@ internal abstract class MalarkeyOAuthFlowHandler
     {
         var returnee = new Dictionary<string, string>();
         returnee[_namingScheme.ClientId] = _conf.ClientId;
-        returnee[_namingScheme.ClientSecret] = _conf.ClientSecret;
         returnee[_namingScheme.ResponseType] = _conf.ResponseType!;
-        returnee[_namingScheme.RedirectUri] = _intConf.AuthenticationUrl;
+        returnee[_namingScheme.RedirectUri] = _intConf.RedirectUrl;
         returnee[_namingScheme.Scope] = (_conf.Scopes ?? DefaultScopes)
             .MakeString()
             .UrlEncoded();
@@ -63,14 +64,14 @@ internal abstract class MalarkeyOAuthFlowHandler
     public virtual string ProduceAuthorizationRequestQueryString(IReadOnlyDictionary<string, string> queryParameters) => queryParameters
         .Select(p => $"{p.Key}={p.Value}")
         .MakeString("&");
-        
+
 
 
     public virtual string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session)
     {
         var queryParameters = ProduceRequestQueryParameters(session);
         var queryString = ProduceAuthorizationRequestQueryString(queryParameters);
-        var baseUrl = _conf.AuthorizationEndpointTemplate;
+        var baseUrl = AuthorizationEndpoint;
         var returnee = $"{baseUrl}?{queryString}";
         return returnee;
     }

@@ -11,12 +11,14 @@ public static class IntegrationConstants
 
     public const string MalarkeyAuthenticationScheme = "Malarkey.Session";
 
-    public static class IdProviders 
+    public const string IdProviderHeaderName = "Malarkey.IDP";
+
+    public static class MalarkeyIdProviders 
     {
-        public const string FacebookAuthenticationSchemeName = "facebook";
-        public const string GoogleAuthenticationSchemeName = "google";
-        public const string MicrosoftAuthenticationSchemeName = "microsoft";
-        public const string MicrosoftIdCookieName = "MalarkeyAzureId";
+        public const string Facebook = "facebook";
+        public const string Google = "google";
+        public const string Microsoft = "microsoft";
+        public const string Spotify = "spotify";
         public const string MicrosoftSchemaClaimName = "http://schemas.microsoft.com/identity";
     }
 
