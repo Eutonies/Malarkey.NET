@@ -1,4 +1,5 @@
-﻿using Malarkey.Persistence.Authentication;
+﻿using Malarkey.Domain.Authentication;
+using Malarkey.Persistence.Authentication;
 using Malarkey.Persistence.Profile.Model;
 using Malarkey.Persistence.Token.Model;
 using Microsoft.EntityFrameworkCore;
@@ -22,16 +23,24 @@ internal class MalarkeyDbContext : DbContext
 
     public DbSet<MalarkeyAuthenticationSessionDbo> AuthenticationSessions { get; set; }
 
-    public MalarkeyDbContext(DbContextOptions opts) : base(opts)
+    public MalarkeyDbContext(DbContextOptions<MalarkeyDbContext> opts) : base(opts)
     {
 
 
+    }
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        base.ConfigureConventions(configurationBuilder);
+        configurationBuilder.Properties<DateTime?>().HaveColumnType("timestamp without time zone");
+        configurationBuilder.Properties<DateTime>().HaveColumnType("timestamp without time zone");
+        //configurationBuilder.Properties<MalarkeyOAuthIdentityProvider>().HaveColumnType("provider_type");
     }
 
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
+
     }
 
 

@@ -64,7 +64,7 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
             .Select(byt => CodeVerifierAllowedChars[byt])
             .MakeString("");
         var challengeBytes = SHA256.HashData(randomBytes);
-        var challenge = Convert.ToBase64String(challengeBytes);
+        var challenge = Convert.ToBase64String(challengeBytes).Substring(0,43);
         return (verifier, challenge);
     }
 
@@ -72,5 +72,5 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         MalarkeyAuthenticationSession session,
         MalarkeyProfileToken profileToken, 
         MalarkeyIdentityToken identityToken) => 
-            (await _repo.UpdateWithAuthenticationInfo(session.State, DateTime.Now, profileToken.TokenId.ToString(), identityToken.TokenId.ToString()))!;
+            (await _repo.UpdateWithAuthenticationInfo(session.State, DateTime.Now, profileToken.TokenId, identityToken.TokenId))!;
 }

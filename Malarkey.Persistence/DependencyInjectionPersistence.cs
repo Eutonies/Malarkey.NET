@@ -1,4 +1,5 @@
 ﻿using Malarkey.Application.Profile.Persistence;
+using Malarkey.Domain.Authentication;
 using Malarkey.Persistence.Authentication;
 using Malarkey.Persistence.Configuration;
 using Malarkey.Persistence.Context;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Npgsql.NameTranslation;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -27,7 +29,7 @@ public static class DependencyInjectionPersistence
     public static WebApplicationBuilder AddPersistence(this WebApplicationBuilder builder)
     {
         builder.Services.AddDbContextFactory<MalarkeyDbContext>(ConfigureDb, lifetime: ServiceLifetime.Singleton);
-        builder.Services.AddDbContext<MalarkeyDbContext>(ConfigureDb, contextLifetime : ServiceLifetime.Scoped);
+        //builder.Services.AddDbContext<MalarkeyDbContext>(ConfigureDb, contextLifetime : ServiceLifetime.Scoped);
         builder.Services.AddSingleton<IMalarkeySessionRepository, MalarkeyAuthenticationSessionRepository>();
         builder.Services.AddSingleton<IMalarkeyProfileRepository, MalarkeyProfileRepository>();
         return builder;
@@ -37,7 +39,10 @@ public static class DependencyInjectionPersistence
     {
         var connectionString = services.GetRequiredService<IOptions<PersistenceConfiguration>>().Value.Db.ConnectionString;
         builder
-            .UseNpgsql(connectionString)
+            .UseNpgsql(connectionString, opts =>
+            {
+                opts.MapEnum<MalarkeyOAuthIdentityProvider>("provider_type", nameTranslator: new NpgsqlNullNameTranslator());
+            })
             .EnableDetailedErrors()
             .EnableSensitiveDataLogging();
     }

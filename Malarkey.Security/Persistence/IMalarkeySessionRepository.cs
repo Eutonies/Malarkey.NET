@@ -17,7 +17,7 @@ public interface IMalarkeySessionRepository
         DateTime initTime,
         string audience);
     Task<MalarkeyAuthenticationSession?> SessionFor(string state);
-    Task<MalarkeyAuthenticationSession?> UpdateWithAuthenticationInfo(string state, DateTime authenticatedTime, string profileTokenId, string identityTokenId);
+    Task<MalarkeyAuthenticationSession?> UpdateWithAuthenticationInfo(string state, DateTime authenticatedTime, Guid profileTokenId, Guid identityTokenId);
 
 
 }

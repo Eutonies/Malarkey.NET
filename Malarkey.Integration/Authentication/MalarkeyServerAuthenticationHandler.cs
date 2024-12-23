@@ -17,7 +17,6 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 {
     private readonly IMalarkeyTokenHandler _tokenHandler;
     private readonly IMalarkeyAuthenticationSessionHandler _sessionHandler;
-    private readonly MalarkeyServerAuthenticationHandlerOptions _options;
     private readonly IReadOnlyDictionary<MalarkeyOAuthIdentityProvider, IMalarkeyOAuthFlowHandler> _flowHandlers;
     private readonly IMalarkeyProfileRepository _profileRepo;
     private readonly MalarkeyIntegrationConfiguration _intConf;
@@ -26,11 +25,9 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
     /// If it is not provided a default instance is supplied which does nothing when the methods are called.
     /// </summary>
-    protected new MalarkeyAuthenticationEvents Events
-    {
-        get { return (MalarkeyAuthenticationEvents) base.Events!; }
-        set { base.Events = value; }
-    }
+
+    private MalarkeyAuthenticationEvents _events;
+    protected new MalarkeyAuthenticationEvents Events => _events;
 
     public MalarkeyServerAuthenticationHandler(
         IOptionsMonitor<MalarkeyServerAuthenticationHandlerOptions> options,
@@ -43,10 +40,10 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         IOptions<MalarkeyIntegrationConfiguration> intConf
         ) : base(options, logger, encoder)
     {
+        _events = new MalarkeyAuthenticationEvents();
         _intConf = intConf.Value;
         _tokenHandler = tokenHandler;
         _sessionHandler = sessionHandler;
-        _options = options.CurrentValue;
         _flowHandlers = flowHandlers
             .ToDictionarySafe(_ => _.HandlerFor);
         _profileRepo = profileRepo;
@@ -70,11 +67,11 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var idp = ExtractIdentityProvider();
         if(idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
         {
-            var accessDeniedUrl = BuildRedirectUri(_options.AccessDeniedUrl);
+            var accessDeniedUrl = BuildRedirectUri(Options.AccessDeniedUrl);
             var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
                 context: Context,
                 scheme: Scheme,
-                options: _options,
+                options: Options,
                 properties: properties,
                 redirectUri: accessDeniedUrl);
             await Events.OnRedirectToAccessDenied(redirContext);
@@ -86,7 +83,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
                 context: Context,
                 scheme: Scheme,
-                options: _options,
+                options: Options,
                 properties: properties,
                 redirectUri: redirectUrl);
             await Events.OnRedirectToLogin(redirContext);
@@ -136,7 +133,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
         var redirectUrl = session.Forwarder ?? $"{_intConf.ServerBasePath}/";
         var props = new AuthenticationProperties();
-        var redirectContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(Context, Scheme, _options, props, redirectUrl);
+        var redirectContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(Context, Scheme, Options, props, redirectUrl);
         await Events.OnRedirectUponCompletion(redirectContext);
     }
 
@@ -149,13 +146,13 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     private MalarkeyOAuthIdentityProvider? ExtractIdentityProvider()
     {
-        var fromHeaders = Request.Headers.TryGetValue(IntegrationConstants.IdProviderHeaderName, out var idpString);
+        var inHeaders = Request.Headers.TryGetValue(IntegrationConstants.IdProviderHeaderName, out var idpHeaderString);
         var fromQuery = Request.Query
             .Where(_ => _.Key.ToLower() == IntegrationConstants.IdProviderHeaderName.ToLower())
             .Select(_ => _.Value.ToString())
             .FirstOrDefault();
 
-        var idp = ( fromHeaders ? idpString.ToString() : fromQuery) switch
+        var idp = ( inHeaders ? idpHeaderString.ToString() : fromQuery)?.ToLower() switch
         {
             IntegrationConstants.MalarkeyIdProviders.Microsoft => (MalarkeyOAuthIdentityProvider?)MalarkeyOAuthIdentityProvider.Microsoft,
             IntegrationConstants.MalarkeyIdProviders.Google => MalarkeyOAuthIdentityProvider.Google,
@@ -170,7 +167,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private string ExtractPublicKeyOfReceiver()
     {
         if (!Request.Headers.TryGetValue(IntegrationConstants.TokenReceiverHeaderName, out var pubKey))
-            return _options.PublicKey;
+            return _intConf.PublicKey;
         return pubKey.ToString();
     }
 

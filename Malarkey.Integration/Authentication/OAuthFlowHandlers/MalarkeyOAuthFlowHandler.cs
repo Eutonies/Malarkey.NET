@@ -29,8 +29,8 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
     public MalarkeyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf)
     {
         _intConf = intConf.Value;
-        _namingScheme = ProduceNamingScheme();
         _conf = ProduceConfiguration();
+        _namingScheme = ProduceNamingScheme();
     }
     public abstract string AuthorizationEndpoint { get; }
 

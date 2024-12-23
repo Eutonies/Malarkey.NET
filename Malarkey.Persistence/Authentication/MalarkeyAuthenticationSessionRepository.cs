@@ -31,7 +31,7 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var insertee = new MalarkeyAuthenticationSessionDbo
         {
-            IdProvider = idProvider.ToString(),
+            IdProvider = idProvider,
             Nonce = nonce,
             Forwarder = forwarder,
             CodeVerifier = codeVerifier,
@@ -48,19 +48,23 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
 
     public async Task<MalarkeyAuthenticationSession?> SessionFor(string state)
     {
+        if (!Guid.TryParse(state, out var guidState))
+            return null;
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var loaded = await cont.AuthenticationSessions
-            .FirstOrDefaultAsync(_ => _.State == state);
+            .FirstOrDefaultAsync(_ => _.State == guidState);
         var returnee = loaded?.ToDomain();
         return returnee;
     }
 
 
-    public async Task<MalarkeyAuthenticationSession?> UpdateWithAuthenticationInfo(string state, DateTime authenticatedTime, string profileTokenId, string identityTokenId)
+    public async Task<MalarkeyAuthenticationSession?> UpdateWithAuthenticationInfo(string state, DateTime authenticatedTime, Guid profileTokenId, Guid identityTokenId)
     {
+        if (!Guid.TryParse(state, out var guidState))
+            return null;
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var loaded = await cont.AuthenticationSessions
-            .FirstOrDefaultAsync(_ => _.State == state);
+            .FirstOrDefaultAsync(_ => _.State == guidState);
         if (loaded == null)
             return null;
         loaded.AuthenticatedTime = authenticatedTime;
