@@ -31,7 +31,7 @@ public static class DependencyInjectionIntegration
                authenticationScheme: IntegrationConstants.MalarkeyAuthenticationScheme,
                configureOptions: opts =>
                {
-                   opts.AccessDeniedUrl = conf.AccessDeniedUrl;
+                   opts.AccessDeniedUrl = conf.AccessDeniedPath;
                    opts.PublicKey = conf.PublicKey;
                });
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyMicrosoftOAuthFlowHandler>();
@@ -47,11 +47,11 @@ public static class DependencyInjectionIntegration
         var conf = app.Configuration.IntegrationConfig();
         app.UseAuthentication();
         app.UseAuthorization();
-        app.MapGet(conf.RedirectUrl, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
+        app.MapGet(conf.RedirectPath, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
         {
             await authHandler.HandleCallback(request);
         });
-        app.MapPost(conf.RedirectUrl, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
+        app.MapPost(conf.RedirectPath, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
         {
             await authHandler.HandleCallback(request);
         });

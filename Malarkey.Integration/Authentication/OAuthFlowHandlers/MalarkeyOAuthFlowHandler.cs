@@ -6,6 +6,7 @@ using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +26,9 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
     protected virtual string DefaultResponseType => "code";
     protected virtual string DefaultCodeChallengeMethod => "S256";
 
-    public MalarkeyOAuthFlowHandler(MalarkeyIntegrationConfiguration intConf)
+    public MalarkeyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf)
     {
-        _intConf = intConf;
+        _intConf = intConf.Value;
         _namingScheme = ProduceNamingScheme();
         _conf = ProduceConfiguration();
     }

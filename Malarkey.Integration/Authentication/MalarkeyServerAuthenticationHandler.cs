@@ -67,14 +67,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     {
         var requestedUrl = OriginalPath;
         var audience = ExtractPublicKeyOfReceiver();
-        var idp = Request.Headers.TryGetValue(IntegrationConstants.IdProviderHeaderName, out var idpString) ? (idpString.ToString() switch
-        {
-            IntegrationConstants.MalarkeyIdProviders.Microsoft => (MalarkeyOAuthIdentityProvider?)MalarkeyOAuthIdentityProvider.Microsoft,
-            IntegrationConstants.MalarkeyIdProviders.Google => MalarkeyOAuthIdentityProvider.Google,
-            IntegrationConstants.MalarkeyIdProviders.Facebook => MalarkeyOAuthIdentityProvider.Facebook,
-            IntegrationConstants.MalarkeyIdProviders.Spotify => MalarkeyOAuthIdentityProvider.Spotify,
-            _ => null
-        }) : null;
+        var idp = ExtractIdentityProvider();
         if(idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
         {
             var accessDeniedUrl = BuildRedirectUri(_options.AccessDeniedUrl);
@@ -102,7 +95,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     }
 
-    public async Task<MalarkeyServerAuthenticationResult> HandleCallback(HttpRequest request)
+    public async Task HandleCallback(HttpRequest request)
     {
         string? state = null;
         foreach(var handler in _flowHandlers.Values)
@@ -112,17 +105,29 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
                 break;
         }
         if (string.IsNullOrWhiteSpace(state))
-            return new MalarkeyServerAuthenticationFailureResult("Could not extract state");
+        {
+            await WriteErrorOnCallback("Could not extract state");
+            return;
+        }
         var session = await _sessionHandler.SessionForState(state);
         if(session == null)
-            return new MalarkeyServerAuthenticationFailureResult($"Could not find session for state={state}");
+        {
+            await WriteErrorOnCallback($"Could not find session for state={state}");
+            return;
+        }
         var flowHandler = _flowHandlers[session.IdProvider];
         var identity = await flowHandler.ResolveIdentity(session, request);
         if (identity == null)
-            return new MalarkeyServerAuthenticationFailureResult($"Could not resolve identity by {session.IdProvider} for callback request with URL={request.GetDisplayUrl()}");
+        {
+            await WriteErrorOnCallback($"Could not resolve identity by {session.IdProvider} for callback request with URL={request.GetDisplayUrl()}");
+            return;
+        }
         var profileAndIdentities = await _profileRepo.LoadOrCreateByIdentity(identity);
         if (profileAndIdentities == null)
-            return new MalarkeyServerAuthenticationFailureResult($"Could not locate profile identity: {identity.ProfileId} by {session.IdProvider}");
+        {
+            await WriteErrorOnCallback($"Could not locate profile identity: {identity.ProfileId} by {session.IdProvider}");
+            return;
+        }
         identity = profileAndIdentities.Identities
             .Where(_ => _.ProviderId == identity.ProviderId)
             .First();
@@ -133,7 +138,32 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var props = new AuthenticationProperties();
         var redirectContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(Context, Scheme, _options, props, redirectUrl);
         await Events.OnRedirectUponCompletion(redirectContext);
+    }
 
+    private async Task WriteErrorOnCallback(string errorMessage)
+    {
+        var props = new AuthenticationProperties();
+        await Events.OnFailure(Context, errorMessage);
+
+    }
+
+    private MalarkeyOAuthIdentityProvider? ExtractIdentityProvider()
+    {
+        var fromHeaders = Request.Headers.TryGetValue(IntegrationConstants.IdProviderHeaderName, out var idpString);
+        var fromQuery = Request.Query
+            .Where(_ => _.Key.ToLower() == IntegrationConstants.IdProviderHeaderName.ToLower())
+            .Select(_ => _.Value.ToString())
+            .FirstOrDefault();
+
+        var idp = ( fromHeaders ? idpString.ToString() : fromQuery) switch
+        {
+            IntegrationConstants.MalarkeyIdProviders.Microsoft => (MalarkeyOAuthIdentityProvider?)MalarkeyOAuthIdentityProvider.Microsoft,
+            IntegrationConstants.MalarkeyIdProviders.Google => MalarkeyOAuthIdentityProvider.Google,
+            IntegrationConstants.MalarkeyIdProviders.Facebook => MalarkeyOAuthIdentityProvider.Facebook,
+            IntegrationConstants.MalarkeyIdProviders.Spotify => MalarkeyOAuthIdentityProvider.Spotify,
+            _ => null
+        };
+        return idp;
     }
 
 

@@ -5,6 +5,7 @@ using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
     public override MalarkeyOAuthIdentityProvider HandlerFor => MalarkeyOAuthIdentityProvider.Facebook;
 
-    public MalarkeyFacebookOAuthFlowHandler(MalarkeyIntegrationConfiguration intConf) : base(intConf)
+    public MalarkeyFacebookOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf) : base(intConf)
     {
     }
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate;

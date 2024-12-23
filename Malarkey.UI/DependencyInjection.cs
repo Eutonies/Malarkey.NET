@@ -51,13 +51,7 @@ public static class DependencyInjection
         app.UseRouting();
         app.UseStaticFiles();
         app.UseIntegration();
-        app.UseApi();
-        app.UseApi();
-
-        app.UseHttpsRedirection();
-
         app.UseAntiforgery();
-
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
         app.MapRazorPages();

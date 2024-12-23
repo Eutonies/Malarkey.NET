@@ -19,6 +19,7 @@ public static class DependencyInjectionSecurity
     {
 
         builder.Services.AddSingleton<IMalarkeyTokenHandler, MalarkeyTokenHandler>();
+        builder.Services.AddSingleton<IMalarkeyAuthenticationSessionHandler, MalarkeyAuthenticationSessionHandler>();
         return builder;
     }
 

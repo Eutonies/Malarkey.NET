@@ -5,6 +5,7 @@ using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
     public override MalarkeyOAuthIdentityProvider HandlerFor => MalarkeyOAuthIdentityProvider.Microsoft;
 
-    public MalarkeyMicrosoftOAuthFlowHandler(MalarkeyIntegrationConfiguration intConf) : base(intConf)
+    public MalarkeyMicrosoftOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf) : base(intConf)
     {
     }
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate.Replace("{tenant}", _conf.Tenant);

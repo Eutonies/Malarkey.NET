@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Malarkey.Integration.Authentication;
 public interface IMalarkeyServerAuthenticationCallbackHandler
 {
-    Task<MalarkeyServerAuthenticationResult> HandleCallback(HttpRequest request);
+    Task HandleCallback(HttpRequest request);
 
 
 }

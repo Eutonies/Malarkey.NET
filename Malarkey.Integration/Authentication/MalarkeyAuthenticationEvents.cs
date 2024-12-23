@@ -37,7 +37,7 @@ public class MalarkeyAuthenticationEvents
     /// <summary>
     /// Invoked when the client needs to be redirected to the access denied url.
     /// </summary>
-    public Func<RedirectContext<MalarkeyServerAuthenticationHandlerOptions>, string, Task> OnFailure { get; set; } = async (context, error) =>
+    public Func<HttpContext, string, Task> OnFailure { get; set; } = async (context, error) =>
     {
         context.Response.StatusCode = 403;
         await context.Response.WriteAsync(error);

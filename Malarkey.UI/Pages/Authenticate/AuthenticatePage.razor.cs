@@ -1,4 +1,6 @@
 ﻿using Malarkey.Application;
+using Malarkey.Domain.Authentication;
+using Malarkey.Integration;
 using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
@@ -38,20 +40,17 @@ public partial class AuthenticatePage
 
     public void OnMicrosoftClick(MouseEventArgs e)
     {
-        NavManager.NavigateTo("authenticate-microsoft");
-        NavManager.Refresh(forceReload: true);
+        NavManager.NavigateTo($"challenge?{IntegrationConstants.IdProviderHeaderName}={MalarkeyOAuthIdentityProvider.Microsoft.ToString()}", forceLoad: true);
     }
 
     public void OnGoogleClick(MouseEventArgs e)
     {
-        NavManager.NavigateTo("authenticate-google");
-        NavManager.Refresh(forceReload: true);
+        NavManager.NavigateTo($"challenge?{IntegrationConstants.IdProviderHeaderName}={MalarkeyOAuthIdentityProvider.Google.ToString()}", forceLoad: true);
     }
 
     public void OnFacebookClick(MouseEventArgs e)
     {
-        NavManager.NavigateTo("authenticate-facebook");
-        NavManager.Refresh(forceReload: true);
+        NavManager.NavigateTo($"challenge?{IntegrationConstants.IdProviderHeaderName}={MalarkeyOAuthIdentityProvider.Facebook.ToString()}", forceLoad: true);
     }
 
 }

@@ -7,12 +7,13 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "dotnetRunMessages": true,
-      "applicationUrl": "http://localhost:5075"
+      "launchUrl": "authenticate",
+      "applicationUrl": "http://localhost"
     },
     "https": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "profile/token",
+      "launchUrl": "authenticate",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
