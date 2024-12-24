@@ -21,7 +21,7 @@ public interface IMalarkeyOAuthFlowHandler
 
     public Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, RedirectData redirectData);
 
-    public record RedirectData(string State, string? Token, string? IdToken);
+    public record RedirectData(string State, string? Token = null, string? IdToken = null, string? Code = null);
 
 
 }

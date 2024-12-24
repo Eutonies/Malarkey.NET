@@ -12,6 +12,8 @@ public class MalarkeyIdentityProviderConfiguration
 
     public string AuthorizationEndpointTemplate { get; set; }
 
+    public string? TokenEndpointTemplate { get; set; }
+
     public string? Tenant { get; set; }
     public string ClientId { get; set; }
     public string ClientSecret { get; set; }

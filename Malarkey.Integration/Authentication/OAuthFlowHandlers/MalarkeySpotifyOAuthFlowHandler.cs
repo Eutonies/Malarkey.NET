@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
-    public override MalarkeyOAuthIdentityProvider HandlerFor => MalarkeyOAuthIdentityProvider.Microsoft;
+    public override MalarkeyOAuthIdentityProvider HandlerFor => MalarkeyOAuthIdentityProvider.Spotify;
 
     public MalarkeySpotifyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf) : base(intConf)
     {
@@ -26,9 +26,36 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
     protected override MalarkeyOAuthNamingScheme ProduceNamingScheme() => MalarkeySpotifyOAuthNamingScheme.Init(_conf.NamingSchemeOverwrites);
     protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Spotify;
 
+    public override IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session)
+    {
+        var returnee = new Dictionary<string, string>();
+        returnee[_namingScheme.ClientId] = _conf.ClientId;
+        returnee[_namingScheme.ResponseType] = _conf.ResponseType!;
+        returnee[_namingScheme.RedirectUri] = _intConf.RedirectUrl;
+        returnee[_namingScheme.Scope] = (_conf.Scopes ?? DefaultScopes)
+            .MakeString(" ")
+            .UrlEncoded();
+        returnee[_namingScheme.CodeChallenge] = session.CodeChallenge;
+        returnee[_namingScheme.CodeChallengeMethod] = DefaultCodeChallengeMethod;
+        returnee[_namingScheme.State] = session.State;
+        return returnee;
+    }
+
     public override async Task<IMalarkeyOAuthFlowHandler.RedirectData?> ExtractRedirectData(HttpRequest request)
     {
-        return null;
+        var keyValued = request.Query
+            .Select(_ => (_.Key, Value: _.Value.ToString()))
+            .ToDictionarySafe(_ => _.Key,  _ => _.Value);
+        if (!keyValued.TryGetValue("code", out var code))
+            return null;
+        if(!keyValued.TryGetValue("state", out var state))
+            return null;
+        await Task.CompletedTask;
+        var returnee = new IMalarkeyOAuthFlowHandler.RedirectData(
+            State: state,
+            Code: code
+            );
+        return returnee;
     }
 
     public override Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, IMalarkeyOAuthFlowHandler.RedirectData redirectData)

@@ -36,14 +36,7 @@ internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
     public override async Task<IMalarkeyOAuthFlowHandler.RedirectData?> ExtractRedirectData(HttpRequest request)
     {
         var body = await request.Body.ReadAsStringAsync();
-        var splitted = body.Split('&')
-            .ToList();
-        var keyValued = splitted
-            .Where(_ => _.Contains('='))
-            .Select(_ => _.Split('='))
-            .Select(_ => (Key: _[0], Value: _[1]))
-            .ToDictionarySafe(_ => _.Key, _ => _.Value);
-
+        var keyValued = ParseUrlValuePairs(body);
         if (!keyValued.TryGetValue("state", out var state))
             return null;
         var returnee = new IMalarkeyOAuthFlowHandler.RedirectData(
@@ -92,6 +85,8 @@ internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
         return identity;
     }
 
+
+
     private readonly static Regex UserObjectIdRegex = new Regex("^0*(.*)");
     private static string ShortenUserObjectId(string userObjectId)
     {
@@ -102,6 +97,9 @@ internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
         var returnee = parseResult.Groups[1].Value;
         return returnee;
     }
+
+
+
 
 }
 

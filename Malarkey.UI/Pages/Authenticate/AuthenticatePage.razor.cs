@@ -53,4 +53,10 @@ public partial class AuthenticatePage
         NavManager.NavigateTo($"challenge?{IntegrationConstants.IdProviderHeaderName}={MalarkeyOAuthIdentityProvider.Facebook.ToString()}", forceLoad: true);
     }
 
+    public void OnSpotifyClick(MouseEventArgs e)
+    {
+        NavManager.NavigateTo($"challenge?{IntegrationConstants.IdProviderHeaderName}={MalarkeyOAuthIdentityProvider.Spotify.ToString()}", forceLoad: true);
+    }
+
+
 }

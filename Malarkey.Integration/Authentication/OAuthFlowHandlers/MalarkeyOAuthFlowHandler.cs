@@ -83,6 +83,21 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
 
     public abstract Task<IMalarkeyOAuthFlowHandler.RedirectData?> ExtractRedirectData(HttpRequest request);
 
+    protected IReadOnlyDictionary<string, string> ParseUrlValuePairs(string input)
+    {
+        var splitted = input.Split('&')
+            .ToList();
+        var keyValued = splitted
+            .Where(_ => _.Contains('='))
+            .Select(_ => _.Split('='))
+            .Select(_ => (Key: _[0], Value: _[1]))
+            .ToDictionarySafe(_ => _.Key, _ => _.Value);
+        return keyValued;
+    }
+
+
+
+
 }
 
 
