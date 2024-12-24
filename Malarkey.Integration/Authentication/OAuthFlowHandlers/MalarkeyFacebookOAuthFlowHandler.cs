@@ -1,4 +1,5 @@
 ﻿using Malarkey.Domain.Authentication;
+using Malarkey.Domain.Profile;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
@@ -32,6 +33,15 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
         (_namingScheme.State, session.State)
     }.ToDictionarySafe(_ => _.Item1, _ => _.Item2);
 
+    public override async Task<IMalarkeyOAuthFlowHandler.RedirectData?> ExtractRedirectData(HttpRequest request)
+    {
+        return null;
+    }
+
+    public override Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, IMalarkeyOAuthFlowHandler.RedirectData redirectData)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 

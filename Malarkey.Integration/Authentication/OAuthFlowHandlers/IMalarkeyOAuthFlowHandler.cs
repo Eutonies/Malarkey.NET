@@ -17,8 +17,11 @@ public interface IMalarkeyOAuthFlowHandler
     public MalarkeyOAuthIdentityProvider HandlerFor { get; }
     public string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session);
 
-    public string? StateFrom(HttpRequest request);
+    public Task<RedirectData?> ExtractRedirectData(HttpRequest request);
 
-    public Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, HttpRequest callbackRequest);
+    public Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, RedirectData redirectData);
+
+    public record RedirectData(string State, string? Token, string? IdToken);
+
 
 }

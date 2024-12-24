@@ -1,4 +1,5 @@
-﻿using Malarkey.Domain.Profile;
+﻿using Malarkey.Domain.Authentication;
+using Malarkey.Domain.Profile;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,16 +9,16 @@ using System.Threading.Tasks;
 namespace Malarkey.Application.Profile.Persistence;
 public interface IMalarkeyProfileRepository
 {
-    protected Task<MalarkeyProfileAndIdentities?> LoadByProviderId(MalarkeyIdentityProviderDbo provider, string providerId);
+    protected Task<MalarkeyProfileAndIdentities?> LoadByProviderId(MalarkeyOAuthIdentityProvider provider, string providerId);
 
     public async Task<MalarkeyProfileAndIdentities?> LoadByMicrosoft(string microsoftId) => 
-        await LoadByProviderId(MalarkeyIdentityProviderDbo.Microsoft, microsoftId);
+        await LoadByProviderId(MalarkeyOAuthIdentityProvider.Microsoft, microsoftId);
 
     public async Task<MalarkeyProfileAndIdentities?> LoadByGoogle(string googleId) =>
-        await LoadByProviderId(MalarkeyIdentityProviderDbo.Google, googleId);
+        await LoadByProviderId(MalarkeyOAuthIdentityProvider.Google, googleId);
 
     public async Task<MalarkeyProfileAndIdentities?> LoadByFacebook(string facebookId) =>
-        await LoadByProviderId(MalarkeyIdentityProviderDbo.Facebook, facebookId);
+        await LoadByProviderId(MalarkeyOAuthIdentityProvider.Facebook, facebookId);
 
 
     Task<MalarkeyProfileAndIdentities?> CreateByIdentity(MalarkeyProfileIdentity identity);

@@ -1,4 +1,5 @@
-﻿using Malarkey.Domain.Authentication;
+﻿using Malarkey.Application.Profile.Persistence;
+using Malarkey.Domain.Authentication;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -15,7 +16,7 @@ internal class MalarkeyAuthenticationSessionDbo
     public long SessionId { get; set; }
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid State { get; set; }
-    public MalarkeyOAuthIdentityProvider IdProvider { get; set; }
+    public MalarkeyIdentityProviderDbo IdProvider { get; set; }
     public string? Nonce { get; set; }
     public string? Forwarder { get; set; }
     public string CodeVerifier { get; set; }
@@ -31,7 +32,7 @@ internal class MalarkeyAuthenticationSessionDbo
     public MalarkeyAuthenticationSession ToDomain() => new MalarkeyAuthenticationSession(
         SessionId: SessionId,
         State: State.ToString(),
-        IdProvider: IdProvider,
+        IdProvider: IdProvider.ToDomain(),
         Nonce: Nonce,
         Forwarder: Forwarder,
         CodeChallenge: CodeChallenge,

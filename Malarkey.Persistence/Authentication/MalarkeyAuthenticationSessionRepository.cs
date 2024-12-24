@@ -1,4 +1,5 @@
-﻿using Malarkey.Application.Security;
+﻿using Malarkey.Application.Profile.Persistence;
+using Malarkey.Application.Security;
 using Malarkey.Domain.Authentication;
 using Malarkey.Persistence.Context;
 using Malarkey.Security.Persistence;
@@ -31,7 +32,7 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var insertee = new MalarkeyAuthenticationSessionDbo
         {
-            IdProvider = idProvider,
+            IdProvider = idProvider.ToDbo(),
             Nonce = nonce,
             Forwarder = forwarder,
             CodeVerifier = codeVerifier,

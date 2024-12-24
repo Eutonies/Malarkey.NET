@@ -16,6 +16,8 @@ public class MalarkeyIdentityProviderConfiguration
     public string ClientId { get; set; }
     public string ClientSecret { get; set; }
     public string? ResponseType { get; set; }
+
+    public string? ResponseMode { get; set; }
     public string? CodeChallengeMethod { get; set; }
     public string[]? Scopes { get; set; }
 

@@ -13,7 +13,7 @@ internal class MalarkeyIdentityDbo
     [Key]
     public Guid IdentityId { get; set; }
     public Guid ProfileId { get; set; }
-    public string Provider { get; set; }
+    public MalarkeyIdentityProviderDbo Provider { get; set; }
     public string ProviderId { get; set; }
     public string IdentityName { get; set; }
     public string? PreferredName { get; set; }
@@ -21,11 +21,13 @@ internal class MalarkeyIdentityDbo
     public string? LastName { get; set; }
 
 
-    public MalarkeyProfileIdentity ToDomain() => Enum.Parse<MalarkeyIdentityProviderDbo>(Provider) switch
+    public MalarkeyProfileIdentity ToDomain() => Provider switch
     {
         MalarkeyIdentityProviderDbo.Microsoft => new MicrosoftIdentity(IdentityId, ProfileId, ProviderId, PreferredName!, IdentityName, MiddleNames, LastName),
         MalarkeyIdentityProviderDbo.Google => new GoogleIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName),
         MalarkeyIdentityProviderDbo.Facebook => new FacebookIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName),
+        MalarkeyIdentityProviderDbo.Spotify => new SpotifyIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName),
+
         _ => throw new NotImplementedException()
     };
 

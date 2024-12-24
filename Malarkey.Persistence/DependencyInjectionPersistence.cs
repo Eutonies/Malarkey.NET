@@ -41,7 +41,7 @@ public static class DependencyInjectionPersistence
         builder
             .UseNpgsql(connectionString, opts =>
             {
-                opts.MapEnum<MalarkeyOAuthIdentityProvider>("provider_type", nameTranslator: new NpgsqlNullNameTranslator());
+                opts.MapEnum<MalarkeyIdentityProviderDbo>("provider_type", nameTranslator: new NpgsqlNullNameTranslator());
             })
             .EnableDetailedErrors()
             .EnableSensitiveDataLogging();

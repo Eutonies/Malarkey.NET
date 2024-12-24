@@ -1,4 +1,5 @@
 ﻿using Malarkey.Domain.Authentication;
+using Malarkey.Domain.Profile;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
@@ -25,7 +26,15 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
     protected override MalarkeyOAuthNamingScheme ProduceNamingScheme() => MalarkeySpotifyOAuthNamingScheme.Init(_conf.NamingSchemeOverwrites);
     protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Spotify;
 
+    public override async Task<IMalarkeyOAuthFlowHandler.RedirectData?> ExtractRedirectData(HttpRequest request)
+    {
+        return null;
+    }
 
+    public override Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, IMalarkeyOAuthFlowHandler.RedirectData redirectData)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 

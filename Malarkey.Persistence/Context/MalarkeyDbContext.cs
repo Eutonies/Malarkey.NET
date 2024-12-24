@@ -33,7 +33,6 @@ internal class MalarkeyDbContext : DbContext
         base.ConfigureConventions(configurationBuilder);
         configurationBuilder.Properties<DateTime?>().HaveColumnType("timestamp without time zone");
         configurationBuilder.Properties<DateTime>().HaveColumnType("timestamp without time zone");
-        //configurationBuilder.Properties<MalarkeyOAuthIdentityProvider>().HaveColumnType("provider_type");
     }
 
 

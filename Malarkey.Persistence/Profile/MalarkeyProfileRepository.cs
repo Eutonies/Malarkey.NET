@@ -1,4 +1,5 @@
 ﻿using Malarkey.Application.Profile.Persistence;
+using Malarkey.Domain.Authentication;
 using Malarkey.Domain.Profile;
 using Malarkey.Persistence.Context;
 using Malarkey.Persistence.Profile.Model;
@@ -24,7 +25,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         await using var cont = await _dbContextFactory.CreateDbContextAsync();
         var provider = ProviderFor(identity);
         var existingIdent = await (cont.Identities
-            .Where(_ => _.ProviderId == identity.ProviderId && _.Provider == provider.ToString()))
+            .Where(_ => _.ProviderId == identity.ProviderId && _.Provider == provider))
             .FirstOrDefaultAsync();
         if (existingIdent != null)
             return null;
@@ -43,7 +44,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
             IdentityName = identity.FirstName,
             MiddleNames = identity.MiddleNames,
             LastName = identity.LastName,
-            Provider = provider.ToString(),
+            Provider = provider,
             ProviderId = identity.ProviderId,
             PreferredName = (identity as MicrosoftIdentity)?.PreferredName
         };
@@ -55,11 +56,12 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         return new MalarkeyProfileAndIdentities(profile, [identity]);
     }
 
-    public async Task<MalarkeyProfileAndIdentities?> LoadByProviderId(MalarkeyIdentityProviderDbo provider, string providerId)
+    public async Task<MalarkeyProfileAndIdentities?> LoadByProviderId(MalarkeyOAuthIdentityProvider provider, string providerId)
     {
+        var providerDbo = provider.ToDbo();
         await using var cont = await _dbContextFactory.CreateDbContextAsync();
         var ident = await cont.Identities
-            .Where(_ => _.Provider == provider.ToString() && _.ProviderId == providerId)
+            .Where(_ => _.Provider == providerDbo && _.ProviderId == providerId)
             .FirstOrDefaultAsync();
         if (ident == null)
             return null;
@@ -93,6 +95,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         MicrosoftIdentity _ => MalarkeyIdentityProviderDbo.Microsoft,
         GoogleIdentity _ => MalarkeyIdentityProviderDbo.Google,
         FacebookIdentity _ => MalarkeyIdentityProviderDbo.Facebook,
+        SpotifyIdentity _ => MalarkeyIdentityProviderDbo.Spotify,
         _ => MalarkeyIdentityProviderDbo.Facebook
     };
 

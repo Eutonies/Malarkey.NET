@@ -48,13 +48,11 @@ public static class DependencyInjectionIntegration
         app.UseAuthentication();
         app.UseAuthorization();
         app.MapGet(conf.RedirectPath, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
-        {
-            await authHandler.HandleCallback(request);
-        });
+            await authHandler.HandleCallback(request)
+        );
         app.MapPost(conf.RedirectPath, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
-        {
-            await authHandler.HandleCallback(request);
-        });
+            await authHandler.HandleCallback(request)
+        );
         return app;
     }
 

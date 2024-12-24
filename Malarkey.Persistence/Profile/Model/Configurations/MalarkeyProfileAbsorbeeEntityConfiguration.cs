@@ -15,7 +15,7 @@ internal class MalarkeyProfileAbsorbeeEntityConfiguration : MalarkeyEntityConfig
         builder.ToTable("profile_absorbees");
         builder.HasNoKey();
         builder.Property(nameof(MalarkeyProfileAbsorbeeDbo.ProfileId)).HasColumnName("profile_id");
-        builder.Property(nameof(MalarkeyProfileAbsorbeeDbo.Absorbee)).HasColumnName("absorbee_id");
+        builder.Property(nameof(MalarkeyProfileAbsorbeeDbo.Absorbee)).HasColumnName("absorbee");
 
     }
 }

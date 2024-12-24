@@ -12,7 +12,7 @@ internal class MalarkeyProfileAbsorberEntityConfiguration : MalarkeyEntityConfig
 {
     public override void Configure(EntityTypeBuilder<MalarkeyProfileAbsorberDbo> builder)
     {
-        builder.ToTable("profile_absorbeer");
+        builder.ToTable("profile_absorber");
         builder.HasNoKey();
         builder.Property(nameof(MalarkeyProfileAbsorberDbo.ProfileId)).HasColumnName("profile_id");
         builder.Property(nameof(MalarkeyProfileAbsorberDbo.Absorber)).HasColumnName("absorber");

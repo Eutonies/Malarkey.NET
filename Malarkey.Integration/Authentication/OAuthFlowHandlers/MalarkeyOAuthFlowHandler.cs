@@ -52,6 +52,7 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
         var returnee = new Dictionary<string, string>();
         returnee[_namingScheme.ClientId] = _conf.ClientId;
         returnee[_namingScheme.ResponseType] = _conf.ResponseType!;
+        returnee[_namingScheme.ResponseMode] = _conf.ResponseMode ?? "form_post";
         returnee[_namingScheme.RedirectUri] = _intConf.RedirectUrl;
         returnee[_namingScheme.Scope] = (_conf.Scopes ?? DefaultScopes)
             .MakeString()
@@ -78,14 +79,10 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
         return returnee;
     }
 
-    public virtual string? StateFrom(HttpRequest request) => request.Headers.TryGetValue("state", out var vals) ? 
-            vals.ToString() :
-            null;
+    public abstract Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, IMalarkeyOAuthFlowHandler.RedirectData redirectData);
 
-    public Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, HttpRequest callbackRequest)
-    {
-        throw new NotImplementedException();
-    }
+    public abstract Task<IMalarkeyOAuthFlowHandler.RedirectData?> ExtractRedirectData(HttpRequest request);
+
 }
 
 

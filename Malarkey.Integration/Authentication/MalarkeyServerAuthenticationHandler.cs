@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Malarkey.Application.Profile.Persistence;
 using Malarkey.Integration.Configuration;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
@@ -92,38 +93,34 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     }
 
-    public async Task HandleCallback(HttpRequest request)
+    public async Task<IResult> HandleCallback(HttpRequest request)
     {
-        string? state = null;
+        IMalarkeyOAuthFlowHandler.RedirectData? redirData = null;
         foreach(var handler in _flowHandlers.Values)
         {
-            state = handler.StateFrom(request);
-            if (!string.IsNullOrWhiteSpace(state))
+            redirData = await handler.ExtractRedirectData(request);
+            if (!string.IsNullOrWhiteSpace(redirData?.State))
                 break;
         }
-        if (string.IsNullOrWhiteSpace(state))
+        if (string.IsNullOrWhiteSpace(redirData?.State))
         {
-            await WriteErrorOnCallback("Could not extract state");
-            return;
+            return await ReturnError("Could not extract state");
         }
-        var session = await _sessionHandler.SessionForState(state);
+        var session = await _sessionHandler.SessionForState(redirData.State);
         if(session == null)
         {
-            await WriteErrorOnCallback($"Could not find session for state={state}");
-            return;
+            return await ReturnError($"Could not find session for state={redirData.State}");
         }
         var flowHandler = _flowHandlers[session.IdProvider];
-        var identity = await flowHandler.ResolveIdentity(session, request);
+        var identity = await flowHandler.ResolveIdentity(session, redirData);
         if (identity == null)
         {
-            await WriteErrorOnCallback($"Could not resolve identity by {session.IdProvider} for callback request with URL={request.GetDisplayUrl()}");
-            return;
+            return await ReturnError($"Could not resolve identity by {session.IdProvider} for callback request with URL={request.GetDisplayUrl()}");
         }
         var profileAndIdentities = await _profileRepo.LoadOrCreateByIdentity(identity);
         if (profileAndIdentities == null)
         {
-            await WriteErrorOnCallback($"Could not locate profile identity: {identity.ProfileId} by {session.IdProvider}");
-            return;
+            return await ReturnError($"Could not locate profile identity: {identity.ProfileId} by {session.IdProvider}");
         }
         identity = profileAndIdentities.Identities
             .Where(_ => _.ProviderId == identity.ProviderId)
@@ -132,17 +129,13 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var (identityToken, identityTokenString) = await _tokenHandler.IssueToken(identity, session.Audience);
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
         var redirectUrl = session.Forwarder ?? $"{_intConf.ServerBasePath}/";
-        var props = new AuthenticationProperties();
-        var redirectContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(Context, Scheme, Options, props, redirectUrl);
-        await Events.OnRedirectUponCompletion(redirectContext);
+        var redirect = TypedResults.Redirect(redirectUrl);
+        return redirect;
     }
 
-    private async Task WriteErrorOnCallback(string errorMessage)
-    {
-        var props = new AuthenticationProperties();
-        await Events.OnFailure(Context, errorMessage);
-
-    }
+    private Task<BadRequest<string>> ReturnError(string errorMessage) => Task.FromResult(
+        TypedResults.BadRequest(errorMessage)
+        );
 
     private MalarkeyOAuthIdentityProvider? ExtractIdentityProvider()
     {
@@ -170,6 +163,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             return _intConf.PublicKey;
         return pubKey.ToString();
     }
+
 
 
 }
