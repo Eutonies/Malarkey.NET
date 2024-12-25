@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -42,7 +43,9 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
         returnee[_namingScheme.Scope] = (_conf.Scopes ?? DefaultScopes)
             .MakeString(" ")
             .UrlEncoded();
-        returnee[_namingScheme.CodeChallenge] = session.CodeChallenge;
+        returnee[_namingScheme.CodeChallenge] = session.CodeChallenge
+            .Replace('+','-')
+            .Replace('/','_');
         returnee[_namingScheme.CodeChallengeMethod] = DefaultCodeChallengeMethod;
         returnee[_namingScheme.State] = session.State;
         return returnee;
@@ -80,15 +83,25 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
             ("code_verifier", session.CodeVerifier)
         };
         request.Content = formParameters.ToFormContent();
-        using var client = _httpClientFactory.CreateClient();
-        var response = await client.SendAsync(request);
-        if(!response.IsSuccessStatusCode)
+        string? accessToken = null;
+        using(var client = _httpClientFactory.CreateClient())
+        {
+            var response = await client.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+            {
+                var responseContent = await response.Content.ReadAsStringAsync();
+                return null;
+            }
+            var tokenResponse = await Parse(response);
+            accessToken = tokenResponse.Token;
+        }
+        if (accessToken == null)
             return null;
-        var tokenResponse = await Parse(response);
-        var accessToken = tokenResponse.Token;
         var authHeader = new AuthenticationHeaderValue("Bearer", accessToken);
-        client.DefaultRequestHeaders.Authorization = authHeader;
-        var apiClient = new SpotifyApiClient(client);
+        using var apiHttpClient = _httpClientFactory.CreateClient();
+        apiHttpClient.DefaultRequestHeaders.Authorization = authHeader;
+        apiHttpClient.BaseAddress = new Uri(_conf.ApiBaseUrl!);
+        var apiClient = new SpotifyApiClient(apiHttpClient);
         var userInfo = await apiClient.GetCurrentUsersProfileAsync();
         var returnee = new SpotifyIdentity(
             IdentityId: Guid.Empty,
@@ -104,7 +117,7 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
 
     private static async Task<AccessTokenResponse> Parse(HttpResponseMessage response) => (await response.Content.ReadFromJsonAsync<AccessTokenResponseJsonLayout>())
         .Pipe(resp => new AccessTokenResponse(
-            Token: resp.access_token,
+            Token: resp!.access_token,
             Scopes: resp.scope.Split(" "),
             Expires: DateTime.Now.AddSeconds(resp.expires_in),
             RefreshToken: resp.refresh_token

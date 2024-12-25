@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Unicode;
 using System.Threading.Tasks;
 
 namespace Malarkey.Security;
@@ -63,7 +64,8 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         var verifier = randomBytes
             .Select(byt => CodeVerifierAllowedChars[byt])
             .MakeString("");
-        var challengeBytes = SHA256.HashData(randomBytes);
+        var verifierBytes = UTF8Encoding.UTF8.GetBytes(verifier);
+        var challengeBytes = SHA256.HashData(verifierBytes);
         var challenge = Convert.ToBase64String(challengeBytes).Substring(0,43);
         return (verifier, challenge);
     }
