@@ -15,4 +15,14 @@ public static class HttpExtensions
         return bodyAsString;
     }
 
+    public static FormUrlEncodedContent ToFormContent(this IEnumerable<(string, string)> formData) => new FormUrlEncodedContent(
+            formData
+            .Where(_ => _.Item2 != null)
+            .Select(_ => new KeyValuePair<string, string>(_.Item1, _.Item2))
+        );
+
+
+
+
+
 }

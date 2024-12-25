@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SpyOff.Infrastructure.Tracks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,6 +39,7 @@ public static class DependencyInjectionIntegration
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyGoogleOAuthFlowHandler>();
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyFacebookOAuthFlowHandler>();
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeySpotifyOAuthFlowHandler>();
+        builder.Services.AddHttpClients();
         return builder;
     }
 
@@ -64,6 +66,12 @@ public static class DependencyInjectionIntegration
         return returnee;
     }
 
+    private static IServiceCollection AddHttpClients(this IServiceCollection services)
+    {
+        services.AddHttpClient();
+
+        return services;
+    }
 
 
 }

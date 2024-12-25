@@ -10,11 +10,20 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
     <PackageReference Include="Microsoft.Identity.Web" Version="3.5.0" />
     <PackageReference Include="Microsoft.IdentityModel.JsonWebTokens" Version="8.3.0" />
+    <PackageReference Include="NSwag.MSBuild" Version="14.2.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Malarkey.Application\Malarkey.Application.csproj" />
     <ProjectReference Include="..\Malarkey.Security\Malarkey.Security.csproj" />
   </ItemGroup>
+
+  <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
+    <Exec Command="$(NSwagExe_Net90) run Clients/Spotify/SpotifyAPIClient.nswag" Condition="1 == 2"></Exec>
+  </Target>
+
 
 </Project>

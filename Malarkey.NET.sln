@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.11.35312.102
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Infrastructure", "Malarkey.Infrastructure\Malarkey.Infrastructure.csproj", "{A03BBF49-85FA-4675-A942-3960EC31ABBF}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Domain", "Malarkey.Domain\Malarkey.Domain.csproj", "{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Application", "Malarkey.Application\Malarkey.Application.csproj", "{D7087605-2585-4E4B-A504-C53C19FAB089}"
@@ -33,10 +31,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A03BBF49-85FA-4675-A942-3960EC31ABBF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A03BBF49-85FA-4675-A942-3960EC31ABBF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A03BBF49-85FA-4675-A942-3960EC31ABBF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A03BBF49-85FA-4675-A942-3960EC31ABBF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{63DA6170-703E-43E4-BD8C-B0D83EBB5D17}.Release|Any CPU.ActiveCfg = Release|Any CPU

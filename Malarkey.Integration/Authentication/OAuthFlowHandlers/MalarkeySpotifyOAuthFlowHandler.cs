@@ -1,4 +1,5 @@
-﻿using Malarkey.Domain.Authentication;
+﻿using Malarkey.Application.Util;
+using Malarkey.Domain.Authentication;
 using Malarkey.Domain.Profile;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.Naming;
@@ -7,19 +8,25 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
+using SpyOff.Infrastructure.Tracks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
+    private readonly IHttpClientFactory _httpClientFactory;
     public override MalarkeyOAuthIdentityProvider HandlerFor => MalarkeyOAuthIdentityProvider.Spotify;
 
-    public MalarkeySpotifyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf) : base(intConf)
+    public MalarkeySpotifyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf, IHttpClientFactory httpClientFactory) : base(intConf)
     {
+        _httpClientFactory = httpClientFactory;
     }
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate;
 
@@ -58,15 +65,72 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
         return returnee;
     }
 
-    public override Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, IMalarkeyOAuthFlowHandler.RedirectData redirectData)
+    public override async Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, IMalarkeyOAuthFlowHandler.RedirectData redirectData)
     {
-        throw new NotImplementedException();
+        if (redirectData.Code == null)
+            return null;
+        var url = _conf.TokenEndpointTemplate!;
+        var request = new HttpRequestMessage(HttpMethod.Post, url);
+        var formParameters = new List<(string, string)>
+        {
+            ("grant_type", "authorization_code"),
+            ("code", redirectData.Code!),
+            ("redirect_uri", _intConf.RedirectUrl),
+            ("client_id", _conf.ClientId),
+            ("code_verifier", session.CodeVerifier)
+        };
+        request.Content = formParameters.ToFormContent();
+        using var client = _httpClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        if(!response.IsSuccessStatusCode)
+            return null;
+        var tokenResponse = await Parse(response);
+        var accessToken = tokenResponse.Token;
+        var authHeader = new AuthenticationHeaderValue("Bearer", accessToken);
+        client.DefaultRequestHeaders.Authorization = authHeader;
+        var apiClient = new SpotifyApiClient(client);
+        var userInfo = await apiClient.GetCurrentUsersProfileAsync();
+        var returnee = new SpotifyIdentity(
+            IdentityId: Guid.Empty,
+            ProfileId: Guid.Empty,
+            SpotifyId: userInfo.Id,
+            Name: userInfo.Display_name,
+            MiddleNames: null,
+            LastName: null
+            );
+
+        return returnee;
     }
+
+    private static async Task<AccessTokenResponse> Parse(HttpResponseMessage response) => (await response.Content.ReadFromJsonAsync<AccessTokenResponseJsonLayout>())
+        .Pipe(resp => new AccessTokenResponse(
+            Token: resp.access_token,
+            Scopes: resp.scope.Split(" "),
+            Expires: DateTime.Now.AddSeconds(resp.expires_in),
+            RefreshToken: resp.refresh_token
+    ));
+
+
+    private record AccessTokenResponse(
+        string Token,
+        string[] Scopes,
+        DateTime Expires,
+        string RefreshToken
+        ); 
+
+    private record AccessTokenResponseJsonLayout(
+        string access_token,
+        string scope,
+        int expires_in,
+        string refresh_token
+        );
+
 }
 
 
 /*
  * ######################## Spotify ##############################
+https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow
 
 const clientId = 'YOUR_CLIENT_ID';
 const redirectUri = 'http://localhost:8080';

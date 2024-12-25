@@ -23,6 +23,8 @@ public class MalarkeyIdentityProviderConfiguration
     public string? CodeChallengeMethod { get; set; }
     public string[]? Scopes { get; set; }
 
+    public string? ApiBaseUrl { get; set; }
+
     public MalarkeyClientCertificateConfiguration? ClientCertificate { get; set; }
 
 
