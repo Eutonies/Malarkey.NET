@@ -402,3 +402,4 @@ FodyWeavers.xsd
 /resources/certificate/malarkey-token.key
 /Malarkey.Persistence/db-volume/
 /Malarkey.UI/malarkey.crt
+**/*.secrets.yaml

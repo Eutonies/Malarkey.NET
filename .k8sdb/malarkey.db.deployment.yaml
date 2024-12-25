@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: malarkey-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: malarkey-postgres
+  template:
+    metadata:
+      labels:
+        app: malarkey-postgres
+    spec:
+      containers:
+        - name: malarkey-postgres
+          image: postgres
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+              name: malarkey-db
+          envFrom:
+            - configMapRef:
+                name: malarkey-db-config
+          volumeMounts:
+            - mountPath: /var/lib/malarkey/postgresql/data
+              name: malarkey-db-volume
+            - name: malarkey-postgres-secret
+              readOnly: true
+              mountPath: "/social-crt-volume"              
+          env:
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: malarkey-db-secrets
+                  key: dbuserpassword
+
+
+      volumes:
+        - name: malarkey-db-volume
+          persistentVolumeClaim:
+            claimName: malarkey-db-volume-claim
+        - name: malarkey-postgres-secret
+          secret:
+            secretName: malarkey-db-secrets
