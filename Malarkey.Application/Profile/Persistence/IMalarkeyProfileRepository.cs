@@ -19,6 +19,8 @@ public interface IMalarkeyProfileRepository
 
     public async Task<MalarkeyProfileAndIdentities?> LoadByFacebook(string facebookId) =>
         await LoadByProviderId(MalarkeyOAuthIdentityProvider.Facebook, facebookId);
+    public async Task<MalarkeyProfileAndIdentities?> LoadBySpotify(string spotifyId) =>
+        await LoadByProviderId(MalarkeyOAuthIdentityProvider.Spotify, spotifyId);
 
 
     Task<MalarkeyProfileAndIdentities?> CreateByIdentity(MalarkeyProfileIdentity identity);
@@ -28,6 +30,7 @@ public interface IMalarkeyProfileRepository
         MicrosoftIdentity micr => await LoadByMicrosoft(micr.MicrosoftId),
         GoogleIdentity goog => await LoadByGoogle(goog.GoogleId),
         FacebookIdentity fac => await LoadByFacebook(fac.FacebookId),
+        SpotifyIdentity spot => await LoadBySpotify(spot.SpotifyId),
         _ => null
     } switch
     {

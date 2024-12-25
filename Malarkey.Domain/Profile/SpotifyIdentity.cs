@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Malarkey.Domain.Token;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,7 +12,9 @@ public sealed record SpotifyIdentity(
     string SpotifyId,
     string Name,
     string? MiddleNames,
-    string? LastName
+    string? LastName,
+    string? Email,
+    IdentityProviderToken? AccessToken
     ) : MalarkeyProfileIdentity(
         IdentityId,
         ProfileId,

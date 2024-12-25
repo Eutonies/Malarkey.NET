@@ -63,7 +63,12 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
-        var requestedUrl = OriginalPath;
+        var forwarder = Request.Query
+            .Where(_ => _.Key == IntegrationConstants.ForwarderQueryParameterName)
+            .Select(_ => _.Value.ToString())
+            .FirstOrDefault();
+        if (forwarder == null)
+            forwarder = OriginalPath;
         var audience = ExtractPublicKeyOfReceiver();
         var idp = ExtractIdentityProvider();
         if(idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
@@ -79,7 +84,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         }
         else
         {
-            var session = await _sessionHandler.InitSession(idp.Value, requestedUrl, audience);
+            var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(session);
             var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
                 context: Context,
@@ -128,8 +133,14 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var (profileToken, profileTokenString) = await _tokenHandler.IssueToken(profileAndIdentities.Profile, session.Audience);
         var (identityToken, identityTokenString) = await _tokenHandler.IssueToken(identity, session.Audience);
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
+        _tokenHandler.BakeCookies(request.HttpContext, profileToken, [identityToken]);
         var redirectUrl = session.Forwarder ?? $"{_intConf.ServerBasePath}/";
-        var redirect = TypedResults.Redirect(redirectUrl);
+        var redirect = new MalarkeyAuthenticationSuccessHttpResult(
+            RedirectUrl: redirectUrl,
+            ProfileToken: profileTokenString,
+            IdentityToken: identityTokenString,
+            IdentityProviderAccessToken: (identity as SpotifyIdentity)?.AccessToken?.Token
+        );
         return redirect;
     }
 

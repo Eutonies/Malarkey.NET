@@ -84,7 +84,10 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
         };
         request.Content = formParameters.ToFormContent();
         string? accessToken = null;
-        using(var client = _httpClientFactory.CreateClient())
+        DateTime? accessTokenIssued = null;
+        DateTime? accessTokenExpires = null;
+        string? refreshToken = null;
+        using (var client = _httpClientFactory.CreateClient())
         {
             var response = await client.SendAsync(request);
             if (!response.IsSuccessStatusCode)
@@ -94,6 +97,9 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
             }
             var tokenResponse = await Parse(response);
             accessToken = tokenResponse.Token;
+            accessTokenIssued = DateTime.Now;
+            accessTokenExpires = tokenResponse.Expires;
+            refreshToken = tokenResponse.RefreshToken;
         }
         if (accessToken == null)
             return null;
@@ -109,8 +115,14 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
             SpotifyId: userInfo.Id,
             Name: userInfo.Display_name,
             MiddleNames: null,
-            LastName: null
-            );
+            LastName: null,
+            Email: userInfo.Email,
+            AccessToken: new Domain.Token.IdentityProviderToken(
+                Token: accessToken,
+                Issued: accessTokenIssued!.Value,
+                Expires: accessTokenExpires!.Value,
+                RefreshToken: refreshToken
+            ));
 
         return returnee;
     }

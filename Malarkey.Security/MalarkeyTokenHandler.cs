@@ -10,6 +10,8 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Malarkey.Application.Util;
+using System.Security.Principal;
+using System.Reflection.PortableExecutable;
 
 namespace Malarkey.Security;
 internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
@@ -39,7 +41,6 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     }
     public async Task<(MalarkeyProfileToken Token, string TokenString)> IssueToken(MalarkeyProfile profile, string receiverPublicKey)
     {
-        receiverPublicKey = receiverPublicKey.CleanCertificate();
         await Task.CompletedTask;
         var token = new MalarkeyProfileToken(
             TokenId: Guid.NewGuid(),
@@ -49,14 +50,13 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
             Profile: profile
             );
         var payload = profile.ToPayloadTso(receiverPublicKey, expiresAt: token.ValidUntil, token.TokenId);
-        var tokenString = CreateTokenString(token, payload);
+        var tokenString = CreateTokenString(token, receiverPublicKey);
         return (token,  tokenString);
     }
 
 
     public async Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(MalarkeyProfileIdentity identity, string receiverPublicKey)
     {
-        receiverPublicKey = receiverPublicKey.CleanCertificate();
         await Task.CompletedTask;
         var token = new MalarkeyIdentityToken(
             TokenId: Guid.NewGuid(),
@@ -65,17 +65,26 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
             ValidUntil: MalarkeySecurityConstants.Now + MalarkeySecurityConstants.TokenLifeTime,
         Identity: identity
             );
-        var payload = identity.ToPayloadTso(receiverPublicKey, expiresAt: token.ValidUntil, token.TokenId);
-        var tokenString = CreateTokenString(token, payload);
+        var tokenString = CreateTokenString(token, receiverPublicKey);
         return (token, tokenString);
     }
 
-
-    private string CreateTokenString(MalarkeyToken token, MalarkeyTokenPayloadTso payload)
+    public string CreateTokenString(MalarkeyProfileToken profileToken, string receiverPublicKey)
     {
-            var header = token.ToHeaderTso();
-            var tokenString = _tokenHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
-            return tokenString;
+        receiverPublicKey = receiverPublicKey.CleanCertificate();
+        var payload = profileToken.ToPayloadTso(receiverPublicKey);
+        var header = profileToken.ToHeaderTso();
+        var tokenString = _tokenHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
+        return tokenString;
+    }
+
+    public string CreateTokenString(MalarkeyIdentityToken identityToken, string receiverPublicKey)
+    {
+        receiverPublicKey = receiverPublicKey.CleanCertificate();
+        var payload = identityToken.ToPayloadTso(receiverPublicKey);
+        var header = identityToken.ToHeaderTso();
+        var tokenString = _tokenHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
+        return tokenString;
     }
 
 
@@ -120,8 +129,6 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         }
 
     }
-
-
 
 }
 

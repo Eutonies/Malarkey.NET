@@ -19,6 +19,7 @@ create table profile_identity (
     preferred_name varchar(200),
     middle_names varchar(200),
     last_name varchar(200),
+    email varchar(1000),
     constraint pk_profile_identity primary key (identity_id),
     unique(provider, provider_id),
     constraint fk_profile_identity_prof foreign key (profile_id) references profile(profile_id) on delete cascade
@@ -61,5 +62,13 @@ create table authentication_session (
 );
 
 
+create table id_provider_token (
+    token_id bigint primary key generated always as identity,
+    identity_id uuid not null,
+    token_string varchar(2000) not null,
+    issued_at timestamp not null,
+    expires_at timestamp not null,
+    refresh_token varchar(2000)
+);
 
 

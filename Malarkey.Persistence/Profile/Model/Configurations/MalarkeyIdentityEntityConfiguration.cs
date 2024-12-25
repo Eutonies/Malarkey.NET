@@ -21,5 +21,7 @@ internal class MalarkeyIdentityEntityConfiguration : MalarkeyEntityConfiguration
         builder.Property(nameof(MalarkeyIdentityDbo.PreferredName)).HasColumnName("preferred_name");
         builder.Property(nameof(MalarkeyIdentityDbo.MiddleNames)).HasColumnName("middle_names");
         builder.Property(nameof(MalarkeyIdentityDbo.LastName)).HasColumnName("last_name");
+        builder.Property(nameof(MalarkeyIdentityDbo.Email)).HasColumnName("email");
+
     }
 }

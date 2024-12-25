@@ -15,6 +15,9 @@ public static class IntegrationConstants
 
     public const string TokenReceiverHeaderName = "Malarkey.Token.Audience";
 
+    public const string ForwarderQueryParameterName = "forwarder";
+
+
     public static class MalarkeyIdProviders 
     {
         public const string Facebook = "facebook";
@@ -31,6 +34,13 @@ public static class IntegrationConstants
         public const string GoogleIsAuthenticatedPolicyName = "MalarkeyGoogleIsAuthenticated";
         public const string MicrosoftIsAuthenticatedPolicyName = "MalarkeyMicrosoftIsAuthenticated";
 
+    }
+
+    public static class SuccessHeaders
+    {
+        public const string ProfileTokenHeaderName = "Malarkey.Profile";
+        public const string IdentityTokenHeaderName = "Malarkey.Identity";
+        public const string IdentityProviderAccessTokenHeaderName = "Malarkey.IdP.Token";
     }
 
 

@@ -1,5 +1,6 @@
 ﻿using Malarkey.Application;
 using Malarkey.Domain.Authentication;
+using Malarkey.Domain.Util;
 using Malarkey.Integration;
 using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components;
@@ -18,45 +19,37 @@ public partial class AuthenticatePage
     [CascadingParameter]
     public MalarkeySessionState SessionState { get; set; }
 
-    [SupplyParameterFromForm(Name = "redirect-url")]
-    public string? RedirectUri { get; set; }
+    [SupplyParameterFromQuery(Name = "forwarder")]
+    [Parameter]
+    public string? Forwarder { get; set; }
 
     private bool IsAuthenticated => SessionState.User != null;
 
     protected async override Task OnInitializedAsync()
     {
-        // https://localhost/authenticate?redirect=http%3A%2F%2Flocalhost%3A8080%2Fmcdonalds
-        var context = ContextAccessor.HttpContext;
-        var parameters = context!.Request.Query;
-        var url = RedirectUri;
-        if (parameters.TryGetValue("redirect", out var redirUrl))
-            url = redirUrl.ToString();
-        if(url != null)
+        await Task.CompletedTask;
+    }
+
+    public void OnMicrosoftClick(MouseEventArgs e) => GoTo(MalarkeyOAuthIdentityProvider.Microsoft);
+
+    public void OnGoogleClick(MouseEventArgs e) => GoTo(MalarkeyOAuthIdentityProvider.Google);
+
+    public void OnFacebookClick(MouseEventArgs e) => GoTo(MalarkeyOAuthIdentityProvider.Facebook);
+
+    public void OnSpotifyClick(MouseEventArgs e) => GoTo(MalarkeyOAuthIdentityProvider.Spotify);
+
+    private void GoTo(MalarkeyOAuthIdentityProvider provider) =>
+        NavManager.NavigateTo(BuildChallengeUrl(provider), forceLoad: true);
+
+
+    private string BuildChallengeUrl(MalarkeyOAuthIdentityProvider provider)
+    {
+        var returnee = $"challenge?{IntegrationConstants.IdProviderHeaderName}={provider.ToString()}";
+        if(Forwarder != null)
         {
-            context!.Response.Cookies.Append(MalarkeyApplicationConstants.MalarkeyRedirectUrlCookie, url);
+            returnee = returnee + $"&{IntegrationConstants.ForwarderQueryParameterName}={Forwarder.UrlEncoded()}";
         }
-
+        return returnee;
     }
-
-    public void OnMicrosoftClick(MouseEventArgs e)
-    {
-        NavManager.NavigateTo($"challenge?{IntegrationConstants.IdProviderHeaderName}={MalarkeyOAuthIdentityProvider.Microsoft.ToString()}", forceLoad: true);
-    }
-
-    public void OnGoogleClick(MouseEventArgs e)
-    {
-        NavManager.NavigateTo($"challenge?{IntegrationConstants.IdProviderHeaderName}={MalarkeyOAuthIdentityProvider.Google.ToString()}", forceLoad: true);
-    }
-
-    public void OnFacebookClick(MouseEventArgs e)
-    {
-        NavManager.NavigateTo($"challenge?{IntegrationConstants.IdProviderHeaderName}={MalarkeyOAuthIdentityProvider.Facebook.ToString()}", forceLoad: true);
-    }
-
-    public void OnSpotifyClick(MouseEventArgs e)
-    {
-        NavManager.NavigateTo($"challenge?{IntegrationConstants.IdProviderHeaderName}={MalarkeyOAuthIdentityProvider.Spotify.ToString()}", forceLoad: true);
-    }
-
 
 }
