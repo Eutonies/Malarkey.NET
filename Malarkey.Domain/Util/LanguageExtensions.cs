@@ -10,6 +10,9 @@ public static class LanguageExtensions
 
     public static B Pipe<A, B>(this A input, Func<A, B> func) => func(input);
 
+    public static B? PipeWhen<A, B>(this A input, Func<A,bool> condition, Func<A, B> func) => condition(input) ?         
+        func(input) :
+        default;
 
 
 }

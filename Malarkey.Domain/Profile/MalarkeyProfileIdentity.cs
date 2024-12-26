@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Malarkey.Domain.Token;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,4 +33,25 @@ public abstract record MalarkeyProfileIdentity
     public string FirstName { get; private set; }
     public string? MiddleNames { get; private set; }
     public string? LastName { get; private set; }
+
+    public string? PreferredNameToUse => this switch
+    {
+        MicrosoftIdentity mic => mic.PreferredName,
+        FacebookIdentity fac => fac.PreferredName,
+        _ => null
+    };
+
+    public string? EmailToUse => this switch
+    {
+        FacebookIdentity fac => fac.Email,
+        SpotifyIdentity sp => sp.Email,
+        _ => null
+    };
+
+    public IdentityProviderToken? IdentityProviderTokenToUse => this switch
+    {
+        SpotifyIdentity sp => sp.IdentityProviderTokenToUse,
+        _ => null
+    };
+
 }

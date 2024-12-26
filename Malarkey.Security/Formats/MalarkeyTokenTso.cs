@@ -1,15 +1,9 @@
 ﻿using Malarkey.Domain.Profile;
 using Malarkey.Domain.Token;
+using Malarkey.Domain.Util;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Malarkey.Security.Formats;
 internal record MalarkeyTokenTso(
@@ -18,7 +12,6 @@ internal record MalarkeyTokenTso(
     string Signature
     )
 {
-    private static readonly CultureInfo EnUs = new CultureInfo("en-US");
 
     public override string ToString() => $"{Header.Serialize()}.{Payload.Serialize()}.{Signature.InBase64()}";
 
@@ -60,13 +53,32 @@ internal record MalarkeyTokenTso(
                     MiddleNames: Payload.midnames,
                     LastName: Payload.lastname
                     ),
+                MalarkeyTokenIdentityTypeTso.Spotify => new SpotifyIdentity(
+                    IdentityId: Guid.Parse(Payload.id),
+                    ProfileId: Guid.Parse(Payload.sub),
+                    SpotifyId: Payload.identid!,
+                    Name: Payload.name,
+                    MiddleNames: Payload.midnames,
+                    LastName: Payload.lastname,
+                    Email: Payload.email,
+                    AccessToken: Payload.idptoken?.Pipe(idpt => new IdentityProviderToken(
+                        Token: idpt.token,
+                        Issued: idpt.iat.ParseJwtTime(),
+                        Expires: idpt.exp.ParseJwtTime(),
+                        RefreshToken: idpt.refresh
+                        )
+                    )
+                    ),
+
                 _ => new FacebookIdentity(
                     IdentityId: Guid.Parse(Payload.id),
                     ProfileId: Guid.Parse(Payload.sub),
                     FacebookId: Payload.identid!,
+                    PreferredName: Payload.prefname ?? "Unknown",
                     Name: Payload.name,
                     MiddleNames: Payload.midnames,
-                    LastName: Payload.lastname
+                    LastName: Payload.lastname,
+                    Email: Payload.email
                     )
 
             })
@@ -96,13 +108,18 @@ internal record MalarkeyTokenPayloadTso(
     string? lastname = null,
     string iss = MalarkeySecurityConstants.TokenIssuer,
     long? crets = null,
-    string? absby = null
-    )
-{
+    string? absby = null,
+    string? email = null,
+    MalarkeyIdProviderAccessTokenTso? idptoken = null
+    );
 
+internal record MalarkeyIdProviderAccessTokenTso(
+    long iat,
+    long exp,
+    string token,
+    string? refresh
+    );
 
-
-}
 
 internal enum MalarkeyTokenTypeTso
 {
@@ -163,6 +180,7 @@ internal static class MalarkeyTokenTsoExtensions
         MalarkeyProfileToken _ => new MalarkeyTokenHeaderTso(toktyp: MalarkeyTokenTypeTso.Profile.ToString()),
         _ => new MalarkeyTokenHeaderTso(toktyp: MalarkeyTokenTypeTso.Identity.ToString())
     };
+
 
     internal static MalarkeyTokenPayloadTso ToPayloadTso(
         this MalarkeyProfile profile, 
@@ -230,9 +248,18 @@ internal static class MalarkeyTokenTsoExtensions
                 identid: token.Identity.ProviderId,
                 prefname: (token.Identity as MicrosoftIdentity)?.PreferredName,
                 midnames: token.Identity.MiddleNames,
-                lastname: token.Identity.LastName
+                lastname: token.Identity.LastName,
+                email: token.Identity.EmailToUse,
+                idptoken: token.Identity.IdentityProviderTokenToUse?.Pipe(_ => _.ToPayloadTso())
                );
 
+
+    internal static MalarkeyIdProviderAccessTokenTso ToPayloadTso(this IdentityProviderToken token) => new MalarkeyIdProviderAccessTokenTso(
+        iat: token.Issued.ToJwtTime(),
+        exp: token.Expires.ToJwtTime(),
+        token: token.Token,
+        refresh: token.RefreshToken
+    );
 
 
 

@@ -9,9 +9,11 @@ public sealed record FacebookIdentity(
     Guid IdentityId,
     Guid ProfileId,
     string FacebookId,
+    string PreferredName,
     string Name,
     string? MiddleNames,
-    string? LastName
+    string? LastName,
+    string? Email
     ) : MalarkeyProfileIdentity(
         IdentityId,
         ProfileId,

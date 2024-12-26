@@ -47,8 +47,8 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
             LastName = identity.LastName,
             Provider = provider,
             ProviderId = identity.ProviderId,
-            PreferredName = (identity as MicrosoftIdentity)?.PreferredName,
-            Email = (identity as SpotifyIdentity)?.Email
+            PreferredName = identity.PreferredNameToUse,
+            Email = identity.EmailToUse
         };
         cont.Identities.Add(insertee);
         await cont.SaveChangesAsync();

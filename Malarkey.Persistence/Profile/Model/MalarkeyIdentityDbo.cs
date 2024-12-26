@@ -27,7 +27,7 @@ internal class MalarkeyIdentityDbo
     {
         MalarkeyIdentityProviderDbo.Microsoft => new MicrosoftIdentity(IdentityId, ProfileId, ProviderId, PreferredName!, IdentityName, MiddleNames, LastName),
         MalarkeyIdentityProviderDbo.Google => new GoogleIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName),
-        MalarkeyIdentityProviderDbo.Facebook => new FacebookIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName),
+        MalarkeyIdentityProviderDbo.Facebook => new FacebookIdentity(IdentityId, ProfileId, ProviderId, PreferredName ?? "", IdentityName, MiddleNames, LastName, Email),
         MalarkeyIdentityProviderDbo.Spotify => new SpotifyIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName, Email, idProviderToken?.ToDomain()),
         _ => throw new NotImplementedException()
     };
