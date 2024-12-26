@@ -1,45 +1,41 @@
-﻿@media only screen and (max-width: 600px) {
-    .malarkey-authenticate-page-bg {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background-image: url('images/authenticate/background.webp');
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
+﻿.malarkey-authenticate-page-bg {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    background-image: url('images/authenticate/background.webp');
+    background-size: cover;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
-@media only screen and (min-width: 600px) {
-    .malarkey-authenticate-page-bg {
-        position: absolute;
-        width: 100%;
-        height: 100%;
-        background-image: url('images/authenticate/background-wide.webp');
-        background-repeat: no-repeat;
-        background-size: cover;
-    }
+.malarkey-authenticate-page-bg::before {
+    content: '';
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    animation-name: bgblur;
+    animation-duration: 100s;
+    animation-iteration-count: infinite;
 }
-
 
 
 .malarkey-authenticate-page-container {
-    position: absolute;
-    margin-left: 30px;
-    margin-top: 50px;
+    position: relative;
+    margin-left: 100px;
+    margin-top: 150px;
     border-radius: 5px;
     padding-left: 20px;
     box-shadow: 5px 5px rgba(30,30,30,0.5);
-    background-color: rgba(233,233,233,0.7);
+    background-color: rgba(195,185,185,0.74);
+    min-width: 200px;
     max-width: 600px;
-    min-height: 600px;
-}
-
-.malarkey-authenticate-page-container ::before {
-    position: absolute;
-    top:0px;
-    left:0px;
-    width:100%;
-    height:100%;
+    height: 600px;
 }
 
 .malarkey-authenticate-page-top-row{
@@ -50,7 +46,7 @@
 .malarkey-authenticate-page-header {
     display: flex;
     justify-content: center;
-    font-family: 'Papyrus';
+    font-family: 'Merienda';
     font-size: 30px;
     font-weight: 900;
     color: black;
@@ -81,4 +77,40 @@
 .malarkey-authenticate-page-button-row {
     margin-top: 30px;
     margin-bottom: 20px;
+}
+
+.malarkey-authenticate-page-container-content {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+@keyframes bgblur {
+    0% {
+        backdrop-filter: blur(0.5px);
+    }
+    10% {
+        backdrop-filter: blur(2.5px);
+    }
+    22% {
+        backdrop-filter: blur(1.5px);
+    }
+    30% {
+        backdrop-filter: blur(5.5px);
+    }
+    46% {
+        backdrop-filter: blur(1.5px);
+    }
+    51% {
+        backdrop-filter: blur(1.7px);
+    }
+    67% {
+        backdrop-filter: blur(0.1px);
+    }
+    73% {
+        backdrop-filter: blur(0.3px);
+    }
+    87% {
+        backdrop-filter: blur(2.5px);
+    }
 }

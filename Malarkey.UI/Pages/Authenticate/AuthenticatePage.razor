@@ -3,47 +3,37 @@
 <div class="malarkey-authenticate-page-bg">
     <div class="malarkey-authenticate-page-container container-fluid">
         <div class="row malarkey-authenticate-page-top-row">
-            <div class="col-md-4"></div>
-            <div class="col-md-4 col-12">
+            <div class="col-12 malarkey-authenticate-page-container-content">
                 <h1 class="malarkey-authenticate-page-header">@(IsAuthenticated ? "Connect account" : "Sign in with")</h1>
             </div>
-            <div class="col-md-4"></div>
         </div>
         <div class="row malarkey-authenticate-page-button-row">
-            <div class="col-md-4"></div>
-            <div class="col-md-4 col-12">
+            <div class="col-12 malarkey-authenticate-page-container-content">
                 <button class="malarkey-authenticate-page-button" @onclick="OnMicrosoftClick">
                     <img src="images/authenticate/microsoft.webp" />
                 </button>
             </div>
-            <div class="col-md-4"></div>
         </div>
         <div class="row malarkey-authenticate-page-button-row">
-            <div class="col-md-4"></div>
-            <div class="col-md-4 col-12">
+            <div class="col-12 malarkey-authenticate-page-container-content">
                 <button class="malarkey-authenticate-page-button" @onclick="OnGoogleClick">
                     <img src="images/authenticate/google.webp" />
                 </button>
             </div>
-            <div class="col-md-4"></div>
         </div>
         <div class="row malarkey-authenticate-page-button-row">
-            <div class="col-md-4"></div>
-            <div class="col-md-4 col-12">
+            <div class="col-12 malarkey-authenticate-page-container-content">
                 <button class="malarkey-authenticate-page-button" @onclick="OnFacebookClick">
                     <img src="images/authenticate/facebook.webp" />
                 </button>
             </div>
-            <div class="col-md-4"></div>
         </div>
         <div class="row malarkey-authenticate-page-button-row">
-            <div class="col-md-4"></div>
-            <div class="col-md-4 col-12">
+            <div class="col-12 malarkey-authenticate-page-container-content">
                 <button class="malarkey-authenticate-page-button" @onclick="OnSpotifyClick">
                     <img src="images/authenticate/spotify.webp" />
                 </button>
             </div>
-            <div class="col-md-4"></div>
         </div>
 
     </div>
