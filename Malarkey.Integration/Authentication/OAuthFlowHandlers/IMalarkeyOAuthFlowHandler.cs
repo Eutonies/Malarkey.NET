@@ -9,12 +9,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 public interface IMalarkeyOAuthFlowHandler
 {
-    public MalarkeyOAuthIdentityProvider HandlerFor { get; }
+    public MalarkeyIdentityProvider HandlerFor { get; }
     public string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session);
 
     public Task<RedirectData?> ExtractRedirectData(HttpRequest request);

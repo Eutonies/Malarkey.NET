@@ -1,6 +1,6 @@
 ﻿using Malarkey.Application.Security;
-using Malarkey.Domain.Profile;
-using Malarkey.Domain.Token;
+using Malarkey.Abstractions.Profile;
+using Malarkey.Abstractions.Token;
 using Malarkey.Application.Configuration;
 using Malarkey.Security.Formats;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,8 +10,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Malarkey.Application.Util;
-using System.Security.Principal;
-using System.Reflection.PortableExecutable;
 
 namespace Malarkey.Security;
 internal class MalarkeyTokenHandler : IMalarkeyTokenHandler

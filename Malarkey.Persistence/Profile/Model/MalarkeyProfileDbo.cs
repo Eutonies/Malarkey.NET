@@ -1,4 +1,4 @@
-﻿using Malarkey.Domain.Profile;
+﻿using Malarkey.Abstractions.Profile;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

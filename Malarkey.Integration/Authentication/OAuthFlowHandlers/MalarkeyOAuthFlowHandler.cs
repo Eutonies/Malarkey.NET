@@ -1,5 +1,5 @@
 ﻿using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
@@ -20,7 +20,7 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
     protected readonly MalarkeyIdentityProviderConfiguration _conf;
     protected readonly MalarkeyIntegrationConfiguration _intConf;
 
-    public abstract MalarkeyOAuthIdentityProvider HandlerFor { get; }
+    public abstract MalarkeyIdentityProvider HandlerFor { get; }
 
     protected virtual string[] DefaultScopes => ["openid"];
     protected virtual string DefaultResponseType => "code";

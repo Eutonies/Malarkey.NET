@@ -1,4 +1,5 @@
-﻿using Malarkey.Domain.Authentication;
+﻿using Malarkey.Abstractions.Profile;
+using Malarkey.Domain.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,20 +18,20 @@ public enum MalarkeyIdentityProviderDbo
 
 public static class MalarkeyIdentityProviderDboExtensions
 {
-    public static MalarkeyIdentityProviderDbo ToDbo(this MalarkeyOAuthIdentityProvider prov) => prov switch {
-        MalarkeyOAuthIdentityProvider.Microsoft => MalarkeyIdentityProviderDbo.Microsoft,
-        MalarkeyOAuthIdentityProvider.Google => MalarkeyIdentityProviderDbo.Google,
-        MalarkeyOAuthIdentityProvider.Facebook => MalarkeyIdentityProviderDbo.Facebook,
-        MalarkeyOAuthIdentityProvider.Spotify => MalarkeyIdentityProviderDbo.Spotify,
+    public static MalarkeyIdentityProviderDbo ToDbo(this MalarkeyIdentityProvider prov) => prov switch {
+        MalarkeyIdentityProvider.Microsoft => MalarkeyIdentityProviderDbo.Microsoft,
+        MalarkeyIdentityProvider.Google => MalarkeyIdentityProviderDbo.Google,
+        MalarkeyIdentityProvider.Facebook => MalarkeyIdentityProviderDbo.Facebook,
+        MalarkeyIdentityProvider.Spotify => MalarkeyIdentityProviderDbo.Spotify,
         _ => throw new NotImplementedException()
     };
 
-    public static MalarkeyOAuthIdentityProvider ToDomain(this MalarkeyIdentityProviderDbo prov) => prov switch
+    public static MalarkeyIdentityProvider ToDomain(this MalarkeyIdentityProviderDbo prov) => prov switch
     {
-        MalarkeyIdentityProviderDbo.Microsoft => MalarkeyOAuthIdentityProvider.Microsoft,
-        MalarkeyIdentityProviderDbo.Google => MalarkeyOAuthIdentityProvider.Google,
-        MalarkeyIdentityProviderDbo.Facebook => MalarkeyOAuthIdentityProvider.Facebook,
-        MalarkeyIdentityProviderDbo.Spotify => MalarkeyOAuthIdentityProvider.Spotify,
+        MalarkeyIdentityProviderDbo.Microsoft => MalarkeyIdentityProvider.Microsoft,
+        MalarkeyIdentityProviderDbo.Google => MalarkeyIdentityProvider.Google,
+        MalarkeyIdentityProviderDbo.Facebook => MalarkeyIdentityProvider.Facebook,
+        MalarkeyIdentityProviderDbo.Spotify => MalarkeyIdentityProvider.Spotify,
         _ => throw new NotImplementedException()
     };
 }

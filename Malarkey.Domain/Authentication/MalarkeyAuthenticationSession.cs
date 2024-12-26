@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Malarkey.Abstractions.Profile;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,7 @@ namespace Malarkey.Domain.Authentication;
 public record MalarkeyAuthenticationSession(
     long SessionId,
     string State,
-    MalarkeyOAuthIdentityProvider IdProvider,
+    MalarkeyIdentityProvider IdProvider,
     string? Nonce,
     string? Forwarder,
     string CodeChallenge,

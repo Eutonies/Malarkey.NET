@@ -1,5 +1,5 @@
 ﻿using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
@@ -16,7 +16,7 @@ using System.Threading.Tasks;
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
-    public override MalarkeyOAuthIdentityProvider HandlerFor => MalarkeyOAuthIdentityProvider.Microsoft;
+    public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Microsoft;
 
     public MalarkeyGoogleOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf) : base(intConf)
     {

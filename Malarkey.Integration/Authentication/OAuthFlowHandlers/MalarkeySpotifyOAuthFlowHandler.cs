@@ -1,29 +1,20 @@
 ﻿using Malarkey.Application.Util;
 using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using SpyOff.Infrastructure.Tracks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
     private readonly IHttpClientFactory _httpClientFactory;
-    public override MalarkeyOAuthIdentityProvider HandlerFor => MalarkeyOAuthIdentityProvider.Spotify;
+    public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Spotify;
 
     public MalarkeySpotifyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf, IHttpClientFactory httpClientFactory) : base(intConf)
     {
@@ -117,7 +108,7 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
             MiddleNames: null,
             LastName: null,
             Email: userInfo.Email,
-            AccessToken: new Domain.Token.IdentityProviderToken(
+            AccessToken: new Abstractions.Token.IdentityProviderToken(
                 Token: accessToken,
                 Issued: accessTokenIssued!.Value,
                 Expires: accessTokenExpires!.Value,

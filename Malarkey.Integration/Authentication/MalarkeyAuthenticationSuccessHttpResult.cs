@@ -1,4 +1,5 @@
-﻿using Malarkey.Domain.Util;
+﻿using Malarkey.Abstractions;
+using Malarkey.Domain.Util;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -18,11 +19,11 @@ public record MalarkeyAuthenticationSuccessHttpResult(
     public Task ExecuteAsync(HttpContext httpContext)
     {
         httpContext.Response.StatusCode = 302;
-        httpContext.Response.Headers.Append(IntegrationConstants.SuccessHeaders.ProfileTokenHeaderName, ProfileToken);
-        httpContext.Response.Headers.Append(IntegrationConstants.SuccessHeaders.IdentityTokenHeaderName, IdentityToken);
+        httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenHeaderName, ProfileToken);
+        httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenHeaderName, IdentityToken);
         if(IdentityProviderAccessToken != null)
         {
-            httpContext.Response.Headers.Append(IntegrationConstants.SuccessHeaders.IdentityProviderAccessTokenHeaderName, IdentityProviderAccessToken);
+            httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityProviderAccessTokenHeaderName, IdentityProviderAccessToken);
         }
         httpContext.Response.Headers.Location = BuildRedirectString();
         return Task.CompletedTask;

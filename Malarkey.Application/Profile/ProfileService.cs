@@ -2,8 +2,8 @@
 using Malarkey.Application.Profile.Persistence;
 using Malarkey.Application.Security;
 using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Profile;
-using Malarkey.Domain.Token;
+using Malarkey.Abstractions.Profile;
+using Malarkey.Abstractions.Token;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,7 +38,7 @@ internal class ProfileService : IProfileService
         return new SuccessActionResult<string>(tokenString);
     }
 
-    public async Task<ActionResult<MalarkeyProfileAndIdentities>> LoadOrCreateProfile(MalarkeyOAuthIdentityProvider provider, string providerId)
+    public async Task<ActionResult<MalarkeyProfileAndIdentities>> LoadOrCreateProfile(MalarkeyIdentityProvider provider, string providerId)
     {
         throw new Exception("");
     }

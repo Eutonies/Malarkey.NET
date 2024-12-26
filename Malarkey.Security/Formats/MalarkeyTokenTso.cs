@@ -1,5 +1,5 @@
-﻿using Malarkey.Domain.Profile;
-using Malarkey.Domain.Token;
+﻿using Malarkey.Abstractions.Profile;
+using Malarkey.Abstractions.Token;
 using Malarkey.Domain.Util;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;

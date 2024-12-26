@@ -36,12 +36,6 @@ public static class IntegrationConstants
 
     }
 
-    public static class SuccessHeaders
-    {
-        public const string ProfileTokenHeaderName = "Malarkey.Profile";
-        public const string IdentityTokenHeaderName = "Malarkey.Identity";
-        public const string IdentityProviderAccessTokenHeaderName = "Malarkey.IdP.Token";
-    }
 
 
 }

@@ -1,5 +1,5 @@
 ﻿using Malarkey.Application.Profile.Persistence;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 using Malarkey.Persistence.Token.Model;
 using System;
 using System.Collections.Generic;

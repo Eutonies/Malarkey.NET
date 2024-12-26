@@ -1,7 +1,7 @@
 ﻿using Malarkey.Application.Profile.Persistence;
 using Malarkey.Application.Util;
 using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
@@ -22,7 +22,7 @@ internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
     private readonly IMalarkeyProfileRepository _profileRepo;
     
-    public override MalarkeyOAuthIdentityProvider HandlerFor => MalarkeyOAuthIdentityProvider.Microsoft;
+    public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Microsoft;
 
 
     public MalarkeyMicrosoftOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf, IMalarkeyProfileRepository profileRepo) : base(intConf)

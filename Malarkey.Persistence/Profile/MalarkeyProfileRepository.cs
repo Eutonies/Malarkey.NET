@@ -1,6 +1,6 @@
 ﻿using Malarkey.Application.Profile.Persistence;
 using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 using Malarkey.Persistence.Context;
 using Malarkey.Persistence.Profile.Model;
 using Malarkey.Persistence.Token.Model;
@@ -76,7 +76,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         return new MalarkeyProfileAndIdentities(profile, [identity]);
     }
 
-    public async Task<MalarkeyProfileAndIdentities?> LoadByProviderId(MalarkeyOAuthIdentityProvider provider, string providerId)
+    public async Task<MalarkeyProfileAndIdentities?> LoadByProviderId(MalarkeyIdentityProvider provider, string providerId)
     {
         var providerDbo = provider.ToDbo();
         await using var cont = await _dbContextFactory.CreateDbContextAsync();

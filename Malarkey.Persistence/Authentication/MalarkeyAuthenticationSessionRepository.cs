@@ -1,4 +1,5 @@
-﻿using Malarkey.Application.Profile.Persistence;
+﻿using Malarkey.Abstractions.Profile;
+using Malarkey.Application.Profile.Persistence;
 using Malarkey.Application.Security;
 using Malarkey.Domain.Authentication;
 using Malarkey.Persistence.Context;
@@ -21,7 +22,7 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
     }
 
     public async Task<MalarkeyAuthenticationSession> InitNewSession(
-        MalarkeyOAuthIdentityProvider idProvider, 
+        MalarkeyIdentityProvider idProvider, 
         string nonce, 
         string? forwarder, 
         string codeChallenge, 

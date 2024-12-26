@@ -1,4 +1,5 @@
-﻿using Malarkey.Application;
+﻿using Malarkey.Abstractions.Profile;
+using Malarkey.Application;
 using Malarkey.Domain.Authentication;
 using Malarkey.Domain.Util;
 using Malarkey.Integration;
@@ -30,19 +31,19 @@ public partial class AuthenticatePage
         await Task.CompletedTask;
     }
 
-    public void OnMicrosoftClick(MouseEventArgs e) => GoTo(MalarkeyOAuthIdentityProvider.Microsoft);
+    public void OnMicrosoftClick(MouseEventArgs e) => GoTo(MalarkeyIdentityProvider.Microsoft);
 
-    public void OnGoogleClick(MouseEventArgs e) => GoTo(MalarkeyOAuthIdentityProvider.Google);
+    public void OnGoogleClick(MouseEventArgs e) => GoTo(MalarkeyIdentityProvider.Google);
 
-    public void OnFacebookClick(MouseEventArgs e) => GoTo(MalarkeyOAuthIdentityProvider.Facebook);
+    public void OnFacebookClick(MouseEventArgs e) => GoTo(MalarkeyIdentityProvider.Facebook);
 
-    public void OnSpotifyClick(MouseEventArgs e) => GoTo(MalarkeyOAuthIdentityProvider.Spotify);
+    public void OnSpotifyClick(MouseEventArgs e) => GoTo(MalarkeyIdentityProvider.Spotify);
 
-    private void GoTo(MalarkeyOAuthIdentityProvider provider) =>
+    private void GoTo(MalarkeyIdentityProvider provider) =>
         NavManager.NavigateTo(BuildChallengeUrl(provider), forceLoad: true);
 
 
-    private string BuildChallengeUrl(MalarkeyOAuthIdentityProvider provider)
+    private string BuildChallengeUrl(MalarkeyIdentityProvider provider)
     {
         var returnee = $"challenge?{IntegrationConstants.IdProviderHeaderName}={provider.ToString()}";
         if(Forwarder != null)

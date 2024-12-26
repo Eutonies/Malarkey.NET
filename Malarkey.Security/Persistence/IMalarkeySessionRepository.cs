@@ -1,4 +1,5 @@
-﻿using Malarkey.Domain.Authentication;
+﻿using Malarkey.Abstractions.Profile;
+using Malarkey.Domain.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,7 +10,7 @@ namespace Malarkey.Security.Persistence;
 public interface IMalarkeySessionRepository
 {
     Task<MalarkeyAuthenticationSession> InitNewSession(
-        MalarkeyOAuthIdentityProvider idProvider, 
+        MalarkeyIdentityProvider idProvider, 
         string nonce, 
         string? forwarder, 
         string codeChallenge, 

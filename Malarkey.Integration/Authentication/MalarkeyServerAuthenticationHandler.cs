@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.Text.Encodings.Web;
 using Malarkey.Application.Security;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 using Malarkey.Domain.Authentication;
 using Malarkey.Domain.Util;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
@@ -18,7 +18,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 {
     private readonly IMalarkeyTokenHandler _tokenHandler;
     private readonly IMalarkeyAuthenticationSessionHandler _sessionHandler;
-    private readonly IReadOnlyDictionary<MalarkeyOAuthIdentityProvider, IMalarkeyOAuthFlowHandler> _flowHandlers;
+    private readonly IReadOnlyDictionary<MalarkeyIdentityProvider, IMalarkeyOAuthFlowHandler> _flowHandlers;
     private readonly IMalarkeyProfileRepository _profileRepo;
     private readonly MalarkeyIntegrationConfiguration _intConf;
 
@@ -148,7 +148,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         TypedResults.BadRequest(errorMessage)
         );
 
-    private MalarkeyOAuthIdentityProvider? ExtractIdentityProvider()
+    private MalarkeyIdentityProvider? ExtractIdentityProvider()
     {
         var inHeaders = Request.Headers.TryGetValue(IntegrationConstants.IdProviderHeaderName, out var idpHeaderString);
         var fromQuery = Request.Query
@@ -158,10 +158,10 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
         var idp = ( inHeaders ? idpHeaderString.ToString() : fromQuery)?.ToLower() switch
         {
-            IntegrationConstants.MalarkeyIdProviders.Microsoft => (MalarkeyOAuthIdentityProvider?)MalarkeyOAuthIdentityProvider.Microsoft,
-            IntegrationConstants.MalarkeyIdProviders.Google => MalarkeyOAuthIdentityProvider.Google,
-            IntegrationConstants.MalarkeyIdProviders.Facebook => MalarkeyOAuthIdentityProvider.Facebook,
-            IntegrationConstants.MalarkeyIdProviders.Spotify => MalarkeyOAuthIdentityProvider.Spotify,
+            IntegrationConstants.MalarkeyIdProviders.Microsoft => (MalarkeyIdentityProvider?)MalarkeyIdentityProvider.Microsoft,
+            IntegrationConstants.MalarkeyIdProviders.Google => MalarkeyIdentityProvider.Google,
+            IntegrationConstants.MalarkeyIdProviders.Facebook => MalarkeyIdentityProvider.Facebook,
+            IntegrationConstants.MalarkeyIdProviders.Spotify => MalarkeyIdentityProvider.Spotify,
             _ => null
         };
         return idp;

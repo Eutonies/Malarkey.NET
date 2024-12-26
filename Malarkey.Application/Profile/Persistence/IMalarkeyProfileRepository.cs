@@ -1,5 +1,5 @@
 ﻿using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,18 +9,18 @@ using System.Threading.Tasks;
 namespace Malarkey.Application.Profile.Persistence;
 public interface IMalarkeyProfileRepository
 {
-    protected Task<MalarkeyProfileAndIdentities?> LoadByProviderId(MalarkeyOAuthIdentityProvider provider, string providerId);
+    protected Task<MalarkeyProfileAndIdentities?> LoadByProviderId(MalarkeyIdentityProvider provider, string providerId);
 
     public async Task<MalarkeyProfileAndIdentities?> LoadByMicrosoft(string microsoftId) => 
-        await LoadByProviderId(MalarkeyOAuthIdentityProvider.Microsoft, microsoftId);
+        await LoadByProviderId(MalarkeyIdentityProvider.Microsoft, microsoftId);
 
     public async Task<MalarkeyProfileAndIdentities?> LoadByGoogle(string googleId) =>
-        await LoadByProviderId(MalarkeyOAuthIdentityProvider.Google, googleId);
+        await LoadByProviderId(MalarkeyIdentityProvider.Google, googleId);
 
     public async Task<MalarkeyProfileAndIdentities?> LoadByFacebook(string facebookId) =>
-        await LoadByProviderId(MalarkeyOAuthIdentityProvider.Facebook, facebookId);
+        await LoadByProviderId(MalarkeyIdentityProvider.Facebook, facebookId);
     public async Task<MalarkeyProfileAndIdentities?> LoadBySpotify(string spotifyId) =>
-        await LoadByProviderId(MalarkeyOAuthIdentityProvider.Spotify, spotifyId);
+        await LoadByProviderId(MalarkeyIdentityProvider.Spotify, spotifyId);
 
 
     Task<MalarkeyProfileAndIdentities?> CreateByIdentity(MalarkeyProfileIdentity identity);

@@ -1,5 +1,6 @@
 ﻿using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Token;
+using Malarkey.Abstractions.Token;
+using Malarkey.Abstractions.Profile;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -10,7 +11,7 @@ using System.Threading.Tasks;
 namespace Malarkey.Application.Security;
 public interface IMalarkeyAuthenticationSessionHandler
 {
-    Task<MalarkeyAuthenticationSession> InitSession(MalarkeyOAuthIdentityProvider idProvider, string? forwarder, string audiencePublicKey);
+    Task<MalarkeyAuthenticationSession> InitSession(MalarkeyIdentityProvider idProvider, string? forwarder, string audiencePublicKey);
     Task<MalarkeyAuthenticationSession?> SessionForState(string state);
 
     Task<MalarkeyAuthenticationSession> UpdateSessionWithTokenInfo(

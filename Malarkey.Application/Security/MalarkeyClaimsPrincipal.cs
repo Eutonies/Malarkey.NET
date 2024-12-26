@@ -1,5 +1,5 @@
-﻿using Malarkey.Domain.Profile;
-using Malarkey.Domain.Token;
+﻿using Malarkey.Abstractions.Profile;
+using Malarkey.Abstractions.Token;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +32,7 @@ public class MalarkeyClaimsPrincipal : ClaimsPrincipal
         foreach (var extId in externalIdentities)
         {
             AddIdentity(new MalarkeyClaimsIdentity(claims: [
-                new Claim(IdentityTypeName, extId.IdentityType),
+                new Claim(IdentityTypeName, extId.IdentityProvider.ToString()),
                         new Claim(MalarkeyIdClaimType, extId.ProviderId),
                         new Claim(MalarkeyNameClaimType, extId.FirstName)
                ])

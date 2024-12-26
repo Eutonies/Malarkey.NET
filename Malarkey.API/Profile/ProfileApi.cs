@@ -2,17 +2,9 @@
 using Malarkey.API.Profile.Model;
 using Malarkey.Application.Profile;
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
-using System.Security.Cryptography.Xml;
-
-
-using System.Text;
-using System.Threading.Tasks;
 using Malarkey.Application.Common;
-using Malarkey.Domain.Profile;
+using Malarkey.Abstractions.Profile;
 using Malarkey.Application.Security;
 
 namespace Malarkey.API.Profile;

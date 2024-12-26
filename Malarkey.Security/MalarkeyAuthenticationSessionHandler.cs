@@ -1,16 +1,11 @@
 ﻿using Malarkey.Application.Security;
 using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Token;
+using Malarkey.Abstractions.Token;
 using Malarkey.Domain.Util;
 using Malarkey.Security.Persistence;
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Unicode;
-using System.Threading.Tasks;
+using Malarkey.Abstractions.Profile;
 
 namespace Malarkey.Security;
 internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSessionHandler
@@ -25,7 +20,7 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         _repo = repo;
     }
 
-    public async Task<MalarkeyAuthenticationSession> InitSession(MalarkeyOAuthIdentityProvider idProvider, string? forwarder, string audiencePublicKey)
+    public async Task<MalarkeyAuthenticationSession> InitSession(MalarkeyIdentityProvider idProvider, string? forwarder, string audiencePublicKey)
     {
         var nonce = GenerateNonce();
         var (verifier, challenge) = GenerateChallengeAndVerifier();
