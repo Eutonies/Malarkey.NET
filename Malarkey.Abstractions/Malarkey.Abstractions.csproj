@@ -6,8 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Malarkey.Abstractions\Malarkey.Abstractions.csproj" />
-  </ItemGroup>
-
 </Project>
