@@ -7,6 +7,12 @@ using System.Threading.Tasks;
 namespace Malarkey.Abstractions;
 public static class MalarkeyConstants
 {
+    public static class API
+    {
+        public const string ClientCertificateHeaderName = "Malarkey.ClientCertificate";
+    }
+
+
     public static class AuthenticationRequestQueryParameters
     {
         public const string ForwarderName = "forwarder";

@@ -1,11 +1,14 @@
 ﻿using Malarkey.Abstractions.Profile;
+using Malarkey.Abstractions.Token;
 using Malarkey.Application.Profile.Persistence;
 using Malarkey.Application.Security;
 using Malarkey.Domain.Authentication;
 using Malarkey.Domain.Util;
 using Malarkey.Persistence.Context;
+using Malarkey.Persistence.Token.Model;
 using Malarkey.Security.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -80,4 +83,45 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
         var returnee = loaded?.ToDomain();
         return returnee;
     }
+
+    public async Task<IMalarkeySessionRepository.RefreshTokenLoadData?> LoadRefreshTokenForAccessToken(string accessToken, string clientCertificate)
+    {
+        await using var cont = await _contectFactory.CreateDbContextAsync();
+        var relevantTokenQuery = from tok in cont.IdentityProviderTokens.Where(_ => _.TokenString == accessToken)
+                                 join ident in cont.Identities
+                                 on tok.IdentityId equals ident.IdentityId
+                                 join identTok in cont.Tokens
+                                 on ident.IdentityId equals identTok.IdentityId
+                                 join sess in cont.AuthenticationSessions.Where(_ => _.Audience == clientCertificate)
+                                 on identTok.TokenId equals sess.IdentityTokenId
+                                 select new { Token = tok, Provider = ident.Provider };
+        var relevantToken = await relevantTokenQuery.FirstOrDefaultAsync();
+        if (relevantToken == null)
+            return null;
+        var scopesSet = relevantToken.Token.ToDomain().Scopes.ToHashSet();
+        var issuedTokens = await cont.IdentityProviderTokens
+            .Where(_ => _.IdentityId == relevantToken.Token.IdentityId && _.RefreshToken != null)
+            .OrderByDescending(_ => _.Expires)
+            .ToListAsync();
+        var bestToken = issuedTokens
+            .FirstOrDefault(_ => _.ToDomain().Scopes.ToHashSet().IsSupersetOf(scopesSet));
+        if (bestToken?.RefreshToken == null)
+            return null;
+        var returnee = new IMalarkeySessionRepository.RefreshTokenLoadData(
+            bestToken.RefreshToken!,
+            IdentityId: relevantToken.Token.IdentityId,
+            relevantToken.Provider.ToDomain()
+            );
+        return returnee;
+    }
+
+    public async Task SaveRefreshedToken(IdentityProviderToken token, Guid identityId)
+    {
+        await using var cont = await _contectFactory.CreateDbContextAsync();
+        var insertee = token.ToDbo(identityId);
+        insertee.IdentityId = identityId;
+        cont.Add(insertee);
+        await cont.SaveChangesAsync();
+    }
+
 }

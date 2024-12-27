@@ -13,9 +13,6 @@ public static class DependencyInjectionApi
 
     public static WebApplication UseApi(this WebApplication app)
     {
-        app
-            .Map(ProfileApi.Group);
-
         return app;
     }
 

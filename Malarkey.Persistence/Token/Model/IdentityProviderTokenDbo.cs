@@ -1,4 +1,5 @@
 ﻿using Malarkey.Abstractions.Token;
+using Malarkey.Domain.Util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -18,12 +19,29 @@ internal class IdentityProviderTokenDbo
     public DateTime Issued { get; set; }
     public DateTime Expires { get; set; }
     public string? RefreshToken { get; set; }
+    public string Scopes { get; set; }
 
     public IdentityProviderToken ToDomain() => new IdentityProviderToken(
         Token: TokenString,
         Issued: Issued,
         Expires: Expires,
-        RefreshToken: RefreshToken
+        RefreshToken: RefreshToken,
+        Scopes: Scopes.Split(" ")
         );
 
 }
+
+
+internal static class IdentityProviderTokenDboExtensions
+{
+    internal static IdentityProviderTokenDbo ToDbo(this IdentityProviderToken token, Guid identityId) => new IdentityProviderTokenDbo
+    {
+        IdentityId = identityId,
+        TokenString = token.Token,
+        Issued = token.Issued,
+        Expires = token.Expires,
+        RefreshToken = token.RefreshToken,
+        Scopes = token.Scopes.MakeString(" ")
+    };
+}
+

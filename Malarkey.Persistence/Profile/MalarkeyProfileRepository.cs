@@ -10,6 +10,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Malarkey.Abstractions.Token;
+using Malarkey.Domain.Util;
 
 namespace Malarkey.Persistence.Profile;
 internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
@@ -55,14 +57,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         var idProviderToken = (identity as SpotifyIdentity)?.AccessToken;
         if (idProviderToken != null)
         {
-            var tokenInsertee = new IdentityProviderTokenDbo
-            {
-                IdentityId = insertee.IdentityId,
-                TokenString = idProviderToken.Token,
-                Issued = idProviderToken.Issued,
-                Expires = idProviderToken.Expires,
-                RefreshToken = idProviderToken.RefreshToken
-            };
+            var tokenInsertee = idProviderToken.ToDbo(insertee.IdentityId);
             cont.Add(tokenInsertee);
             await cont.SaveChangesAsync();
             identity = insertee.ToDomain(tokenInsertee);
@@ -114,6 +109,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
 
 
     }
+
 
 
     private MalarkeyIdentityProviderDbo ProviderFor(MalarkeyProfileIdentity ident) => ident switch

@@ -6,6 +6,7 @@ using Malarkey.Security.Persistence;
 using System.Security.Cryptography;
 using System.Text;
 using Malarkey.Abstractions.Profile;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Malarkey.Security;
 internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSessionHandler
@@ -14,9 +15,11 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         .ToCharArray();
 
     private readonly IMalarkeySessionRepository _repo;
+    private readonly IServiceScopeFactory _scopeFactory;
 
-    public MalarkeyAuthenticationSessionHandler(IMalarkeySessionRepository repo)
+    public MalarkeyAuthenticationSessionHandler(IMalarkeySessionRepository repo, IServiceScopeFactory scopeFactory)
     {
+        _scopeFactory = scopeFactory;
         _repo = repo;
     }
 
@@ -75,4 +78,21 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         MalarkeyProfileToken profileToken, 
         MalarkeyIdentityToken identityToken) => 
             (await _repo.UpdateWithAuthenticationInfo(session.State, DateTime.Now, profileToken.TokenId, identityToken.TokenId))!;
+
+    public async Task<IdentityProviderToken?> Refresh(string accessToken, string audiencePublicKey)
+    {
+        var loadedInfo = await _repo.LoadRefreshTokenForAccessToken(accessToken, audiencePublicKey);
+        if (loadedInfo == null)
+            return null;
+        using var scope = _scopeFactory.CreateScope();
+        var refresher = scope.ServiceProvider.GetKeyedService<IMalarkeyIdentityProviderTokenRefresher>(loadedInfo.Provider);
+        if (refresher == null)
+            return null;
+        var refreshed = await refresher.Refresh(loadedInfo.Token);
+        if (refreshed == null) 
+            return null;
+        await _repo.SaveRefreshedToken(refreshed, loadedInfo.IdentityId);
+        return refreshed;
+
+    }
 }

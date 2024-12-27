@@ -69,7 +69,8 @@ create table id_provider_token (
     token_string varchar(2000) not null,
     issued_at timestamp not null,
     expires_at timestamp not null,
-    refresh_token varchar(2000)
+    refresh_token varchar(2000),
+    scopes varchar(1000) not null
 );
 
 

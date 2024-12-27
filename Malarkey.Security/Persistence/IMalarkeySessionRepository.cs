@@ -1,4 +1,5 @@
 ﻿using Malarkey.Abstractions.Profile;
+using Malarkey.Abstractions.Token;
 using Malarkey.Domain.Authentication;
 using System;
 using System.Collections.Generic;
@@ -21,5 +22,14 @@ public interface IMalarkeySessionRepository
     Task<MalarkeyAuthenticationSession?> SessionFor(string state);
     Task<MalarkeyAuthenticationSession?> UpdateWithAuthenticationInfo(string state, DateTime authenticatedTime, Guid profileTokenId, Guid identityTokenId);
 
+    public Task<RefreshTokenLoadData?> LoadRefreshTokenForAccessToken(string accessToken, string clientCertificate);
+    public Task SaveRefreshedToken(IdentityProviderToken token, Guid identityId);
+
+
+    public record RefreshTokenLoadData(
+        string Token,
+        Guid IdentityId,
+        MalarkeyIdentityProvider Provider
+        );
 
 }

@@ -4,11 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Abstractions.Token;
-public record IdentityProviderToken(
+namespace Malarkey.Abstractions.API.Profile;
+public record MalarkeyIdentityProviderTokenDto(
     string Token,
     DateTime Issued,
-    DateTime Expires,
-    string? RefreshToken,
-    string[] Scopes
+    DateTime Expires
     );

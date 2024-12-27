@@ -5,10 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.API.Profile.Model;
-public enum IdentityProviderDto
-{
-    Microsoft = 10,
-    Google = 20,
-    Facebook = 30,
-    Spotify = 40
-};
+public record IdentityProviderTokenDto(
+    DateTime IssuedAt,
+    DateTime Expires,
+    string TokenString
+    );

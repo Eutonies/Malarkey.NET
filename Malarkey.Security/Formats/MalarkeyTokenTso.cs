@@ -65,7 +65,8 @@ internal record MalarkeyTokenTso(
                         Token: idpt.token,
                         Issued: idpt.iat.ParseJwtTime(),
                         Expires: idpt.exp.ParseJwtTime(),
-                        RefreshToken: idpt.refresh
+                        RefreshToken: idpt.refresh,
+                        Scopes: idpt.scopes.Split(" ")
                         )
                     )
                     ),
@@ -117,7 +118,8 @@ internal record MalarkeyIdProviderAccessTokenTso(
     long iat,
     long exp,
     string token,
-    string? refresh
+    string? refresh,
+    string scopes
     );
 
 
@@ -258,7 +260,8 @@ internal static class MalarkeyTokenTsoExtensions
         iat: token.Issued.ToJwtTime(),
         exp: token.Expires.ToJwtTime(),
         token: token.Token,
-        refresh: token.RefreshToken
+        refresh: token.RefreshToken,
+        scopes: token.Scopes.MakeString(" ")
     );
 
 

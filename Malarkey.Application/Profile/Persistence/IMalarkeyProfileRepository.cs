@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Malarkey.Abstractions.Token;
 
 namespace Malarkey.Application.Profile.Persistence;
 public interface IMalarkeyProfileRepository

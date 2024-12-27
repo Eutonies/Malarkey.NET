@@ -9,9 +9,13 @@ using Microsoft.Extensions.Options;
 using SpyOff.Infrastructure.Tracks;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using Malarkey.Application.Security;
+using Malarkey.Abstractions.Token;
+using static Malarkey.Integration.Authentication.OAuthFlowHandlers.IMalarkeyOAuthFlowHandler;
+using Azure.Core;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
-internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
+internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMalarkeyIdentityProviderTokenRefresher
 {
     private readonly IHttpClientFactory _httpClientFactory;
     public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Spotify;
@@ -74,10 +78,7 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
             ("code_verifier", session.CodeVerifier)
         };
         request.Content = formParameters.ToFormContent();
-        string? accessToken = null;
-        DateTime? accessTokenIssued = null;
-        DateTime? accessTokenExpires = null;
-        string? refreshToken = null;
+        IdentityProviderToken? accessToken = null;
         using (var client = _httpClientFactory.CreateClient())
         {
             var response = await client.SendAsync(request);
@@ -86,15 +87,11 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
                 var responseContent = await response.Content.ReadAsStringAsync();
                 return null;
             }
-            var tokenResponse = await Parse(response);
-            accessToken = tokenResponse.Token;
-            accessTokenIssued = DateTime.Now;
-            accessTokenExpires = tokenResponse.Expires;
-            refreshToken = tokenResponse.RefreshToken;
+            accessToken = await ParseAsToken(response);
         }
         if (accessToken == null)
             return null;
-        var authHeader = new AuthenticationHeaderValue("Bearer", accessToken);
+        var authHeader = new AuthenticationHeaderValue("Bearer", accessToken.Token);
         using var apiHttpClient = _httpClientFactory.CreateClient();
         apiHttpClient.DefaultRequestHeaders.Authorization = authHeader;
         apiHttpClient.BaseAddress = new Uri(_conf.ApiBaseUrl!);
@@ -108,12 +105,8 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
             MiddleNames: null,
             LastName: null,
             Email: userInfo.Email,
-            AccessToken: new Abstractions.Token.IdentityProviderToken(
-                Token: accessToken,
-                Issued: accessTokenIssued!.Value,
-                Expires: accessTokenExpires!.Value,
-                RefreshToken: refreshToken
-            ));
+            AccessToken: accessToken
+        );
 
         return returnee;
     }
@@ -126,6 +119,41 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
             RefreshToken: resp.refresh_token
     ));
 
+    private static async Task<IdentityProviderToken> ParseAsToken(HttpResponseMessage response)
+    {
+        var tokenResponse = await Parse(response);
+        var accessToken = tokenResponse.Token;
+        var accessTokenIssued = DateTime.Now;
+        var accessTokenExpires = tokenResponse.Expires;
+        var refreshToken = tokenResponse.RefreshToken;
+        var accessTokenScopes = tokenResponse.Scopes;
+        var returnee = new IdentityProviderToken(Token: accessToken, Issued: accessTokenIssued, Expires: accessTokenExpires, RefreshToken: refreshToken, Scopes: accessTokenScopes);
+        return returnee;
+    }
+
+
+
+
+    public async Task<IdentityProviderToken?> Refresh(string refreshToken)
+    {
+        var url = _conf.TokenEndpointTemplate!;
+        var request = new HttpRequestMessage(HttpMethod.Post, url);
+        var formParameters = new List<(string, string)>
+        {
+            ("grant_type", "refresh_token"),
+            ("refresh_token", refreshToken),
+            ("client_id", _conf.ClientId)
+        };
+        request.Content = formParameters.ToFormContent();
+        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", $"{_conf.ClientId}:{_conf.ClientSecret}");
+        using var client = _httpClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        var content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+            return null;
+        var returnee = await ParseAsToken(response);
+        return returnee;
+    }
 
     private record AccessTokenResponse(
         string Token,
@@ -140,6 +168,7 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
         int expires_in,
         string refresh_token
         );
+
 
 }
 

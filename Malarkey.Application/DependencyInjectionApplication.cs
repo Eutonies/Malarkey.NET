@@ -17,7 +17,6 @@ public static class DependencyInjectionApplication
 
     public static WebApplicationBuilder AddApplication(this WebApplicationBuilder builder)
     {
-        builder.Services.AddSingleton<IProfileService, ProfileService>();
         return builder;
     }
 

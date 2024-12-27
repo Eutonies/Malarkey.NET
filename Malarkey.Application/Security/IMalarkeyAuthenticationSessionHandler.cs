@@ -23,4 +23,7 @@ public interface IMalarkeyAuthenticationSessionHandler
         MalarkeyProfileToken profileToken, 
         MalarkeyIdentityToken identityToken);
 
+    Task<IdentityProviderToken?> Refresh(string accessToken, string audiencePublicKey);
+
+
 }
