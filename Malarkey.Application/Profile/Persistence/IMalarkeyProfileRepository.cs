@@ -23,8 +23,11 @@ public interface IMalarkeyProfileRepository
     public async Task<MalarkeyProfileAndIdentities?> LoadBySpotify(string spotifyId) =>
         await LoadByProviderId(MalarkeyIdentityProvider.Spotify, spotifyId);
 
+    Task SaveIdentityProviderToken(IdentityProviderToken token, Guid identityId); 
 
     Task<MalarkeyProfileAndIdentities?> CreateByIdentity(MalarkeyProfileIdentity identity);
+
+
 
     async Task<MalarkeyProfileAndIdentities?> LoadOrCreateByIdentity(MalarkeyProfileIdentity identity) => identity switch
     {
@@ -36,8 +39,25 @@ public interface IMalarkeyProfileRepository
     } switch
     {
         null => await CreateByIdentity(identity),
-        MalarkeyProfileAndIdentities profId => profId
+        MalarkeyProfileAndIdentities profId => await SaveAndAddIdentityProviderToken(profId, identity.ProviderId, identity.IdentityProviderTokenToUse)
     };
+
+    private async Task<MalarkeyProfileAndIdentities> SaveAndAddIdentityProviderToken(MalarkeyProfileAndIdentities ident, string idProviderId, IdentityProviderToken? token)
+    {
+        if (token == null)
+            return ident;
+        var relIdentity = ident.Identities
+            .FirstOrDefault(_ => _.ProviderId == idProviderId);
+        if (relIdentity == null) return ident;
+        await SaveIdentityProviderToken(token, relIdentity.IdentityId);
+        var returnee = ident with
+        {
+            Identities = ident.Identities
+                .Select(iden => iden.IdentityId == relIdentity.IdentityId ? iden.WithToken(token) : iden)
+                .ToList()
+        };
+        return returnee;
+    }
 
 
 }

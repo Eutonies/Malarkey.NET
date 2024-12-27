@@ -110,7 +110,13 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
 
     }
 
-
+    public async Task SaveIdentityProviderToken(IdentityProviderToken token, Guid identityId)
+    {
+        await using var cont = await _dbContextFactory.CreateDbContextAsync();
+        var insertee = token.ToDbo(identityId);
+        cont.Add(insertee);
+        await cont.SaveChangesAsync();
+    }
 
     private MalarkeyIdentityProviderDbo ProviderFor(MalarkeyProfileIdentity ident) => ident switch
     {

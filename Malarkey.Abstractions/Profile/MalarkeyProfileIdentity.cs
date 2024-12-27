@@ -56,4 +56,7 @@ public abstract record MalarkeyProfileIdentity
         _ => null
     };
 
+    public virtual MalarkeyProfileIdentity WithToken(IdentityProviderToken token) => this;
+
+
 }

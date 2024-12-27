@@ -143,7 +143,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             RedirectUrl: redirectUrl,
             ProfileToken: profileTokenString,
             IdentityToken: identityTokenString,
-            IdentityProviderAccessToken: (identity as SpotifyIdentity)?.AccessToken?.Token
+            IdentityProviderAccessToken: identity.IdentityProviderTokenToUse?.Token
         );
         return redirect;
     }

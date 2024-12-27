@@ -21,5 +21,9 @@ public sealed record SpotifyIdentity(
         )
 {
     public override MalarkeyIdentityProvider IdentityProvider => MalarkeyIdentityProvider.Spotify;
+    public override MalarkeyProfileIdentity WithToken(IdentityProviderToken token) => this with
+    {
+        AccessToken = token
+    };
 
 }

@@ -25,4 +25,12 @@ public sealed record GoogleIdentity(
         )
 {
     public override MalarkeyIdentityProvider IdentityProvider => MalarkeyIdentityProvider.Google;
+
+    public override MalarkeyProfileIdentity WithToken(IdentityProviderToken token) => this with
+    {
+        AccessToken = token
+    };
+
+
 }
+
