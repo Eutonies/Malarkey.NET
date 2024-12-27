@@ -51,7 +51,15 @@ internal record MalarkeyTokenTso(
                     GoogleId: Payload.identid!,
                     Name: Payload.name,
                     MiddleNames: Payload.midnames,
-                    LastName: Payload.lastname
+                    LastName: Payload.lastname,
+                    Email: Payload.email,
+                    AccessToken: Payload.idptoken?.Pipe(idpt => new IdentityProviderToken(
+                        Token: idpt.token,
+                        Issued: idpt.iat.ParseJwtTime(),
+                        Expires: idpt.exp.ParseJwtTime(),
+                        RefreshToken: idpt.refresh,
+                        Scopes: idpt.scopes.Split(" ")
+                        ))
                     ),
                 MalarkeyTokenIdentityTypeTso.Spotify => new SpotifyIdentity(
                     IdentityId: Guid.Parse(Payload.id),

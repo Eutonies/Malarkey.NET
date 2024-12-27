@@ -46,7 +46,7 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMala
         return returnee;
     }
 
-    public override async Task<IMalarkeyOAuthFlowHandler.RedirectData?> ExtractRedirectData(HttpRequest request)
+    public override async Task<RedirectData?> ExtractRedirectData(HttpRequest request)
     {
         var keyValued = request.Query
             .Select(_ => (_.Key, Value: _.Value.ToString()))
@@ -56,14 +56,14 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMala
         if(!keyValued.TryGetValue("state", out var state))
             return null;
         await Task.CompletedTask;
-        var returnee = new IMalarkeyOAuthFlowHandler.RedirectData(
+        var returnee = new RedirectData(
             State: state,
             Code: code
             );
         return returnee;
     }
 
-    public override async Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, IMalarkeyOAuthFlowHandler.RedirectData redirectData)
+    public override async Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, RedirectData redirectData)
     {
         if (redirectData.Code == null)
             return null;

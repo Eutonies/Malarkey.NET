@@ -54,7 +54,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         };
         cont.Identities.Add(insertee);
         await cont.SaveChangesAsync();
-        var idProviderToken = (identity as SpotifyIdentity)?.AccessToken;
+        var idProviderToken = identity.IdentityProviderTokenToUse;
         if (idProviderToken != null)
         {
             var tokenInsertee = idProviderToken.ToDbo(insertee.IdentityId);

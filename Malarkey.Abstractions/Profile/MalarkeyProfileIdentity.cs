@@ -45,12 +45,14 @@ public abstract record MalarkeyProfileIdentity
     {
         FacebookIdentity fac => fac.Email,
         SpotifyIdentity sp => sp.Email,
+        GoogleIdentity google => google.Email,
         _ => null
     };
 
     public IdentityProviderToken? IdentityProviderTokenToUse => this switch
     {
         SpotifyIdentity sp => sp.AccessToken,
+        GoogleIdentity goog => goog.AccessToken,
         _ => null
     };
 

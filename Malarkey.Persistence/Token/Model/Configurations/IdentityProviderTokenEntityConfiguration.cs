@@ -19,5 +19,7 @@ internal class IdentityProviderTokenEntityConfiguration : MalarkeyEntityConfigur
         builder.Property(nameof(IdentityProviderTokenDbo.Issued)).HasColumnName("issued_at");
         builder.Property(nameof(IdentityProviderTokenDbo.Expires)).HasColumnName("expires_at");
         builder.Property(nameof(IdentityProviderTokenDbo.RefreshToken)).HasColumnName("refresh_token");
+        builder.Property(nameof(IdentityProviderTokenDbo.Scopes)).HasColumnName("scopes");
+
     }
 }
