@@ -7,6 +7,20 @@ using System.Threading.Tasks;
 namespace Malarkey.Abstractions;
 public static class MalarkeyConstants
 {
+    public const string MalarkeyAuthenticationScheme = "Malarkey.Session";
+
+    public static class Authentication
+    {
+        public const string IdentityCookieName = "Malarkey.Identity";
+        public const string ProfileCookieName = "Malarkey.Profile";
+        public const string TokenIssuer = "eutonies.com/malarkey";
+        public const string TokenAlgorithm = "RS256";
+        public const string TokenType = "JWT";
+        public const string AudienceHeaderName = API.ClientCertificateHeaderName;
+
+    }
+
+
     public static class API
     {
         public const string ClientCertificateHeaderName = "Malarkey.ClientCertificate";
@@ -37,6 +51,9 @@ public static class MalarkeyConstants
         /// </summary>
         public const string IdentityProviderAccessTokenName = "malarkeyidptoken";
     }
+
+    
+
 
     public static class Scopes
     {

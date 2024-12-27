@@ -1,150 +1,13 @@
 ﻿using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Token;
-using Malarkey.Domain.Util;
+using Malarkey.Abstractions.Util;
 using Microsoft.IdentityModel.Tokens;
 using System.Globalization;
+using System.Reflection.PortableExecutable;
+using System.Security.Cryptography.Xml;
 using System.Text.Json;
 
 namespace Malarkey.Security.Formats;
-internal record MalarkeyTokenTso(
-    MalarkeyTokenHeaderTso Header,
-    MalarkeyTokenPayloadTso Payload,
-    string Signature
-    )
-{
-
-    public override string ToString() => $"{Header.Serialize()}.{Payload.Serialize()}.{Signature.InBase64()}";
-
-    public MalarkeyToken ToDomain() => Enum.Parse<MalarkeyTokenTypeTso>(Header.toktyp) switch
-    {
-        MalarkeyTokenTypeTso.Profile => new MalarkeyProfileToken(
-            TokenId: Guid.Parse(Payload.jti),
-            IssuedTo: Payload.aud,
-            IssuedAt: Payload.iat.ParseJwtTime(),
-            ValidUntil: Payload.exp.ParseJwtTime(),
-            Profile: new MalarkeyProfile(
-                ProfileId: Guid.Parse(Payload.sub),
-                ProfileName: Payload.name,
-                CreatedAt: DateTime.UnixEpoch + TimeSpan.FromSeconds(Payload.crets!.Value),
-                AbsorbedBy: Payload.absby == null ? null : Guid.Parse(Payload.absby)
-                )
-            ),
-        _ => new MalarkeyIdentityToken(
-            TokenId: Guid.Parse(Payload.jti),
-            IssuedTo: Payload.aud,
-            IssuedAt: Payload.iat.ParseJwtTime(),
-            ValidUntil: Payload.exp.ParseJwtTime(),
-            Identity: Enum.Parse<MalarkeyTokenIdentityTypeTso>(Payload.identtyp!) switch
-            {
-                MalarkeyTokenIdentityTypeTso.Microsoft => new MicrosoftIdentity(
-                    IdentityId: Guid.Parse(Payload.id),
-                    ProfileId: Guid.Parse(Payload.sub),
-                    MicrosoftId: Payload.identid!,
-                    PreferredName: Payload.prefname!,
-                    Name: Payload.name,
-                    MiddleNames: Payload.midnames,
-                    LastName: Payload.lastname
-                    ),
-                MalarkeyTokenIdentityTypeTso.Google => new GoogleIdentity(
-                    IdentityId: Guid.Parse(Payload.id),
-                    ProfileId: Guid.Parse(Payload.sub),
-                    GoogleId: Payload.identid!,
-                    Name: Payload.name,
-                    MiddleNames: Payload.midnames,
-                    LastName: Payload.lastname,
-                    Email: Payload.email,
-                    AccessToken: Payload.idptoken?.Pipe(idpt => new IdentityProviderToken(
-                        Token: idpt.token,
-                        Issued: idpt.iat.ParseJwtTime(),
-                        Expires: idpt.exp.ParseJwtTime(),
-                        RefreshToken: idpt.refresh,
-                        Scopes: idpt.scopes.Split(" ")
-                        ))
-                    ),
-                MalarkeyTokenIdentityTypeTso.Spotify => new SpotifyIdentity(
-                    IdentityId: Guid.Parse(Payload.id),
-                    ProfileId: Guid.Parse(Payload.sub),
-                    SpotifyId: Payload.identid!,
-                    Name: Payload.name,
-                    MiddleNames: Payload.midnames,
-                    LastName: Payload.lastname,
-                    Email: Payload.email,
-                    AccessToken: Payload.idptoken?.Pipe(idpt => new IdentityProviderToken(
-                        Token: idpt.token,
-                        Issued: idpt.iat.ParseJwtTime(),
-                        Expires: idpt.exp.ParseJwtTime(),
-                        RefreshToken: idpt.refresh,
-                        Scopes: idpt.scopes.Split(" ")
-                        )
-                    )
-                    ),
-
-                _ => new FacebookIdentity(
-                    IdentityId: Guid.Parse(Payload.id),
-                    ProfileId: Guid.Parse(Payload.sub),
-                    FacebookId: Payload.identid!,
-                    PreferredName: Payload.prefname ?? "Unknown",
-                    Name: Payload.name,
-                    MiddleNames: Payload.midnames,
-                    LastName: Payload.lastname,
-                    Email: Payload.email
-                    )
-
-            })
-
-         };
-
-}
-
-internal record MalarkeyTokenHeaderTso(
-    string toktyp,
-    string alg = MalarkeySecurityConstants.TokenAlgorithm,
-    string typ = MalarkeySecurityConstants.TokenType
-    );
-
-internal record MalarkeyTokenPayloadTso(
-    long iat,
-    string sub,
-    string aud,
-    string name,
-    long exp,
-    string jti,
-    string id,
-    string? identtyp = null,
-    string? identid = null,
-    string? prefname = null,
-    string? midnames = null,
-    string? lastname = null,
-    string iss = MalarkeySecurityConstants.TokenIssuer,
-    long? crets = null,
-    string? absby = null,
-    string? email = null,
-    MalarkeyIdProviderAccessTokenTso? idptoken = null
-    );
-
-internal record MalarkeyIdProviderAccessTokenTso(
-    long iat,
-    long exp,
-    string token,
-    string? refresh,
-    string scopes
-    );
-
-
-internal enum MalarkeyTokenTypeTso
-{
-    Identity = 1,
-    Profile = 2
-}
-
-internal enum MalarkeyTokenIdentityTypeTso
-{
-    Microsoft = 10,
-    Google = 20,
-    Facebook = 30,
-    Spotify = 40
-}
-
 internal static class MalarkeyTokenTsoExtensions
 {
     private static readonly JsonSerializerOptions _serializationOptions = new JsonSerializerOptions
@@ -281,7 +144,87 @@ internal static class MalarkeyTokenTsoExtensions
         SpotifyIdentity _ => MalarkeyTokenIdentityTypeTso.Spotify.ToString(),
         _ => MalarkeyTokenIdentityTypeTso.Facebook.ToString()
     };
-   
+
+    public static string ToTokenString(this MalarkeyTokenTso token) => $"{token.Header.Serialize()}.{token.Payload.Serialize()}.{token.Signature.Base64UrlEncoded()}";
+
+    public static MalarkeyToken ToDomain(this MalarkeyTokenTso token) => Enum.Parse<MalarkeyTokenTypeTso>(token.Header.toktyp) switch
+    {
+        MalarkeyTokenTypeTso.Profile => new MalarkeyProfileToken(
+            TokenId: Guid.Parse(token.Payload.jti),
+            IssuedTo: token.Payload.aud,
+            IssuedAt: token.Payload.iat.ParseJwtTime(),
+            ValidUntil: token.Payload.exp.ParseJwtTime(),
+            Profile: new MalarkeyProfile(
+                ProfileId: Guid.Parse(token.Payload.sub),
+                ProfileName: token.Payload.name,
+                CreatedAt: DateTime.UnixEpoch + TimeSpan.FromSeconds(token.Payload.crets!.Value),
+                AbsorbedBy: token.Payload.absby == null ? null : Guid.Parse(token.Payload.absby)
+                )
+            ),
+        _ => new MalarkeyIdentityToken(
+            TokenId: Guid.Parse(token.Payload.jti),
+            IssuedTo: token.Payload.aud,
+            IssuedAt: token.Payload.iat.ParseJwtTime(),
+            ValidUntil: token.Payload.exp.ParseJwtTime(),
+            Identity: Enum.Parse<MalarkeyTokenIdentityTypeTso>(token.Payload.identtyp!) switch
+            {
+                MalarkeyTokenIdentityTypeTso.Microsoft => new MicrosoftIdentity(
+                    IdentityId: Guid.Parse(token.Payload.id),
+                    ProfileId: Guid.Parse(token.Payload.sub),
+                    MicrosoftId: token.Payload.identid!,
+                    PreferredName: token.Payload.prefname!,
+                    Name: token.Payload.name,
+                    MiddleNames: token.Payload.midnames,
+                    LastName: token.Payload.lastname
+                    ),
+                MalarkeyTokenIdentityTypeTso.Google => new GoogleIdentity(
+                    IdentityId: Guid.Parse(token.Payload.id),
+                    ProfileId: Guid.Parse(token.Payload.sub),
+                    GoogleId: token.Payload.identid!,
+                    Name: token.Payload.name,
+                    MiddleNames: token.Payload.midnames,
+                    LastName: token.Payload.lastname,
+                    Email: token.Payload.email,
+                    AccessToken: token.Payload.idptoken?.Pipe(idpt => new IdentityProviderToken(
+                        Token: idpt.token,
+                        Issued: idpt.iat.ParseJwtTime(),
+                        Expires: idpt.exp.ParseJwtTime(),
+                        RefreshToken: idpt.refresh,
+                        Scopes: idpt.scopes.Split(" ")
+                        ))
+                    ),
+                MalarkeyTokenIdentityTypeTso.Spotify => new SpotifyIdentity(
+                    IdentityId: Guid.Parse(token.Payload.id),
+                    ProfileId: Guid.Parse(token.Payload.sub),
+                    SpotifyId: token.Payload.identid!,
+                    Name: token.Payload.name,
+                    MiddleNames: token.Payload.midnames,
+                    LastName: token.Payload.lastname,
+                    Email: token.Payload.email,
+                    AccessToken: token.Payload.idptoken?.Pipe(idpt => new IdentityProviderToken(
+                        Token: idpt.token,
+                        Issued: idpt.iat.ParseJwtTime(),
+                        Expires: idpt.exp.ParseJwtTime(),
+                        RefreshToken: idpt.refresh,
+                        Scopes: idpt.scopes.Split(" ")
+                        )
+                    )
+                    ),
+
+                _ => new FacebookIdentity(
+                    IdentityId: Guid.Parse(token.Payload.id),
+                    ProfileId: Guid.Parse(token.Payload.sub),
+                    FacebookId: token.Payload.identid!,
+                    PreferredName: token.Payload.prefname ?? "Unknown",
+                    Name: token.Payload.name,
+                    MiddleNames: token.Payload.midnames,
+                    LastName: token.Payload.lastname,
+                    Email: token.Payload.email
+                    )
+
+            })
+
+    };
 
 
 }

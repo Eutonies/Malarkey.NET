@@ -11,6 +11,8 @@ using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Malarkey.Application.Util;
 using Malarkey.Security.Persistence;
+using Malarkey.Abstractions;
+using Malarkey.Abstractions.Util;
 
 namespace Malarkey.Security;
 internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
@@ -116,7 +118,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
             receiver= receiver.CleanCertificate();
             var result = await _tokenHandler.ValidateTokenAsync(token, new TokenValidationParameters
             {
-                ValidIssuer = MalarkeySecurityConstants.TokenIssuer,
+                ValidIssuer = MalarkeyConstants.Authentication.TokenIssuer,
                 ValidAudience = receiver,
                 IssuerSigningKey = _rsaPublicKey
             });

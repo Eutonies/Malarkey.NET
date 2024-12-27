@@ -1,4 +1,4 @@
-﻿using Malarkey.Domain.Authentication;
+﻿using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Profile;
 using System;
 using System.Collections.Generic;

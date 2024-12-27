@@ -1,4 +1,4 @@
-﻿using Malarkey.Domain.Authentication;
+﻿using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Token;
 using Malarkey.Abstractions.Profile;
 using Microsoft.AspNetCore.Http;

@@ -2,7 +2,7 @@
 using Malarkey.Application.Util;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Token;
-using Malarkey.Domain.Util;
+using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;

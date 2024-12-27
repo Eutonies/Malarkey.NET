@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Domain.Authentication;
+namespace Malarkey.Abstractions.Authentication;
 public record MalarkeyAuthenticationSession(
     long SessionId,
     string State,

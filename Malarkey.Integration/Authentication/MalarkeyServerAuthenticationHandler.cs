@@ -4,14 +4,15 @@ using Microsoft.Extensions.Options;
 using System.Text.Encodings.Web;
 using Malarkey.Application.Security;
 using Malarkey.Abstractions.Profile;
-using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Util;
+using Malarkey.Abstractions.Authentication;
+using Malarkey.Abstractions.Util;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
 using Malarkey.Application.Profile.Persistence;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http.HttpResults;
+using Malarkey.Abstractions;
 
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
@@ -55,7 +56,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             null => AuthenticateResult.Fail("No profile info found"),
             MalarkeyProfileAndIdentities p => AuthenticateResult.Success(new AuthenticationTicket(
                 principal: p.Profile.ToClaimsPrincipal(p.Identities),
-                IntegrationConstants.MalarkeyAuthenticationScheme
+                MalarkeyConstants.MalarkeyAuthenticationScheme
                 ))
         };
 
@@ -64,13 +65,13 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
         var forwarder = Request.Query
-            .Where(_ => _.Key == IntegrationConstants.ForwarderQueryParameterName)
+            .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName)
             .Select(_ => _.Value.ToString())
             .FirstOrDefault();
         if (forwarder == null)
             forwarder = OriginalPath;
         var scopes = Request.Query
-            .Where(_ => _.Key == IntegrationConstants.ScopesQueryParameterName)
+            .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName)
             .Select(_ => _.Value.ToString().Split(" "))
             .FirstOrDefault();
         var audience = ExtractPublicKeyOfReceiver();
@@ -154,27 +155,31 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     private MalarkeyIdentityProvider? ExtractIdentityProvider()
     {
-        var inHeaders = Request.Headers.TryGetValue(IntegrationConstants.IdProviderHeaderName, out var idpHeaderString);
+        var inHeaders = Request.Headers.TryGetValue(MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName, out var idpHeaderString);
         var fromQuery = Request.Query
-            .Where(_ => _.Key.ToLower() == IntegrationConstants.IdProviderHeaderName.ToLower())
+            .Where(_ => _.Key.ToLower() == MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName.ToLower())
             .Select(_ => _.Value.ToString())
             .FirstOrDefault();
 
-        var idp = ( inHeaders ? idpHeaderString.ToString() : fromQuery)?.ToLower() switch
-        {
-            IntegrationConstants.MalarkeyIdProviders.Microsoft => (MalarkeyIdentityProvider?)MalarkeyIdentityProvider.Microsoft,
-            IntegrationConstants.MalarkeyIdProviders.Google => MalarkeyIdentityProvider.Google,
-            IntegrationConstants.MalarkeyIdProviders.Facebook => MalarkeyIdentityProvider.Facebook,
-            IntegrationConstants.MalarkeyIdProviders.Spotify => MalarkeyIdentityProvider.Spotify,
-            _ => null
-        };
-        return idp;
+        var idpList = new List<MalarkeyIdentityProvider> {
+            MalarkeyIdentityProvider.Microsoft,
+            MalarkeyIdentityProvider.Google,
+            MalarkeyIdentityProvider.Facebook,
+            MalarkeyIdentityProvider.Spotify
+        }.Select(_ => (Key: _.ToString().ToLower(), Value: _))
+        .Where(_ => _.Key == (inHeaders ? idpHeaderString.ToString().ToLower() : fromQuery?.ToLower()))
+        .Select(_ => _.Value)
+        .ToList();
+        if (!idpList.Any())
+            return null;
+
+        return idpList.First();
     }
 
 
     private string ExtractPublicKeyOfReceiver()
     {
-        if (!Request.Headers.TryGetValue(IntegrationConstants.TokenReceiverHeaderName, out var pubKey))
+        if (!Request.Headers.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var pubKey))
             return _intConf.PublicKey;
         return pubKey.ToString();
     }

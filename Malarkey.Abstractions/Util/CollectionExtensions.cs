@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Domain.Util;
+namespace Malarkey.Abstractions.Util;
 public static class CollectionExtensions
 {
 
