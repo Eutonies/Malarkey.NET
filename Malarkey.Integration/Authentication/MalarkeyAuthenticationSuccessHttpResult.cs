@@ -19,11 +19,11 @@ public record MalarkeyAuthenticationSuccessHttpResult(
     public Task ExecuteAsync(HttpContext httpContext)
     {
         httpContext.Response.StatusCode = 302;
-        httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenHeaderName, ProfileToken);
-        httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenHeaderName, IdentityToken);
+        httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenName, ProfileToken);
+        httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenName, IdentityToken);
         if(IdentityProviderAccessToken != null)
         {
-            httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityProviderAccessTokenHeaderName, IdentityProviderAccessToken);
+            httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityProviderAccessTokenName, IdentityProviderAccessToken);
         }
         httpContext.Response.Headers.Location = BuildRedirectString();
         return Task.CompletedTask;

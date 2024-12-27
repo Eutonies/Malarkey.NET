@@ -1,4 +1,5 @@
-﻿using Malarkey.Abstractions.Profile;
+﻿using Malarkey.Abstractions;
+using Malarkey.Abstractions.Profile;
 using Malarkey.Application;
 using Malarkey.Domain.Authentication;
 using Malarkey.Domain.Util;
@@ -20,16 +21,41 @@ public partial class AuthenticatePage
     [CascadingParameter]
     public MalarkeySessionState SessionState { get; set; }
 
-    [SupplyParameterFromQuery(Name = "forwarder")]
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName)]
     [Parameter]
     public string? Forwarder { get; set; }
 
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName)]
+    [Parameter]
+    public string? IdProvider { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName)]
+    [Parameter]
+    public string? Scopes { get; set; }
+
+
+
     private bool IsAuthenticated => SessionState.User != null;
 
-    protected async override Task OnInitializedAsync()
+    protected async override Task OnAfterRenderAsync(bool firstRender)
     {
         await Task.CompletedTask;
+        if (IdProvider != null)
+        {
+            var provMap = new List<MalarkeyIdentityProvider> {
+                MalarkeyIdentityProvider.Microsoft,
+                MalarkeyIdentityProvider.Google,
+                MalarkeyIdentityProvider.Facebook,
+                MalarkeyIdentityProvider.Spotify
+            }.Select(_ => (Key: _.ToString().ToLower(), Value: _))
+            .ToDictionarySafe(_ => _.Key, _ => _.Value);
+            if (provMap.TryGetValue(IdProvider.ToLower().Trim(), out var prov))
+            {
+                GoTo(prov);
+            }
+        }
     }
+
 
     public void OnMicrosoftClick(MouseEventArgs e) => GoTo(MalarkeyIdentityProvider.Microsoft);
 
@@ -49,6 +75,10 @@ public partial class AuthenticatePage
         if(Forwarder != null)
         {
             returnee = returnee + $"&{IntegrationConstants.ForwarderQueryParameterName}={Forwarder.UrlEncoded()}";
+        }
+        if(Scopes != null)
+        {
+            returnee = returnee + $"&{IntegrationConstants.ScopesQueryParameterName}={Scopes.UrlEncoded()}";
         }
         return returnee;
     }

@@ -16,7 +16,8 @@ public interface IMalarkeySessionRepository
         string codeChallenge, 
         string codeVerifier, 
         DateTime initTime,
-        string audience);
+        string audience,
+        string[]? scopes);
     Task<MalarkeyAuthenticationSession?> SessionFor(string state);
     Task<MalarkeyAuthenticationSession?> UpdateWithAuthenticationInfo(string state, DateTime authenticatedTime, Guid profileTokenId, Guid identityTokenId);
 

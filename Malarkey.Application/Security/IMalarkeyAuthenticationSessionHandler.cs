@@ -11,7 +11,11 @@ using System.Threading.Tasks;
 namespace Malarkey.Application.Security;
 public interface IMalarkeyAuthenticationSessionHandler
 {
-    Task<MalarkeyAuthenticationSession> InitSession(MalarkeyIdentityProvider idProvider, string? forwarder, string audiencePublicKey);
+    Task<MalarkeyAuthenticationSession> InitSession(
+        MalarkeyIdentityProvider idProvider, 
+        string? forwarder, 
+        string audiencePublicKey,
+        string[]? scopes);
     Task<MalarkeyAuthenticationSession?> SessionForState(string state);
 
     Task<MalarkeyAuthenticationSession> UpdateSessionWithTokenInfo(

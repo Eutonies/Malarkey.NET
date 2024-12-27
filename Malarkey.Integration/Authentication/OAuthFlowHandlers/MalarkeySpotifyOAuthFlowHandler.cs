@@ -31,7 +31,7 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler
         returnee[_namingScheme.ClientId] = _conf.ClientId;
         returnee[_namingScheme.ResponseType] = _conf.ResponseType!;
         returnee[_namingScheme.RedirectUri] = _intConf.RedirectUrl;
-        returnee[_namingScheme.Scope] = (_conf.Scopes ?? DefaultScopes)
+        returnee[_namingScheme.Scope] = (session.Scopes ?? ( _conf.Scopes ?? DefaultScopes))
             .MakeString(" ")
             .UrlEncoded();
         returnee[_namingScheme.CodeChallenge] = session.CodeChallenge

@@ -25,6 +25,7 @@ internal class MalarkeyAuthenticationSessionDbo
     public DateTime? AuthenticatedTime { get; set; }
     public Guid? ProfileTokenId { get; set; }
     public Guid? IdentityTokenId { get; set; }
+    public string? Scopes { get; set; }
 
     public string Audience { get; set; }
 
@@ -41,7 +42,8 @@ internal class MalarkeyAuthenticationSessionDbo
         AuthenticatedTime: AuthenticatedTime,
         ProfileTokenId: ProfileTokenId,
         IdentityTokenId: IdentityTokenId,
-        Audience: Audience
+        Audience: Audience,
+        Scopes: Scopes?.Split(" ")
     );
 
 

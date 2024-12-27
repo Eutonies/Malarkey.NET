@@ -20,7 +20,11 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         _repo = repo;
     }
 
-    public async Task<MalarkeyAuthenticationSession> InitSession(MalarkeyIdentityProvider idProvider, string? forwarder, string audiencePublicKey)
+    public async Task<MalarkeyAuthenticationSession> InitSession(
+        MalarkeyIdentityProvider idProvider, 
+        string? forwarder, 
+        string audiencePublicKey,
+        string[]? scopes)
     {
         var nonce = GenerateNonce();
         var (verifier, challenge) = GenerateChallengeAndVerifier();
@@ -31,7 +35,8 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
             codeChallenge: challenge,
             codeVerifier: verifier,
             initTime: DateTime.Now,
-            audience: audiencePublicKey
+            audience: audiencePublicKey,
+            scopes: scopes
         );
         return session;
     }

@@ -69,6 +69,10 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             .FirstOrDefault();
         if (forwarder == null)
             forwarder = OriginalPath;
+        var scopes = Request.Query
+            .Where(_ => _.Key == IntegrationConstants.ScopesQueryParameterName)
+            .Select(_ => _.Value.ToString().Split(" "))
+            .FirstOrDefault();
         var audience = ExtractPublicKeyOfReceiver();
         var idp = ExtractIdentityProvider();
         if(idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
@@ -84,7 +88,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         }
         else
         {
-            var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience);
+            var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience, scopes);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(session);
             var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
                 context: Context,

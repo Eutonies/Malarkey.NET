@@ -50,7 +50,7 @@ public abstract record MalarkeyProfileIdentity
 
     public IdentityProviderToken? IdentityProviderTokenToUse => this switch
     {
-        SpotifyIdentity sp => sp.IdentityProviderTokenToUse,
+        SpotifyIdentity sp => sp.AccessToken,
         _ => null
     };
 

@@ -16,6 +16,7 @@ public static class IntegrationConstants
     public const string TokenReceiverHeaderName = "Malarkey.Token.Audience";
 
     public const string ForwarderQueryParameterName = "forwarder";
+    public const string ScopesQueryParameterName = "scopes";
 
 
     public static class MalarkeyIdProviders 

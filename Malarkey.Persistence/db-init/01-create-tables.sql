@@ -58,6 +58,7 @@ create table authentication_session (
     profile_token_id uuid ,
     identity_token_id uuid ,
     audience varchar(2000) not null,
+    scopes varchar(1000),
     unique(state)
 );
 

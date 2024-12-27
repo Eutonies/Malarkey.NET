@@ -18,5 +18,6 @@ public record MalarkeyAuthenticationSession(
     DateTime? AuthenticatedTime,
     Guid? ProfileTokenId,
     Guid? IdentityTokenId,
-    string Audience
+    string Audience,
+    string[]? Scopes
     );

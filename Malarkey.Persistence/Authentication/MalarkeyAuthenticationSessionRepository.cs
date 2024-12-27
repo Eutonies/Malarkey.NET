@@ -2,6 +2,7 @@
 using Malarkey.Application.Profile.Persistence;
 using Malarkey.Application.Security;
 using Malarkey.Domain.Authentication;
+using Malarkey.Domain.Util;
 using Malarkey.Persistence.Context;
 using Malarkey.Security.Persistence;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +29,8 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
         string codeChallenge, 
         string codeVerifier, 
         DateTime initTime,
-        string audience)
+        string audience,
+        string[]? scopes)
     {
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var insertee = new MalarkeyAuthenticationSessionDbo
@@ -39,7 +41,8 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
             CodeVerifier = codeVerifier,
             CodeChallenge = codeChallenge,
             InitTime = initTime,
-            Audience = audience
+            Audience = audience,
+            Scopes = scopes?.MakeString(" ")
         };
         cont.Add(insertee);
         await cont.SaveChangesAsync();

@@ -7,11 +7,29 @@ using System.Threading.Tasks;
 namespace Malarkey.Abstractions;
 public static class MalarkeyConstants
 {
+    public static class AuthenticationRequestQueryParameters
+    {
+        public const string ForwarderName = "forwarder";
+        public const string ScopesName = "scopes";
+        public const string IdProviderName = "idprovider";
+    }
+
+
     public static class AuthenticationSuccessQueryParameters
     {
-        public const string ProfileTokenHeaderName = "malarkeyprofiletoken";
-        public const string IdentityTokenHeaderName = "malarkeyidentitytoken";
-        public const string IdentityProviderAccessTokenHeaderName = "malarkeyidptoken";
+        /// <summary>
+        /// If Malarkey authentication succeeds, profile token will returned as <see cref="ProfileTokenName"/> query parameter on forward
+        /// </summary>
+        public const string ProfileTokenName = "malarkeyprofiletoken";
+        /// <summary>
+        /// If Malarkey authentication succeeds, identity token for employed provider will returned as <see cref="IdentityTokenName"/> query parameter on forward
+        /// </summary>
+        public const string IdentityTokenName = "malarkeyidentitytoken";
+
+        /// <summary>
+        /// If the access-token obtained from identity provider is transferable for use by client API it will be returned as <see cref="IdentityProviderAccessTokenName"/> query parameter on forward
+        /// </summary>
+        public const string IdentityProviderAccessTokenName = "malarkeyidptoken";
     }
 
     public static class Scopes

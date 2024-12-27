@@ -54,7 +54,7 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
         returnee[_namingScheme.ResponseType] = _conf.ResponseType!;
         returnee[_namingScheme.ResponseMode] = _conf.ResponseMode ?? "form_post";
         returnee[_namingScheme.RedirectUri] = _intConf.RedirectUrl;
-        returnee[_namingScheme.Scope] = (_conf.Scopes ?? DefaultScopes)
+        returnee[_namingScheme.Scope] = (session.Scopes ?? (_conf.Scopes ?? DefaultScopes))
             .MakeString()
             .UrlEncoded();
         if (session.Nonce != null)
