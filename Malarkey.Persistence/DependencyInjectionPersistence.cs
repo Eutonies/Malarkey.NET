@@ -4,6 +4,7 @@ using Malarkey.Persistence.Authentication;
 using Malarkey.Persistence.Configuration;
 using Malarkey.Persistence.Context;
 using Malarkey.Persistence.Profile;
+using Malarkey.Persistence.Token.Model;
 using Malarkey.Security.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -32,6 +33,7 @@ public static class DependencyInjectionPersistence
         //builder.Services.AddDbContext<MalarkeyDbContext>(ConfigureDb, contextLifetime : ServiceLifetime.Scoped);
         builder.Services.AddSingleton<IMalarkeySessionRepository, MalarkeyAuthenticationSessionRepository>();
         builder.Services.AddSingleton<IMalarkeyProfileRepository, MalarkeyProfileRepository>();
+        builder.Services.AddSingleton<IMalarkeyTokenRepository, MalarkeyTokenRepository>();
         return builder;
     }
 
@@ -42,6 +44,8 @@ public static class DependencyInjectionPersistence
             .UseNpgsql(connectionString, opts =>
             {
                 opts.MapEnum<MalarkeyIdentityProviderDbo>("provider_type", nameTranslator: new NpgsqlNullNameTranslator());
+                opts.MapEnum<MalarkeyTokenTypeDbo>("token_type", nameTranslator: new NpgsqlNullNameTranslator());
+
             })
             .EnableDetailedErrors()
             .EnableSensitiveDataLogging();

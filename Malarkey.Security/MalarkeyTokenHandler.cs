@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using Malarkey.Application.Util;
+using Malarkey.Security.Persistence;
 
 namespace Malarkey.Security;
 internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
@@ -49,6 +50,9 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
             );
         var payload = profile.ToPayloadTso(receiverPublicKey, expiresAt: token.ValidUntil, token.TokenId);
         var tokenString = CreateTokenString(token, receiverPublicKey);
+        using var scope = _scopeFactory.CreateScope();
+        var tokenRepo = scope.ServiceProvider.GetRequiredService<IMalarkeyTokenRepository>();
+        token = await tokenRepo.SaveToken(token);
         return (token,  tokenString);
     }
 
@@ -64,6 +68,9 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         Identity: identity
             );
         var tokenString = CreateTokenString(token, receiverPublicKey);
+        using var scope = _scopeFactory.CreateScope();
+        var tokenRepo = scope.ServiceProvider.GetRequiredService<IMalarkeyTokenRepository>();
+        token = await tokenRepo.SaveToken(token);
         return (token, tokenString);
     }
 
@@ -73,6 +80,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         var payload = profileToken.ToPayloadTso(receiverPublicKey);
         var header = profileToken.ToHeaderTso();
         var tokenString = _tokenHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
+
         return tokenString;
     }
 

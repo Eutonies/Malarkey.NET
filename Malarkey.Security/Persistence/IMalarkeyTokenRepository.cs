@@ -6,9 +6,9 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Security.Persistence;
-internal interface IMalarkeyTokenRepository
+public interface IMalarkeyTokenRepository
 {
-    Task<MalarkeyToken> CreateToken();
-
+    Task<MalarkeyIdentityToken> SaveToken(MalarkeyIdentityToken token);
+    Task<MalarkeyProfileToken> SaveToken(MalarkeyProfileToken token);
 
 }

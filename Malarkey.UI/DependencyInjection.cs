@@ -43,6 +43,7 @@ public static class DependencyInjection
         builder.Services.AddAntiforgery();
         builder.Services.AddCascadingAuthenticationState();
         builder.AddSecurity();
+        builder.AddApi();
         return builder;
     }
 
@@ -54,6 +55,7 @@ public static class DependencyInjection
         app.UseAntiforgery();
         app.MapRazorComponents<App>()
             .AddInteractiveServerRenderMode();
+        app.UseApi();
         app.MapRazorPages();
 
         return app;

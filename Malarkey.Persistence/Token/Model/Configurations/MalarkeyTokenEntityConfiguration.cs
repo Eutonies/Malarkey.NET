@@ -13,7 +13,7 @@ internal class MalarkeyTokenEntityConfiguration : MalarkeyEntityConfiguration<Ma
     public override void Configure(EntityTypeBuilder<MalarkeyTokenDbo> builder)
     {
         builder.ToTable("token");
-        builder.Property(nameof(MalarkeyTokenDbo.ProfileId)).HasColumnName("token_id");
+        builder.Property(nameof(MalarkeyTokenDbo.TokenId)).HasColumnName("token_id");
         builder.Property(nameof(MalarkeyTokenDbo.TokenType)).HasColumnName("token_type");
         builder.Property(nameof(MalarkeyTokenDbo.ProfileId)).HasColumnName("profile_id");
         builder.Property(nameof(MalarkeyTokenDbo.IdentityId)).HasColumnName("identity_id");

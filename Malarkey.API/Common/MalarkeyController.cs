@@ -1,4 +1,5 @@
 ﻿using Malarkey.Abstractions;
+using Malarkey.Domain.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -9,13 +10,15 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.API.Common;
+
+[Route("api/[controller]")]
 public class MalarkeyController : ControllerBase
 {
 
 
     protected string? ExtractCertificate() => Request.Headers
             .Where(_ => _.Key == MalarkeyConstants.API.ClientCertificateHeaderName)
-            .Select(_ => _.Value.ToString())
+            .Select(_ => _.Value.ToString().UrlDecoded())
             .FirstOrDefault();
 
     protected async Task<Results<BadRequest<string>,Ok<A>>> RequireClientCertificate<A>(Func<string, Task<A>> toPerform)
