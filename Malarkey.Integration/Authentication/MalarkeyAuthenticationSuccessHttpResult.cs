@@ -12,7 +12,8 @@ public record MalarkeyAuthenticationSuccessHttpResult(
     string RedirectUrl,
     string ProfileToken,
     string IdentityToken,
-    string? IdentityProviderAccessToken
+    string? IdentityProviderAccessToken,
+    string? ForwarderState
     ) : IResult
 {
     
@@ -25,6 +26,10 @@ public record MalarkeyAuthenticationSuccessHttpResult(
         {
             httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityProviderAccessTokenName, IdentityProviderAccessToken);
         }
+        if (ForwarderState != null)
+        {
+            httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ForwarderStateName, ForwarderState);
+        }
         httpContext.Response.Headers.Location = BuildRedirectString();
         return Task.CompletedTask;
     }
@@ -33,12 +38,14 @@ public record MalarkeyAuthenticationSuccessHttpResult(
     {
         var returnee = new StringBuilder();
         returnee.Append(RedirectUrl);
-        returnee.Append("?profileToken=" + ProfileToken.UrlEncoded());
-        returnee.Append("&identityToken=" + IdentityToken.UrlEncoded());
+        returnee.Append($"?{MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenName}={ProfileToken.UrlEncoded()}");
+        returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenName}={IdentityToken.UrlEncoded()}");
         if (IdentityProviderAccessToken != null)
         {
-            returnee.Append("&idpToken=" + IdentityProviderAccessToken.UrlEncoded());
+            returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityProviderAccessTokenName}={IdentityProviderAccessToken.UrlEncoded()}");
         }
+        if (ForwarderState != null)
+            returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.ForwarderStateName}={ForwarderState.UrlEncoded()}");
         return returnee.ToString();
     }
 

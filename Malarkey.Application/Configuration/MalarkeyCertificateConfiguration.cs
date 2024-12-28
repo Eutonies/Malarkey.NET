@@ -20,10 +20,9 @@ public class MalarkeyCertificateConfiguration
     private X509Certificate2 Create()
     {
         var fileToUse = CertificateFileToUse();
-        var bytes = File.ReadAllBytes(fileToUse);
-        var returnee = new X509Certificate2(bytes, CertificatePasswordToUse());
+        var returnee = X509CertificateLoader.LoadPkcs12FromFile(fileToUse, password: CertificatePasswordToUse());
         return returnee;
     }
-
-
+    private string? _exportableCertificate;
+    public string ExportableCertificate => _exportableCertificate ??= AsCertificate.ExportCertificatePem();
 }

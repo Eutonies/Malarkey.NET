@@ -17,13 +17,43 @@ public static class MalarkeyConstants
         public const string TokenAlgorithm = "RS256";
         public const string TokenType = "JWT";
         public const string AudienceHeaderName = API.ClientCertificateHeaderName;
+        public const string ServerAuthenticationPath = "authenticate";
 
     }
 
 
     public static class API
     {
+        public const string ApiPath = "api";
         public const string ClientCertificateHeaderName = "Malarkey.ClientCertificate";
+
+        public static class Paths
+        {
+            public static class Profile
+            {
+                public const string ProfilePath = "profile";
+                public const string RefreshTokenRelativePath = "refresh-idprovider-token";
+                public const string RefreshTokenAbsolutePath = $"{ApiPath}/{ProfilePath}/{RefreshTokenRelativePath}";
+            }
+
+            public static class Certificates
+            {
+                public const string CertificatesPath = "certificates";
+                public const string HostingCertificateRelativePath = "hosting-certificate";
+                public const string HostingCertificateAbsolutePath = $"{ApiPath}/{CertificatesPath}/{HostingCertificateRelativePath}";
+                public const string SigningCertificateRelativePath = "signing-certificate";
+                public const string SigningCertificateAbsolutePath = $"{ApiPath}/{CertificatesPath}/{SigningCertificateRelativePath}";
+
+            }
+        }
+    }
+
+    public static class Client
+    {
+        public static class Paths
+        {
+            public const string DefaultAuthenticationForwarderPath = "on-authenticated";
+        }
     }
 
 
@@ -32,6 +62,7 @@ public static class MalarkeyConstants
         public const string ForwarderName = "forwarder";
         public const string ScopesName = "scopes";
         public const string IdProviderName = "idprovider";
+        public const string ForwarderStateName = "forwarderstate";
     }
 
 
@@ -50,6 +81,11 @@ public static class MalarkeyConstants
         /// If the access-token obtained from identity provider is transferable for use by client API it will be returned as <see cref="IdentityProviderAccessTokenName"/> query parameter on forward
         /// </summary>
         public const string IdentityProviderAccessTokenName = "malarkeyidptoken";
+
+        /// <summary>
+        /// The state provided when initiating authentication.
+        /// </summary>
+        public const string ForwarderStateName = "malarkeystate";
     }
 
     

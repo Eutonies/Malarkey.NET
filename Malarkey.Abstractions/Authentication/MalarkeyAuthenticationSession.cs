@@ -19,5 +19,6 @@ public record MalarkeyAuthenticationSession(
     Guid? ProfileTokenId,
     Guid? IdentityTokenId,
     string Audience,
-    string[]? Scopes
+    string[]? Scopes,
+    string? ForwarderState
     );

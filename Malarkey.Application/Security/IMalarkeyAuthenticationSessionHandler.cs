@@ -15,7 +15,9 @@ public interface IMalarkeyAuthenticationSessionHandler
         MalarkeyIdentityProvider idProvider, 
         string? forwarder, 
         string audiencePublicKey,
-        string[]? scopes);
+        string[]? scopes,
+        string? forwarderState
+        );
     Task<MalarkeyAuthenticationSession?> SessionForState(string state);
 
     Task<MalarkeyAuthenticationSession> UpdateSessionWithTokenInfo(

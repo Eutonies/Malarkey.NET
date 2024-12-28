@@ -1,4 +1,5 @@
-﻿using Malarkey.Abstractions.API.Profile;
+﻿using Malarkey.Abstractions;
+using Malarkey.Abstractions.API.Profile;
 using Malarkey.Abstractions.API.Profile.Requests;
 using Malarkey.API.Common;
 using Malarkey.Application.Security;
@@ -16,7 +17,7 @@ public class ProfileController : MalarkeyController
 {
 
 
-    [HttpPost("refresh-idprovider-token")]
+    [HttpPost(MalarkeyConstants.API.Paths.Profile.RefreshTokenRelativePath)]
     public Task<Results<BadRequest<string>, Ok<MalarkeyIdentityProviderTokenDto>>> RefreshIdentityProviderToken(
            [FromServices] IMalarkeyAuthenticationSessionHandler sessionHandler,
            [FromBody] MalarkeyProfileRefreshProviderTokenRequest request) =>

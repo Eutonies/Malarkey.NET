@@ -59,6 +59,7 @@ create table authentication_session (
     identity_token_id uuid ,
     audience varchar(2000) not null,
     scopes varchar(1000),
+    forwarder_state varchar(1000)
     unique(state)
 );
 

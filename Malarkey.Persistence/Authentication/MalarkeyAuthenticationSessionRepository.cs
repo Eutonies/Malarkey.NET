@@ -33,7 +33,8 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
         string codeVerifier, 
         DateTime initTime,
         string audience,
-        string[]? scopes)
+        string[]? scopes,
+        string? forwarderState)
     {
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var insertee = new MalarkeyAuthenticationSessionDbo
@@ -45,7 +46,8 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeySessionReposit
             CodeChallenge = codeChallenge,
             InitTime = initTime,
             Audience = audience,
-            Scopes = scopes?.MakeString(" ")
+            Scopes = scopes?.MakeString(" "),
+            ForwarderState = forwarderState
         };
         cont.Add(insertee);
         await cont.SaveChangesAsync();

@@ -13,6 +13,7 @@ using Malarkey.Application.Profile.Persistence;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Malarkey.Abstractions;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
@@ -39,8 +40,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         IMalarkeyAuthenticationSessionHandler sessionHandler,
         IEnumerable<IMalarkeyOAuthFlowHandler> flowHandlers,
         IMalarkeyProfileRepository profileRepo,
-        IOptions<MalarkeyIntegrationConfiguration> intConf
-        ) : base(options, logger, encoder)
+        IOptions<MalarkeyIntegrationConfiguration> intConf) : base(options, logger, encoder)
     {
         _events = new MalarkeyAuthenticationEvents();
         _intConf = intConf.Value;
@@ -74,6 +74,10 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName)
             .Select(_ => _.Value.ToString().Split(" "))
             .FirstOrDefault();
+        var forwarderState = Request.Query
+            .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName)
+            .Select(_ => _.Value.ToString())
+            .FirstOrDefault();
         var audience = ExtractPublicKeyOfReceiver();
         var idp = ExtractIdentityProvider();
         if(idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
@@ -89,7 +93,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         }
         else
         {
-            var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience, scopes);
+            var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience, scopes, forwarderState);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(session);
             var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
                 context: Context,
@@ -144,7 +148,8 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             RedirectUrl: redirectUrl,
             ProfileToken: profileTokenString,
             IdentityToken: identityTokenString,
-            IdentityProviderAccessToken: identity.IdentityProviderTokenToUse?.Token
+            IdentityProviderAccessToken: identity.IdentityProviderTokenToUse?.Token,
+            ForwarderState: session.ForwarderState
         );
         return redirect;
     }
