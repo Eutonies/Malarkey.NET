@@ -1,5 +1,5 @@
 ﻿using Malarkey.Application.Profile.Persistence;
-using Malarkey.Domain.Authentication;
+using Malarkey.Abstractions.Authentication;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

@@ -1,7 +1,7 @@
 ﻿using Malarkey.Application.Security;
-using Malarkey.Domain.Authentication;
+using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Token;
-using Malarkey.Domain.Util;
+using Malarkey.Abstractions.Util;
 using Malarkey.Security.Persistence;
 using System.Security.Cryptography;
 using System.Text;

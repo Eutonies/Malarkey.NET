@@ -1,5 +1,5 @@
 ﻿using Malarkey.Application.Profile.Persistence;
-using Malarkey.Domain.Authentication;
+using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Persistence.Context;
 using Malarkey.Persistence.Profile.Model;
@@ -11,7 +11,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Malarkey.Abstractions.Token;
-using Malarkey.Domain.Util;
+using Malarkey.Abstractions.Util;
 
 namespace Malarkey.Persistence.Profile;
 internal class MalarkeyProfileRepository : IMalarkeyProfileRepository

@@ -1,6 +1,7 @@
 ﻿
 @page "/challenge"
+@using Malarkey.Abstractions
 @using Malarkey.Integration
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize(AuthenticationSchemes = IntegrationConstants.MalarkeyAuthenticationScheme)]
+@attribute [Authorize(AuthenticationSchemes = MalarkeyConstants.MalarkeyAuthenticationScheme)]
 <div></div>

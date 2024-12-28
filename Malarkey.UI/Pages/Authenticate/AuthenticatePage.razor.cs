@@ -1,8 +1,8 @@
 ﻿using Malarkey.Abstractions;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Application;
-using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Util;
+using Malarkey.Abstractions.Authentication;
+using Malarkey.Abstractions.Util;
 using Malarkey.Integration;
 using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components;
@@ -71,14 +71,14 @@ public partial class AuthenticatePage
 
     private string BuildChallengeUrl(MalarkeyIdentityProvider provider)
     {
-        var returnee = $"challenge?{IntegrationConstants.IdProviderHeaderName}={provider.ToString()}";
+        var returnee = $"challenge?{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}";
         if(Forwarder != null)
         {
-            returnee = returnee + $"&{IntegrationConstants.ForwarderQueryParameterName}={Forwarder.UrlEncoded()}";
+            returnee += $"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={Forwarder.UrlEncoded()}";
         }
         if(Scopes != null)
         {
-            returnee = returnee + $"&{IntegrationConstants.ScopesQueryParameterName}={Scopes.UrlEncoded()}";
+            returnee += $"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={Scopes.UrlEncoded()}";
         }
         return returnee;
     }

@@ -6,6 +6,7 @@ using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Malarkey.Abstractions;
 
 namespace Malarkey.Application.Security;
 public interface IMalarkeyTokenHandler
@@ -40,7 +41,7 @@ public interface IMalarkeyTokenHandler
     public async Task<MalarkeyTokenValidationResult?> ValidateProfileToken(HttpContext context)
     {
         using var scope = ServiceScopeFactory.CreateScope();
-        if(!context.Request.Cookies.TryGetValue(MalarkeyApplicationConstants.MalarkeyProfileCookieName, out var profileCookie) || string.IsNullOrWhiteSpace(profileCookie))
+        if(!context.Request.Cookies.TryGetValue(MalarkeyConstants.Authentication.ProfileCookieName, out var profileCookie) || string.IsNullOrWhiteSpace(profileCookie))
             return null;
         var publicKeyString = ExtractPublicKey(context, scope);
         if(publicKeyString == null)
@@ -54,7 +55,7 @@ public interface IMalarkeyTokenHandler
         var results = new List<MalarkeyTokenValidationResult>();
         var failedCookies = new HashSet<string>();
         var relevantCookies = context.Request.Cookies
-            .Where(_ => _.Key.StartsWith(MalarkeyApplicationConstants.MalarkeyIdentityCookieBaseName))
+            .Where(_ => _.Key.StartsWith(MalarkeyConstants.Authentication.IdentityCookieBaseName))
             .OrderBy(_ => _.Key)
             .ToList();
         var cookieValueMap = relevantCookies
@@ -85,30 +86,17 @@ public interface IMalarkeyTokenHandler
         if(publicKeyString != null)
         {
             var (profTok, profTokString) = await IssueToken(profile, publicKeyString);
-            context.Response.Cookies.Append(MalarkeyApplicationConstants.MalarkeyProfileCookieName, profTokString);
+            context.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName, profTokString);
             foreach(var (iden, indx) in identities.OrderBy(_ => _.GetType().Name).Select((_,indx) => (_,indx)))
             {
                 var (idenTok, idenTokString) = await IssueToken(iden, publicKeyString);
-                context.Response.Cookies.Append($"{MalarkeyApplicationConstants.MalarkeyIdentityCookieBaseName}.{indx}", idenTokString);
+                context.Response.Cookies.Append($"{MalarkeyConstants.Authentication.IdentityCookieBaseName}.{indx}", idenTokString);
             }
         }
     }
 
-    public void BakeCookies(HttpContext context, MalarkeyProfileToken profile, IReadOnlyCollection<MalarkeyIdentityToken> identities)
-    {
-        using var scope = ServiceScopeFactory.CreateScope();
-        var publicKeyString = ExtractPublicKey(context, scope);
-        if (publicKeyString != null)
-        {
-            var profTokenString = CreateTokenString(profile, publicKeyString);
-            context.Response.Cookies.Append(MalarkeyApplicationConstants.MalarkeyProfileCookieName, profTokenString);
-            foreach (var (iden, indx) in identities.OrderBy(_ => _.GetType().Name).Select((_, indx) => (_, indx)))
-            {
-                var idenTokenString = CreateTokenString(iden, publicKeyString);
-                context.Response.Cookies.Append($"{MalarkeyApplicationConstants.MalarkeyIdentityCookieBaseName}.{indx}", idenTokenString);
-            }
-        }
-    }
+    public void BakeCookies(HttpContext context, MalarkeyProfileToken profile, IReadOnlyCollection<MalarkeyIdentityToken> identities) => 
+        (BakeCookies(context, profile.Profile, identities.Select(_ => _.Identity).ToList())).Wait();
 
 
     protected IServiceScopeFactory ServiceScopeFactory { get; }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Malarkey.Abstractions.Token.Serialization;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,4 +25,16 @@ public abstract record MalarkeyToken
         IssuedAt = issuedAt;
         ValidUntil = validUntil;
     }
+
+    public static MalarkeyIdentityToken? ParseIdentityToken(string tokenString) => ParseToken(tokenString) as MalarkeyIdentityToken;
+    public static MalarkeyProfileToken? ParseProfileToken(string tokenString) => ParseToken(tokenString) as MalarkeyProfileToken;
+
+    internal static MalarkeyToken ParseToken(string tokenString)
+    {
+        var tso = tokenString.DeserializeToMalarkeyToken();
+        var token = tso.ToDomain();
+        return token;
+    }
+
+
 }

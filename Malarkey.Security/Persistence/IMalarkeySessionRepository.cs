@@ -1,6 +1,6 @@
 ﻿using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Token;
-using Malarkey.Domain.Authentication;
+using Malarkey.Abstractions.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;

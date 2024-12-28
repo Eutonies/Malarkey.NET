@@ -1,5 +1,5 @@
 ﻿using Malarkey.Abstractions;
-using Malarkey.Domain.Util;
+using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;

@@ -1,13 +1,8 @@
 ﻿using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Token;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace Malarkey.Application.Security;
+namespace Malarkey.Abstractions.Authentication;
 public class MalarkeyClaimsPrincipal : ClaimsPrincipal
 {
     public const string MalarkeyIdClaimType = "malid";

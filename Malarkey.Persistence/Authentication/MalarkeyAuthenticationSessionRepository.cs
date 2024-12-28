@@ -2,8 +2,8 @@
 using Malarkey.Abstractions.Token;
 using Malarkey.Application.Profile.Persistence;
 using Malarkey.Application.Security;
-using Malarkey.Domain.Authentication;
-using Malarkey.Domain.Util;
+using Malarkey.Abstractions.Authentication;
+using Malarkey.Abstractions.Util;
 using Malarkey.Persistence.Context;
 using Malarkey.Persistence.Token.Model;
 using Malarkey.Security.Persistence;

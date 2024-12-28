@@ -1,5 +1,5 @@
 ﻿using Malarkey.Abstractions.Token;
-using Malarkey.Domain.Util;
+using Malarkey.Abstractions.Util;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

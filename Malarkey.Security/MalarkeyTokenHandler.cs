@@ -9,7 +9,7 @@ using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
-using Malarkey.Application.Util;
+using Malarkey.Abstractions.Token.Serialization;
 using Malarkey.Security.Persistence;
 using Malarkey.Abstractions;
 using Malarkey.Abstractions.Util;
@@ -22,7 +22,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     private readonly X509Certificate2 _certificate;
     private readonly RsaSecurityKey _rsaPublicKey;
     private readonly RsaSecurityKey _rsaPrivateKey;
-    private readonly JsonWebTokenHandler _tokenHandler;
+    private readonly JsonWebTokenHandler _jwtHandler;
     private readonly SigningCredentials _credentials;
 
     public IServiceScopeFactory ServiceScopeFactory => _scopeFactory;
@@ -37,7 +37,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         _certificate = _securityConfiguration.SigningCertificate.AsCertificate;
         _rsaPublicKey = new RsaSecurityKey(_certificate.GetRSAPublicKey());
         _rsaPrivateKey = new RsaSecurityKey(_certificate.GetRSAPrivateKey());
-        _tokenHandler = new JsonWebTokenHandler();
+        _jwtHandler = new JsonWebTokenHandler();
         _credentials = new SigningCredentials(_rsaPrivateKey, SecurityAlgorithms.RsaSsaPssSha256);
     }
     public async Task<(MalarkeyProfileToken Token, string TokenString)> IssueToken(MalarkeyProfile profile, string receiverPublicKey)
@@ -81,7 +81,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         receiverPublicKey = receiverPublicKey.CleanCertificate();
         var payload = profileToken.ToPayloadTso(receiverPublicKey);
         var header = profileToken.ToHeaderTso();
-        var tokenString = _tokenHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
+        var tokenString = _jwtHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
 
         return tokenString;
     }
@@ -91,7 +91,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         receiverPublicKey = receiverPublicKey.CleanCertificate();
         var payload = identityToken.ToPayloadTso(receiverPublicKey);
         var header = identityToken.ToHeaderTso();
-        var tokenString = _tokenHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
+        var tokenString = _jwtHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
         return tokenString;
     }
 
@@ -116,7 +116,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         try
         {
             receiver= receiver.CleanCertificate();
-            var result = await _tokenHandler.ValidateTokenAsync(token, new TokenValidationParameters
+            var result = await _jwtHandler.ValidateTokenAsync(token, new TokenValidationParameters
             {
                 ValidIssuer = MalarkeyConstants.Authentication.TokenIssuer,
                 ValidAudience = receiver,
@@ -124,7 +124,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
             });
             if (result.IsValid)
             {
-                var readToken = _tokenHandler.ReadToken(token);
+                var readToken = _jwtHandler.ReadToken(token);
                 var tokenTso = readToken.ToMalarkeyTokenTso();
                 var returnToken = tokenTso.ToDomain();
                 return new MalarkeyTokenValidationSuccessResult(token, returnToken);
@@ -170,7 +170,10 @@ internal static class MalarkeyTokenHandlerExtensions
         (nameof(payload.name), payload.name),
         (nameof(payload.midnames), payload.midnames),
         (nameof(payload.lastname), payload.lastname),
-        (nameof(payload.prefname), payload.prefname)
+        (nameof(payload.prefname), payload.prefname),
+        (nameof(payload.email), payload.email),
+        (nameof(payload.idptoken), payload.idptoken?.ToValueString()),
+
     }.Where(_ => _.Item2 != null)
         .Select(_ => new Claim(_.Item1, _.Item2!))
         .ToList();

@@ -1,4 +1,5 @@
-﻿using Malarkey.Integration.Authentication;
+﻿using Malarkey.Abstractions;
+using Malarkey.Integration.Authentication;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Authorization;
@@ -27,9 +28,9 @@ public static class DependencyInjectionIntegration
     public static WebApplicationBuilder AddIntegrationServices(this WebApplicationBuilder builder)
     {
         var conf = builder.Configuration.IntegrationConfig();
-        builder.Services.AddAuthentication(IntegrationConstants.MalarkeyAuthenticationScheme)
+        builder.Services.AddAuthentication(MalarkeyConstants.MalarkeyAuthenticationScheme)
             .AddScheme<MalarkeyServerAuthenticationHandlerOptions, MalarkeyServerAuthenticationHandler>(
-               authenticationScheme: IntegrationConstants.MalarkeyAuthenticationScheme,
+               authenticationScheme: MalarkeyConstants.MalarkeyAuthenticationScheme,
                configureOptions: opts =>
                {
                    opts.AccessDeniedUrl = conf.AccessDeniedPath;

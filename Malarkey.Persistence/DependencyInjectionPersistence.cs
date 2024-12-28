@@ -1,5 +1,5 @@
 ﻿using Malarkey.Application.Profile.Persistence;
-using Malarkey.Domain.Authentication;
+using Malarkey.Abstractions.Authentication;
 using Malarkey.Persistence.Authentication;
 using Malarkey.Persistence.Configuration;
 using Malarkey.Persistence.Context;

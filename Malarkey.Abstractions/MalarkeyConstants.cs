@@ -11,7 +11,7 @@ public static class MalarkeyConstants
 
     public static class Authentication
     {
-        public const string IdentityCookieName = "Malarkey.Identity";
+        public const string IdentityCookieBaseName = "Malarkey.Identity";
         public const string ProfileCookieName = "Malarkey.Profile";
         public const string TokenIssuer = "eutonies.com/malarkey";
         public const string TokenAlgorithm = "RS256";

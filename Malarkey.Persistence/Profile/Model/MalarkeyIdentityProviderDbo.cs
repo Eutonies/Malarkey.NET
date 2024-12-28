@@ -1,5 +1,5 @@
 ﻿using Malarkey.Abstractions.Profile;
-using Malarkey.Domain.Authentication;
+using Malarkey.Abstractions.Authentication;
 using System;
 using System.Collections.Generic;
 using System.Linq;
