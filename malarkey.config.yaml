@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: malarkey
+data:
+  # file-like keys
+  appsettings: |
+     Integration.ServerBasePath=https://eutonies.com/malarkey
+     

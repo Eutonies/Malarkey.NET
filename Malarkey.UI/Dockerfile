@@ -13,10 +13,11 @@ FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["Malarkey.UI/Malarkey.UI.csproj", "Malarkey.UI/"]
-COPY ["Malarkey.Persistence/Malarkey.Persistence.csproj", "Malarkey.Persistence/"]
+COPY ["Malarkey.Integration/Malarkey.Integration.csproj", "Malarkey.Integration/"]
 COPY ["Malarkey.Application/Malarkey.Application.csproj", "Malarkey.Application/"]
-COPY ["Malarkey.Domain/Malarkey.Domain.csproj", "Malarkey.Domain/"]
+COPY ["Malarkey.Abstractions/Malarkey.Abstractions.csproj", "Malarkey.Abstractions/"]
 COPY ["Malarkey.Security/Malarkey.Security.csproj", "Malarkey.Security/"]
+COPY ["Malarkey.Persistence/Malarkey.Persistence.csproj", "Malarkey.Persistence/"]
 COPY ["Malarkey.API/Malarkey.API.csproj", "Malarkey.API/"]
 RUN dotnet restore "./Malarkey.UI/Malarkey.UI.csproj"
 COPY . .

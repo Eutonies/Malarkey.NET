@@ -19,6 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Persistence", "Mal
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "K8S", "K8S", "{51D360FB-7621-46F1-9C36-0D6E30BB9C09}"
 	ProjectSection(SolutionItems) = preProject
+		malarkey.config.yaml = malarkey.config.yaml
 		.k8s\malarkey.deployment.yaml = .k8s\malarkey.deployment.yaml
 		.k8s\malarkey.service.yaml = .k8s\malarkey.service.yaml
 	EndProjectSection

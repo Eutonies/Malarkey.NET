@@ -18,6 +18,12 @@ spec:
         - name: crt-volume
           secret:
             secretName: malarkey-certs
+        - name: malarkeyconfig
+          configMap: 
+            name: malarkey
+            items:
+              - key: "appsettings"
+                path: "appsettings.production.json"
       containers:
       - name: malarkey
         image: docker.io/suneroenne/malarkey:1.0.1
@@ -77,3 +83,6 @@ spec:
                 - name: crt-volume
                   readOnly: true
                   mountPath: "/crt-volume"
+                - name: malarkeyconfig
+                  mountPath: "/config"
+                  readOnly: true
