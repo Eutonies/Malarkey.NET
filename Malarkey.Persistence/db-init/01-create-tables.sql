@@ -36,7 +36,7 @@ create table token (
   token_type token_type not null,
   profile_id uuid not null,
   identity_id uuid,
-  issued_to varchar(1000) not null,
+  issued_to varchar(2000) not null,
   issued_at timestamp not null,
   valid_until timestamp not null,
   revoked_at timestamp,
@@ -58,8 +58,8 @@ create table authentication_session (
     profile_token_id uuid ,
     identity_token_id uuid ,
     audience varchar(2000) not null,
-    scopes varchar(1000),
-    forwarder_state varchar(1000)
+    scopes varchar(2000),
+    forwarder_state varchar(2000),
     unique(state)
 );
 
@@ -71,7 +71,7 @@ create table id_provider_token (
     issued_at timestamp not null,
     expires_at timestamp not null,
     refresh_token varchar(2000),
-    scopes varchar(1000) not null
+    scopes varchar(2000) not null
 );
 
 

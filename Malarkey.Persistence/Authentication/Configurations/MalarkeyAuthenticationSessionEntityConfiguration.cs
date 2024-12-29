@@ -27,5 +27,7 @@ internal class MalarkeyAuthenticationSessionEntityConfiguration : MalarkeyEntity
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.IdentityTokenId)).HasColumnName("identity_token_id");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.Audience)).HasColumnName("audience");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.Scopes)).HasColumnName("scopes");
+        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.ForwarderState)).HasColumnName("forwarder_state");
+
     }
 }

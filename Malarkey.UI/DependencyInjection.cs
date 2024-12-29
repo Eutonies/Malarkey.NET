@@ -7,6 +7,7 @@ using Microsoft.Identity.Web;
 using Microsoft.IdentityModel.Logging;
 using Malarkey.Persistence;
 using Malarkey.Integration;
+using Malarkey.UI.Configuration;
 
 namespace Malarkey.UI;
 
@@ -16,10 +17,13 @@ public static class DependencyInjection
     {
         builder.Configuration.AddJsonFile("appsettings.json");
         builder.Configuration.AddJsonFile("appsettings.local.json", optional: true);
+        if(Path.Exists("/config"))
+           builder.Configuration.AddJsonFile("appsettings.production.json", optional: true);
         builder.Configuration.AddEnvironmentVariables();
         builder.AddApplicationConfiguration();
         builder.AddPersistenceConfiguration();
         builder.AddIntegrationConfiguration();
+        builder.Services.Configure<MalarkeyUIConfiguration>(builder.Configuration.GetSection(MalarkeyUIConfiguration.ConfigurationElementName));
         return builder;
     }
 
@@ -49,6 +53,9 @@ public static class DependencyInjection
 
     public static WebApplication UseUiServices(this WebApplication app)
     {
+        var uiConf = app.Configuration.UiConf();
+        if(!string.IsNullOrWhiteSpace(uiConf.HostingBasePath))
+           app.UsePathBase("/" + uiConf.HostingBasePath);
         app.UseRouting();
         app.UseStaticFiles();
         app.UseIntegration();
@@ -59,6 +66,14 @@ public static class DependencyInjection
         app.MapRazorPages();
 
         return app;
+    }
+
+
+    private static MalarkeyUIConfiguration UiConf(this IConfiguration conf)
+    {
+        var returnee = new MalarkeyUIConfiguration();
+        conf.Bind(MalarkeyUIConfiguration.ConfigurationElementName, returnee);
+        return returnee;
     }
 
 }

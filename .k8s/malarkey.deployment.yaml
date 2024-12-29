@@ -17,72 +17,61 @@ spec:
       volumes:
         - name: crt-volume
           secret:
-            secretName: malarkey-certs
-        - name: malarkeyconfig
-          configMap: 
-            name: malarkey
-            items:
-              - key: "appsettings"
-                path: "appsettings.production.json"
+            secretName: malarkey-cert          
       containers:
       - name: malarkey
-        image: docker.io/suneroenne/malarkey:1.0.1
+        image: docker.io/library/malarkey:1.0.5
+        imagePullPolicy: Never
         ports:
         - containerPort: 8080
           name: http-malarkey
+        volumeMounts:
+          - name: crt-volume
+            readOnly: true
+            mountPath: "/crts"              
         env:
+        - name: UI__HostingBasePath
+          value: malarkey
+        - name: Integration__ServerBasePath
+          value: https://eutonies.com/malarkey
+        - name: Integration__PublicKeyFile
+          value: /crts/malarkey.crt
+        - name: Persistence__Db__ConnectionString
+          valueFrom:
+            secretKeyRef:
+              name: malarkey-secrets
+              key: dbconn
         - name: Application__SigningCertificate__CertificatePassword
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
-              key: certpasssigning
+              key: certsignpassword
         - name: Application__HostingCertificate__CertificatePassword
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
-              key: certpasshosting
-
-        - name: Integration__Facebook__Identity__ClientId
-          valueFrom:
-            secretKeyRef:
-              name: malarkey-secrets
-              key: idpfacebookclientid
-        - name: Integration__Facebook__Identity__ClientSecret
-          valueFrom:
-            secretKeyRef:
-              name: malarkey-secrets
-              key: idpfacebookclientsecret
-        - name: Integration__Microsoft__Identity__ClientId
-          valueFrom:
-            secretKeyRef:
-              name: malarkey-secrets
-              key: idpmicrosoftclientid
+              key: certhostpassword
+        - name: Integration__Microsoft__AzureAd__ClientCertificates__0__SourceType
+          value: Path
+        - name: Integration__Microsoft__AzureAd__ClientCertificates__0__CertificateDiskPath
+          value: malarkey.pfx
         - name: Integration__Microsoft__AzureAd__ClientSecret
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
-              key: idpmicrosoftclientsecret
+              key: clientsecretmicrosoft
+        - name: Integration__Facebook__Identity__ClientSecret
+          valueFrom:
+            secretKeyRef:
+              name: malarkey-secrets
+              key: clientsecretfacebook
         - name: Integration__Google__Identity__ClientSecret
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
-              key: idpgoogleclientsecret
-
-        - name: Kestrel__Endpoints__Https__Certificate__Password
+              key: clientsecretgoogle
+        - name: Integration__Spotify__Identity__ClientSecret
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
-              key: certpasshosting
-
-        - name: Integration__Microsoft__AzureAd__ClientCertificates__0__SourceType
-          value: Path
-        - name: Integration__Microsoft__AzureAd__ClientCertificates__0__CertificateDiskPath
-          value: /crt-volume/malarkey.pfx
-
-        volumeMounts:
-                - name: crt-volume
-                  readOnly: true
-                  mountPath: "/crt-volume"
-                - name: malarkeyconfig
-                  mountPath: "/config"
-                  readOnly: true
+              key: clientsecretspotify
