@@ -56,6 +56,15 @@ public abstract record MalarkeyProfileIdentity
         _ => null
     };
 
+    public string ProvidersIdForIdentity => this switch
+    {
+        MicrosoftIdentity mi => mi.MicrosoftId,
+        GoogleIdentity go => go.GoogleId,
+        FacebookIdentity fa => fa.FacebookId,
+        SpotifyIdentity sp => sp.SpotifyId,
+        _ => throw new NotImplementedException()
+    };
+
     public virtual MalarkeyProfileIdentity WithToken(IdentityProviderToken token) => this;
 
 

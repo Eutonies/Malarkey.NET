@@ -23,6 +23,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly IReadOnlyDictionary<MalarkeyIdentityProvider, IMalarkeyOAuthFlowHandler> _flowHandlers;
     private readonly IMalarkeyProfileRepository _profileRepo;
     private readonly MalarkeyIntegrationConfiguration _intConf;
+    private readonly ILogger<MalarkeyServerAuthenticationHandler> _logger;
 
     /// <summary>
     /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
@@ -34,14 +35,16 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     public MalarkeyServerAuthenticationHandler(
         IOptionsMonitor<MalarkeyServerAuthenticationHandlerOptions> options,
-        ILoggerFactory logger,
+        ILoggerFactory loggerFactory,
         UrlEncoder encoder,
         IMalarkeyTokenHandler tokenHandler,
         IMalarkeyAuthenticationSessionHandler sessionHandler,
         IEnumerable<IMalarkeyOAuthFlowHandler> flowHandlers,
         IMalarkeyProfileRepository profileRepo,
-        IOptions<MalarkeyIntegrationConfiguration> intConf) : base(options, logger, encoder)
+        IOptions<MalarkeyIntegrationConfiguration> intConf,
+        ILogger<MalarkeyServerAuthenticationHandler> logger) : base(options, loggerFactory, encoder)
     {
+        _logger = logger;
         _events = new MalarkeyAuthenticationEvents();
         _intConf = intConf.Value;
         _tokenHandler = tokenHandler;
@@ -118,24 +121,30 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         }
         if (string.IsNullOrWhiteSpace(redirData?.State))
         {
+            _logger.LogError($"Unable to extract state from callback request");
             return await ReturnError("Could not extract state");
         }
         var session = await _sessionHandler.SessionForState(redirData.State);
         if(session == null)
         {
+            _logger.LogError($"Unable to load session from state: {redirData.State}");
             return await ReturnError($"Could not find session for state={redirData.State}");
         }
         var flowHandler = _flowHandlers[session.IdProvider];
         var identity = await flowHandler.ResolveIdentity(session, redirData);
         if (identity == null)
         {
+            _logger.LogError($"Unable to load identity from state: {redirData.State} and redirect data: {redirData.ToString()}");
             return await ReturnError($"Could not resolve identity by {session.IdProvider} for callback request with URL={request.GetDisplayUrl()}");
         }
         var profileAndIdentities = await _profileRepo.LoadOrCreateByIdentity(identity);
         if (profileAndIdentities == null)
         {
+            _logger.LogError($"Unable to load/create profile and/or identities for identity {identity.ProvidersIdForIdentity} from provider: {identity.IdentityProvider}");
             return await ReturnError($"Could not locate profile identity: {identity.ProfileId} by {session.IdProvider}");
         }
+        _logger.LogInformation($"Resolved profile: {profileAndIdentities.Profile.ProfileId} and {profileAndIdentities.Identities.Count} identities");
+
         identity = profileAndIdentities.Identities
             .Where(_ => _.ProviderId == identity.ProviderId)
             .First();
