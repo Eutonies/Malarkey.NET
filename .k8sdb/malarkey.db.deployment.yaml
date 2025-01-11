@@ -1,7 +1,9 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: malarkey-postgres
+  labels:
+    role: service
 spec:
   replicas: 1
   selector:
@@ -11,6 +13,7 @@ spec:
     metadata:
       labels:
         app: malarkey-postgres
+        role: service
     spec:
       containers:
         - name: malarkey-postgres
