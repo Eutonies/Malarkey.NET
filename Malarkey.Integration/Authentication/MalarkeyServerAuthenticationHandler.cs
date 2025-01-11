@@ -14,6 +14,7 @@ using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Malarkey.Abstractions;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Components;
 
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
@@ -153,12 +154,14 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
         _tokenHandler.BakeCookies(request.HttpContext, profileToken, [identityToken]);
         var redirectUrl = session.Forwarder ?? $"{_intConf.ServerBasePath}/";
+        _logger.LogInformation($"Will redirect to URL: {redirectUrl} ");
         var redirect = new MalarkeyAuthenticationSuccessHttpResult(
             RedirectUrl: redirectUrl,
             ProfileToken: profileTokenString,
             IdentityToken: identityTokenString,
             IdentityProviderAccessToken: identity.IdentityProviderTokenToUse?.Token,
-            ForwarderState: session.ForwarderState
+            ForwarderState: session.ForwarderState,
+            Logger: _logger
         );
         return redirect;
     }

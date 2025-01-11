@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Logging;
 using Malarkey.Persistence;
 using Malarkey.Integration;
 using Malarkey.UI.Configuration;
+using Malarkey.UI.Middleware;
 
 namespace Malarkey.UI;
 
@@ -46,6 +47,7 @@ public static class DependencyInjection
         });
         builder.Services.AddAntiforgery();
         builder.Services.AddCascadingAuthenticationState();
+        builder.Services.AddHttpLogging();
         builder.AddSecurity();
         builder.AddApi();
         return builder;
@@ -56,6 +58,8 @@ public static class DependencyInjection
         var uiConf = app.Configuration.UiConf();
         if(!string.IsNullOrWhiteSpace(uiConf.HostingBasePath))
            app.UsePathBase("/" + uiConf.HostingBasePath);
+        app.UseMiddleware<MalarkeyRequestLoggingMiddleware>();   
+        app.UseHttpLogging();
         app.UseRouting();
         app.UseStaticFiles();
         app.UseIntegration();

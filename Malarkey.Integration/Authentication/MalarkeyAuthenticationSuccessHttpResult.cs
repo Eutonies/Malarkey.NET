@@ -1,6 +1,7 @@
 ﻿using Malarkey.Abstractions;
 using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,10 +14,12 @@ public record MalarkeyAuthenticationSuccessHttpResult(
     string ProfileToken,
     string IdentityToken,
     string? IdentityProviderAccessToken,
-    string? ForwarderState
+    string? ForwarderState,
+    ILogger Logger
     ) : IResult
 {
-    
+    private string? _forwardLocation;
+    public string ForwardLocation => _forwardLocation ??= BuildRedirectString();
     public Task ExecuteAsync(HttpContext httpContext)
     {
         httpContext.Response.StatusCode = 302;
@@ -30,7 +33,10 @@ public record MalarkeyAuthenticationSuccessHttpResult(
         {
             httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ForwarderStateName, ForwarderState);
         }
-        httpContext.Response.Headers.Location = BuildRedirectString();
+        var newLocation = BuildRedirectString();
+        Logger.LogInformation($"Authentication success redirect result redirecting to: {newLocation}");
+        //httpContext.Response.Headers.Location = newLocation;
+        httpContext.Response.Redirect(newLocation);
         return Task.CompletedTask;
     }
 

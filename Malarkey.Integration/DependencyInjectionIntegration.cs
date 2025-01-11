@@ -4,7 +4,9 @@ using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -50,13 +52,33 @@ public static class DependencyInjectionIntegration
         var conf = app.Configuration.IntegrationConfig();
         app.UseAuthentication();
         app.UseAuthorization();
-        app.MapGet(conf.RedirectPath, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
-            await authHandler.HandleCallback(request)
+        app.MapGet(
+            conf.RedirectPath, 
+            async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, 
+                   [FromServices] NavigationManager navManager,
+                    HttpRequest request) => await authHandler.HandleCallback(navManager, request)
         );
-        app.MapPost(conf.RedirectPath, async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, HttpRequest request) =>
-            await authHandler.HandleCallback(request)
+        app.MapPost(
+            conf.RedirectPath, 
+            async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, 
+                   [FromServices] NavigationManager navManager,
+                    HttpRequest request) => await authHandler.HandleCallback(navManager, request)
         );
         return app;
+    }
+
+    private static async Task HandleCallback(this MalarkeyServerAuthenticationHandler authHandler, NavigationManager navManager, HttpRequest req) 
+    {
+        var result = await authHandler.HandleCallback(req);
+        if(result is MalarkeyAuthenticationSuccessHttpResult succ){
+            navManager.NavigateTo(succ.ForwardLocation, forceLoad: true);
+        }
+        else if(result is BadRequest<string> badReq) {
+            throw new Exception(badReq.Value);
+        }
+        else {
+            throw new Exception("Did not complete authentication flow correctly");
+        }
     }
 
 
