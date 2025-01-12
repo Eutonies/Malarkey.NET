@@ -67,4 +67,6 @@ public interface IMalarkeyProfileRepository
     Task<ActionResult<MalarkeyProfile>> VerifyPrimaryEmail(Guid profileId, string email);
     Task<ActionResult<MalarkeyProfile>> UpdateProfileImage(Guid profileId, byte[] image, string imageType);
 
+    Task<MalarkeyProfileAndIdentities?> LoadProfileAndIdentities(Guid profileId);
+
 }

@@ -229,4 +229,50 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         }
     }
 
+    public async Task<MalarkeyProfileAndIdentities?> LoadProfileAndIdentities(Guid profileId)
+    {
+        await using var cont = await _dbContextFactory.CreateDbContextAsync();
+        var profile = await cont.Profiles
+            .AsNoTracking()
+            .FirstOrDefaultAsync(_ => _.ProfileId == profileId);
+        if(profile == null)
+            return null;
+        var profileIdQuery = cont.ProfileAbserbees
+            .AsNoTracking()
+            .Where(_ => _.ProfileId == profileId)
+            .Select(_ => _.Absorbee)
+            .Union(
+                cont.ProfileAbsorbers
+                   .AsNoTracking()
+                   .Where(_ => _.ProfileId == profileId && _.Absorber != null)
+                   .Select(_ => _.Absorber!.Value)
+            ).Union(
+                cont.Profiles
+                   .AsNoTracking()
+                   .Where(_ => _.ProfileId == profileId)
+                   .Select(_ => _.ProfileId)
+            );
+        var identityQuery = from profId in profileIdQuery
+                            join ident in cont.Identities
+                            on profId equals ident.ProfileId
+                            select ident;
+        var identities = await identityQuery
+            .AsNoTracking()
+            .ToListAsync();
+        var idProvTokenQuery = from tok in cont.IdentityProviderTokens.Where(_ => _.Expires > DateTime.Now)
+                               join iden in identityQuery
+                               on tok.IdentityId equals iden.IdentityId
+                               select tok;
+        var idProvTokenMap = (await idProvTokenQuery.ToListAsync())
+            .ToDictionarySafe(_ => _.IdentityId);
+        var domainIdentities = identities
+            .Select(_ => _.ToDomain(idProvTokenMap.GetValueOrDefault(_.IdentityId)))
+            .ToList();
+        var absorbeeIds = await cont.ProfileAbserbees
+            .Where(_ => _.ProfileId == profileId)
+            .Select(_ => _.Absorbee)
+            .ToListAsync();
+        var returnee = new MalarkeyProfileAndIdentities(profile!.ToDomain(), domainIdentities, absorbeeIds);
+        return returnee;
+    }
 }

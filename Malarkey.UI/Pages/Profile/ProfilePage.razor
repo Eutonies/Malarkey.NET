@@ -9,8 +9,25 @@
         <div class="malarkey-profile-header">Profile</div>
         <div class="malarkey-profile-input-form">
             <div class="malarkey-profile-input-container">
-                <label class="malarkey-profile-input-label" for="malarkey-profile-name"></label>
+                <label class="malarkey-profile-input-label" for="malarkey-profile-name">User ID</label>
+                <input type="text" class="malarkey-profile-input" id="malarkey-profile-name" @bind="ProfileName" />
+                @if(_profileNameError != null) {
+                    <div class="malarkey-profile-input-error">@_profileNameError</div>
+                }
             </div>
+            <div class="malarkey-profile-input-container">
+                <label class="malarkey-profile-input-label" for="malarkey-profile-first-name">First name</label>
+                <input type="text" class="malarkey-profile-input" id="malarkey-profile-first-name" @bind="FirstName" />
+            </div>
+            <div class="malarkey-profile-input-container">
+                <label class="malarkey-profile-input-label" for="malarkey-profile-last-name">Last name</label>
+                <input type="text" class="malarkey-profile-input" id="malarkey-profile-last-name" @bind="LastName" />
+            </div>
+            <div class="malarkey-profile-input-container">
+                <label class="malarkey-profile-input-label" for="malarkey-profile-email">Email</label>
+                <input type="email" class="malarkey-profile-input" id="malarkey-profile-email" @bind="PrimaryEmail" />
+            </div>
+
         </div>
     </div>
 </div>

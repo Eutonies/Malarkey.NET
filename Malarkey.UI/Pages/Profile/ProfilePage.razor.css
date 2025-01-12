@@ -1,0 +1,41 @@
+﻿.malarkey-profile-page-bg {
+}
+
+.malarkey-profile-container {
+    width: 800px;
+    height: 1000px;
+    display: flex;
+    flex-direction: column;
+}
+
+.malarkey-profile-header {
+    font-family: 'Merienda';
+    font-size: 20pt;
+    width: 100%;
+    text-align: center;
+}
+
+.malarkey-profile-input-form {
+    width: 600px;
+    height: 800px;
+}
+
+.malarkey-profile-input-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.malarkey-profile-input-label {
+
+}
+
+.malarkey-profile-input {
+    border-radius: 5px;
+    width: 200px;
+}
+
+.malarkey-profile-input-error {
+}
