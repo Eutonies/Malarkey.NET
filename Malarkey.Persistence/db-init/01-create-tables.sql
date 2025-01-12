@@ -1,9 +1,17 @@
 create table profile (
     profile_id uuid default gen_random_uuid(),
     profile_name varchar(100) not null,
+    profile_name_uniqueness varchar(100) not null,
+    first_name varchar(100),
+    last_name varchar(100),
+    primary_email varchar(200),
+    primary_email_is_verified boolean not null,
+    profile_image bytea,
+    profile_image_type varchar(50),
     created_at timestamp default current_timestamp,
     absorbed_by uuid,
-    constraint pk_profile primary key (profile_id) 
+    constraint pk_profile primary key (profile_id),
+    unique(profile_name_uniqueness)
 );
 
 create type provider_type as 

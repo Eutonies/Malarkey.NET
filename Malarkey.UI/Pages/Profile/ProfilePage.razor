@@ -4,6 +4,13 @@
 
 @attribute [Authorize(AuthenticationSchemes = MalarkeyConstants.MalarkeyAuthenticationScheme)]
 
-<div class="profile-page-bg">
-    <button type="button" class="btn btn-primary" @onclick="@(() => OnForwardClick())">Forward me</button>
+<div class="malarkey-profile-page-bg">
+    <div class="malarkey-profile-container">
+        <div class="malarkey-profile-header">Profile</div>
+        <div class="malarkey-profile-input-form">
+            <div class="malarkey-profile-input-container">
+                <label class="malarkey-profile-input-label" for="malarkey-profile-name"></label>
+            </div>
+        </div>
+    </div>
 </div>

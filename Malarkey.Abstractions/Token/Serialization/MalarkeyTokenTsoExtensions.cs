@@ -30,7 +30,11 @@ public static class MalarkeyTokenTsoExtensions
                 ProfileId: Guid.Parse(token.Payload.sub),
                 ProfileName: token.Payload.name,
                 CreatedAt: DateTime.UnixEpoch + TimeSpan.FromSeconds(long.Parse(token.Payload.crets!)),
-                AbsorbedBy: token.Payload.absby == null ? null : Guid.Parse(token.Payload.absby)
+                AbsorbedBy: token.Payload.absby == null ? null : Guid.Parse(token.Payload.absby),
+                FirstName: token.Payload.firstname,
+                LastName: token.Payload.lastname,
+                PrimaryEmail: token.Payload.email,
+                PrimaryEmailIsVerified: false
                 )
             ),
         _ => new MalarkeyIdentityToken(
@@ -150,7 +154,10 @@ public static class MalarkeyTokenTsoExtensions
             jti: tokenId.ToString(),
             id: profile.ProfileId.ToString(),
             crets: ((long)(profile.CreatedAt - DateTime.UnixEpoch).TotalSeconds).ToString(),
-            absby: profile.AbsorbedBy?.ToString()
+            absby: profile.AbsorbedBy?.ToString(),
+            lastname: profile.LastName,
+            email: profile.PrimaryEmail,
+            firstname: profile.FirstName
             );
 
     public static MalarkeyTokenPayloadTso ToPayloadTso(
@@ -170,7 +177,9 @@ public static class MalarkeyTokenTsoExtensions
                 identid: ident.ProviderId,
                 prefname: (ident as MicrosoftIdentity)?.PreferredName,
                 midnames: ident.MiddleNames,
-                lastname: ident.LastName
+                lastname: ident.LastName,
+                firstname: ident.FirstName,
+                email: ident.EmailToUse
                );
 
     public static MalarkeyTokenPayloadTso ToPayloadTso(

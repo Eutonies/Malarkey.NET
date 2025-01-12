@@ -39,7 +39,8 @@ public record MalarkeyTokenPayloadTso(
     string? crets = null,
     string? absby = null,
     string? email = null,
-    MalarkeyIdProviderAccessTokenTso? idptoken = null
+    MalarkeyIdProviderAccessTokenTso? idptoken = null,
+    string? firstname = null
     );
 
 public record MalarkeyIdProviderAccessTokenTso(

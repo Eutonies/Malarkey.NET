@@ -9,5 +9,11 @@ public sealed record MalarkeyProfile(
     Guid ProfileId,
     string ProfileName,
     DateTime CreatedAt,
-    Guid? AbsorbedBy
+    Guid? AbsorbedBy,
+    string? FirstName,
+    string? LastName,
+    string? PrimaryEmail,
+    bool PrimaryEmailIsVerified,
+    byte[]? ProfileImage = null,
+    string? ProfileImageType = null
     );

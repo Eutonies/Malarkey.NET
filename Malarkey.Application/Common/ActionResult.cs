@@ -33,3 +33,7 @@ public sealed record UnauthorizedActionResult<TRes>(
 public sealed record ExceptionActionResult<TRes>(
     Exception Exception
     ) : ErrorActionResult<TRes>(Exception.Message);
+
+public sealed record ErrorMessageActionResult<TRes>(
+    string ErrorMessage
+    ) : ErrorActionResult<TRes>(ErrorMessage);

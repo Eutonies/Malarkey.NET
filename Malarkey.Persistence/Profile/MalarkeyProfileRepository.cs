@@ -12,11 +12,13 @@ using System.Text;
 using System.Threading.Tasks;
 using Malarkey.Abstractions.Token;
 using Malarkey.Abstractions.Util;
+using Malarkey.Application.Common;
 
 namespace Malarkey.Persistence.Profile;
 internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
 {
     private readonly IDbContextFactory<MalarkeyDbContext> _dbContextFactory;
+    private SemaphoreSlim _nameUniqueLock = new SemaphoreSlim(1);
 
     public MalarkeyProfileRepository(IDbContextFactory<MalarkeyDbContext> dbContextFactory)
     {
@@ -38,8 +40,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
             CreatedAt = DateTime.Now,
             ProfileName = identity.FirstName
         };
-        cont.Profiles.Add(profileInsertee);
-        await cont.SaveChangesAsync();
+        profileInsertee = await SaveAndEnsureUniqueName(profileInsertee, cont);
 
         var insertee = new MalarkeyIdentityDbo
         {
@@ -118,6 +119,32 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         await cont.SaveChangesAsync();
     }
 
+    private async Task<MalarkeyProfileDbo> SaveAndEnsureUniqueName(MalarkeyProfileDbo profile, MalarkeyDbContext cont) 
+    {
+        await _nameUniqueLock.WaitAsync();
+        try
+        {
+            var baseName = profile.ProfileName;
+            var alreadyExists = await cont.Profiles
+                .AnyAsync(_ => _.ProfileNameUniqueness == profile.ProfileName.ToLower());
+            var random = new Random();
+            while (alreadyExists)
+            {
+                profile.ProfileName = baseName + random.Next(1000, 1_000_000_000);
+                alreadyExists = await cont.Profiles
+                    .AnyAsync(_ => _.ProfileNameUniqueness == profile.ProfileName.ToLower());
+            }
+            profile.ProfileNameUniqueness = profile.ProfileName.ToLower();
+            cont.Add(profile);
+            await cont.SaveChangesAsync();
+        }
+        finally
+        {
+            _nameUniqueLock.Release();
+        }
+        return profile;
+    }
+
     private MalarkeyIdentityProviderDbo ProviderFor(MalarkeyProfileIdentity ident) => ident switch
     {
         MicrosoftIdentity _ => MalarkeyIdentityProviderDbo.Microsoft,
@@ -127,5 +154,79 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         _ => MalarkeyIdentityProviderDbo.Facebook
     };
 
+    public async Task<ActionResult<MalarkeyProfile>> UpdateProfileName(Guid profileId, string name)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+            return new ErrorMessageActionResult<MalarkeyProfile>("Profile name cannot be null or empty");
+        await _nameUniqueLock.WaitAsync();
+        try
+        {
+            await using (var cont = await _dbContextFactory.CreateDbContextAsync())
+            {
+                var nameIsTaken = await cont.Profiles
+                    .AnyAsync(_ => _.ProfileId != profileId && _.ProfileNameUniqueness == name.ToLower());
+                if (nameIsTaken)
+                    return new ErrorMessageActionResult<MalarkeyProfile>($"Name: {name} is already in use");
+            }
+            var returnee = await UpdateAndReturn(profileId, prof =>
+            {
+                prof.ProfileName = name; 
+                prof.ProfileNameUniqueness = name.ToLower();
+            });
+            return returnee;
+        }
+        finally
+        {
+            _nameUniqueLock.Release();
+        }
+    }
+
+    public Task<ActionResult<MalarkeyProfile>> UpdateFirstName(Guid profileId, string? firstName) => 
+        UpdateAndReturn(profileId, prof => prof.FirstName = firstName);
+
+    public Task<ActionResult<MalarkeyProfile>> UpdateLastName(Guid profileId, string? lastName) =>
+        UpdateAndReturn(profileId, prof => prof.LastName = lastName);
+
+    public Task<ActionResult<MalarkeyProfile>> UpdatePrimaryEmail(Guid profileId, string? email) =>
+        UpdateAndReturn(profileId, prof =>
+        {
+            prof.PrimaryEmail = email;
+            prof.PrimaryEmailIsVerified = false;
+        });
+
+    public Task<ActionResult<MalarkeyProfile>> VerifyPrimaryEmail(Guid profileId, string email) =>
+        UpdateAndReturn(profileId, prof =>
+        {
+            if(prof.PrimaryEmail != null && prof.PrimaryEmail.ToLower() == email.ToLower())
+                prof.PrimaryEmailIsVerified = true;
+        });
+
+    public Task<ActionResult<MalarkeyProfile>> UpdateProfileImage(Guid profileId, byte[] image, string imageType) =>
+        UpdateAndReturn(profileId, prof =>
+        {
+            prof.ProfileImage = image;
+            prof.ProfileImageType = imageType;
+        });
+
+    private async Task<ActionResult<MalarkeyProfile>> UpdateAndReturn(Guid profileId, Action<MalarkeyProfileDbo> changer)
+    {
+        try
+        {
+            await using var cont = await _dbContextFactory.CreateDbContextAsync();
+            var loaded = await cont.Profiles
+                .FirstOrDefaultAsync(_ => _.ProfileId == profileId);
+            if (loaded == null)
+                return new ErrorMessageActionResult<MalarkeyProfile>($"Unable to load profile with ID: {profileId}");
+            changer(loaded);
+            cont.Update(loaded);
+            await cont.SaveChangesAsync();
+            var returnee = loaded.ToDomain();
+            return new SuccessActionResult<MalarkeyProfile>(returnee);
+        }
+        catch(Exception ex) 
+        {
+            return new ExceptionActionResult<MalarkeyProfile>(ex);
+        }
+    }
 
 }

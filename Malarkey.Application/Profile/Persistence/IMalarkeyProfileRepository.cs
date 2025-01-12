@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Malarkey.Abstractions.Token;
+using Malarkey.Application.Common;
 
 namespace Malarkey.Application.Profile.Persistence;
 public interface IMalarkeyProfileRepository
@@ -59,5 +60,11 @@ public interface IMalarkeyProfileRepository
         return returnee;
     }
 
+    Task<ActionResult<MalarkeyProfile>> UpdateProfileName(Guid profileId, string name);
+    Task<ActionResult<MalarkeyProfile>> UpdateFirstName(Guid profileId, string? firstName);
+    Task<ActionResult<MalarkeyProfile>> UpdateLastName(Guid profileId, string? lastName);
+    Task<ActionResult<MalarkeyProfile>> UpdatePrimaryEmail(Guid profileId, string? email);
+    Task<ActionResult<MalarkeyProfile>> VerifyPrimaryEmail(Guid profileId, string email);
+    Task<ActionResult<MalarkeyProfile>> UpdateProfileImage(Guid profileId, byte[] image, string imageType);
 
 }
