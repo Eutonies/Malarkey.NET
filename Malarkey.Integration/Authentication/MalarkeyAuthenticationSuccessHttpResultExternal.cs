@@ -23,8 +23,10 @@ public record MalarkeyAuthenticationSuccessHttpResultExternal(
     public async Task ExecuteAsync(HttpContext httpContext)
     {
         httpContext.Response.StatusCode = 200;
-        var body = BodyString(RedirectUrl, ProfileToken, IdentityToken, IdentityProviderAccessToken, ForwarderState);
-        await httpContext.Response.WriteAsJsonAsync(body);
+        var body = BodyString(RedirectUrl, ProfileToken, IdentityToken, IdentityProviderAccessToken, ForwarderState).Trim();
+        httpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName, ProfileToken);
+        httpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.IdentityCookieName(0), IdentityToken);
+        await httpContext.Response.WriteAsync(body);
     }
 
 

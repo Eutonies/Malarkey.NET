@@ -29,7 +29,7 @@ public static class MalarkeyTokenTsoExtensions
             Profile: new MalarkeyProfile(
                 ProfileId: Guid.Parse(token.Payload.sub),
                 ProfileName: token.Payload.name,
-                CreatedAt: DateTime.UnixEpoch + TimeSpan.FromSeconds(token.Payload.crets!.Value),
+                CreatedAt: DateTime.UnixEpoch + TimeSpan.FromSeconds(long.Parse(token.Payload.crets!)),
                 AbsorbedBy: token.Payload.absby == null ? null : Guid.Parse(token.Payload.absby)
                 )
             ),
@@ -149,7 +149,7 @@ public static class MalarkeyTokenTsoExtensions
             exp: expiresAt.ToJwtTime(),
             jti: tokenId.ToString(),
             id: profile.ProfileId.ToString(),
-            crets: (long)(profile.CreatedAt - DateTime.UnixEpoch).TotalSeconds,
+            crets: ((long)(profile.CreatedAt - DateTime.UnixEpoch).TotalSeconds).ToString(),
             absby: profile.AbsorbedBy?.ToString()
             );
 
@@ -184,7 +184,7 @@ public static class MalarkeyTokenTsoExtensions
                 exp: token.ValidUntil.ToJwtTime(),
                 jti: token.TokenId.ToString(),
                 id: token.Profile.ProfileId.ToString(),
-                crets: (long)(token.Profile.CreatedAt - DateTime.UnixEpoch).TotalSeconds,
+                crets: ((long)(token.Profile.CreatedAt - DateTime.UnixEpoch).TotalSeconds).ToString(),
                 absby: token.Profile.AbsorbedBy?.ToString()
                );
 

@@ -36,7 +36,7 @@ public record MalarkeyTokenPayloadTso(
     string? midnames = null,
     string? lastname = null,
     string iss = MalarkeyConstants.Authentication.TokenIssuer,
-    long? crets = null,
+    string? crets = null,
     string? absby = null,
     string? email = null,
     MalarkeyIdProviderAccessTokenTso? idptoken = null

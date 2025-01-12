@@ -28,6 +28,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly ILogger<MalarkeyServerAuthenticationHandler> _logger;
     private readonly IAuthenticationUrlResolver _urlResolver;
     private readonly MalarkeyAuthenticationRequestCache _requestCache;
+    private readonly string _malarkeyTokenReceiver;
 
     /// <summary>
     /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
@@ -60,9 +61,14 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             .ToDictionarySafe(_ => _.HandlerFor);
         _profileRepo = profileRepo;
         _requestCache = requestCache;
+        _malarkeyTokenReceiver = intConf.Value.PublicKey.CleanCertificate();
     }
 
-    protected override async Task<AuthenticateResult> HandleAuthenticateAsync() => (await _tokenHandler.ExtractProfileAndIdentities(Context)) switch
+    private string TokenReceiver => (Context?.Request?.Headers?.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var audience) ?? false) ?
+        audience.ToString() :
+        _malarkeyTokenReceiver;
+
+    protected override async Task<AuthenticateResult> HandleAuthenticateAsync() => (await _tokenHandler.ExtractProfileAndIdentities(Context, TokenReceiver)) switch
         {
             null => AuthenticateResult.Fail("No profile info found"),
             MalarkeyProfileAndIdentities p => AuthenticateResult.Success(new AuthenticationTicket(
@@ -152,10 +158,13 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var (profileToken, profileTokenString) = await _tokenHandler.IssueToken(profileAndIdentities.Profile, session.Audience);
         var (identityToken, identityTokenString) = await _tokenHandler.IssueToken(identity, session.Audience);
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
-        _tokenHandler.BakeCookies(request.HttpContext, profileToken, [identityToken]);
         if(session.ForwarderState != null && _requestCache.TryPop(session.ForwarderState, out var conti))
         {
-            var ret = new MalarkeyAuthenticationSuccessHttpResultInternal(conti!, _logger);
+            var ret = new MalarkeyAuthenticationSuccessHttpResultInternal(
+                Continuation: conti!, 
+                ProfileToken: profileTokenString,
+                IdentityToken: identityTokenString,
+                Logger: _logger);
             return ret;
         }
         else
@@ -205,7 +214,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private string ExtractPublicKeyOfReceiver()
     {
         if (!Request.Headers.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var pubKey))
-            return _intConf.PublicKey;
+            return _intConf.PublicKey.CleanCertificate();
         return pubKey.ToString();
     }
 

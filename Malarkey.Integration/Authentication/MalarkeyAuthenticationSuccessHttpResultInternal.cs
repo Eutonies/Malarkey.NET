@@ -12,6 +12,8 @@ using System.Threading.Tasks;
 namespace Malarkey.Integration.Authentication;
 public record MalarkeyAuthenticationSuccessHttpResultInternal(
     MalarkeyAuthenticationRequestContinuation Continuation,
+    string ProfileToken,
+    string IdentityToken,
     ILogger Logger
     ) : IResult
 {
@@ -19,6 +21,8 @@ public record MalarkeyAuthenticationSuccessHttpResultInternal(
     {
         await Task.CompletedTask;
         httpContext.Response.StatusCode = 302;
+        httpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName, ProfileToken);
+        httpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.IdentityCookieName(0), IdentityToken);
         var url = new StringBuilder($"{Continuation.Path}");
         if (Continuation.QueryParameters.Any())
             url.Append("?" + (Continuation.QueryParameters

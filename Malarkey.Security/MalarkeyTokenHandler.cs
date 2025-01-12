@@ -46,8 +46,8 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         var token = new MalarkeyProfileToken(
             TokenId: Guid.NewGuid(),
             IssuedTo: receiverPublicKey,
-            IssuedAt: MalarkeySecurityConstants.Now,
-            ValidUntil: MalarkeySecurityConstants.Now + MalarkeySecurityConstants.TokenLifeTime,
+            IssuedAt: MalarkeySecurityConstants.Now.ToUniversalTime(),
+            ValidUntil: MalarkeySecurityConstants.Now.ToUniversalTime() + MalarkeySecurityConstants.TokenLifeTime,
             Profile: profile
             );
         var payload = profile.ToPayloadTso(receiverPublicKey, expiresAt: token.ValidUntil, token.TokenId);
@@ -65,8 +65,8 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         var token = new MalarkeyIdentityToken(
             TokenId: Guid.NewGuid(),
             IssuedTo: receiverPublicKey,
-            IssuedAt: MalarkeySecurityConstants.Now,
-            ValidUntil: MalarkeySecurityConstants.Now + MalarkeySecurityConstants.TokenLifeTime,
+            IssuedAt: MalarkeySecurityConstants.Now.ToUniversalTime(),
+            ValidUntil: MalarkeySecurityConstants.Now.ToUniversalTime() + MalarkeySecurityConstants.TokenLifeTime,
         Identity: identity
             );
         var tokenString = CreateTokenString(token, receiverPublicKey);
@@ -173,7 +173,7 @@ internal static class MalarkeyTokenHandlerExtensions
         (nameof(payload.prefname), payload.prefname),
         (nameof(payload.email), payload.email),
         (nameof(payload.idptoken), payload.idptoken?.ToValueString()),
-
+        (nameof(payload.crets), payload.crets?.ToString()),
     }.Where(_ => _.Item2 != null)
         .Select(_ => new Claim(_.Item1, _.Item2!))
         .ToList();

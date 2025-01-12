@@ -26,16 +26,16 @@ internal class MalarkeyTokenDbo
     public MalarkeyIdentityToken ToIdentityToken(MalarkeyProfileIdentity ident) => new MalarkeyIdentityToken(
         TokenId: TokenId,
         IssuedTo: IssuedTo,
-        IssuedAt: IssuedAt,
-        ValidUntil: ValidUntil,
+        IssuedAt: IssuedAt.ToUniversalTime(),
+        ValidUntil: ValidUntil.ToUniversalTime(),
         Identity: ident
         );
 
     public MalarkeyProfileToken ToProfileToken(MalarkeyProfile prof) => new MalarkeyProfileToken(
         TokenId: TokenId,
         IssuedTo: IssuedTo,
-        IssuedAt: IssuedAt,
-        ValidUntil: ValidUntil,
+        IssuedAt: IssuedAt.ToUniversalTime(),
+        ValidUntil: ValidUntil.ToUniversalTime(),
         Profile: prof
         );
 }

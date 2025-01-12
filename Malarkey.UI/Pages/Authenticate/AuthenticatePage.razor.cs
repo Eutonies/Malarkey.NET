@@ -33,6 +33,9 @@ public partial class AuthenticatePage
     [Parameter]
     public string? Scopes { get; set; }
 
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName)]
+    [Parameter]
+    public string? ForwarderState { get; set; }
 
 
 

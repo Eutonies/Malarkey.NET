@@ -19,6 +19,7 @@ public static class MalarkeyConstants
         public const string AudienceHeaderName = API.ClientCertificateHeaderName;
         public const string ServerAuthenticationPath = "authenticate";
 
+        public static string IdentityCookieName(int no) => $"{IdentityCookieBaseName}.{no}";
     }
 
 

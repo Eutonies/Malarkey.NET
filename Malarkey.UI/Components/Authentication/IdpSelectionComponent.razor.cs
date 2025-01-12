@@ -4,6 +4,7 @@ using Malarkey.Abstractions;
 using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
+using System.Text;
 
 namespace Malarkey.UI.Components.Authentication;
 
@@ -24,6 +25,8 @@ public partial class IdpSelectionComponent
     [Parameter]
     public string? Scopes { get; set; }
 
+    [Parameter]
+    public string? ForwarderState { get; set; }
 
 
     private bool IsAuthenticated => SessionState.User != null;
@@ -62,16 +65,14 @@ public partial class IdpSelectionComponent
 
     private string BuildChallengeUrl(MalarkeyIdentityProvider provider)
     {
-        var returnee = $"challenge?{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}";
+        var returnee = new StringBuilder($"challenge?{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
         if (Forwarder != null)
-        {
-            returnee += $"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={Forwarder.UrlEncoded()}";
-        }
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={Forwarder.UrlEncoded()}");
         if (Scopes != null)
-        {
-            returnee += $"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={Scopes.UrlEncoded()}";
-        }
-        return returnee;
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={Scopes.UrlEncoded()}");
+        if (ForwarderState != null)
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName}={ForwarderState.UrlEncoded()}");
+        return returnee.ToString();
     }
 
 

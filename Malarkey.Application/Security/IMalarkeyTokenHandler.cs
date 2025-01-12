@@ -25,31 +25,39 @@ public interface IMalarkeyTokenHandler
     public async Task<MalarkeyTokenValidationResult> ValidateToken(string token, string receiverPublicKey) => (await ValidateTokens([(token, receiverPublicKey)])).First();
 
 
-    public async Task<MalarkeyProfileAndIdentities?> ExtractProfileAndIdentities(HttpContext context) => (await ValidateProfileToken(context)) switch
+    public async Task<MalarkeyProfileAndIdentities?> ExtractProfileAndIdentities(HttpContext context, string receiver) 
     {
-        MalarkeyTokenValidationSuccessResult succ when succ.Token is MalarkeyProfileToken profTok => new MalarkeyProfileAndIdentities(
-            Profile: profTok.Profile,
-            Identities: (await ValidateIdentityTokens(context)).Results
-               .Select(_ => _.Token)
-               .OfType<MalarkeyIdentityToken>()
-               .Select(_ => _.Identity)
-               .ToList()
-
-            ),
-        _ => null
-    };
-    public async Task<MalarkeyTokenValidationResult?> ValidateProfileToken(HttpContext context)
+        var profileToken = await ValidateProfileToken(context, receiver);
+        if(profileToken is MalarkeyTokenValidationSuccessResult profSucc)
+        {
+            if(profSucc.Token is MalarkeyProfileToken profTok)
+            {
+                var identityTokens = await ValidateIdentityTokens(context, receiver);
+                var validIdentityTokens = identityTokens.Results
+                    .Select(_ => _.Token)
+                    .OfType<MalarkeyIdentityToken>()
+                    .ToList();
+                var identities = validIdentityTokens
+                    .Select(_ => _.Identity)
+                    .ToList();
+                var returnee = new MalarkeyProfileAndIdentities(
+                    Profile: profTok.Profile,
+                    Identities: identities
+                    );
+                return returnee;
+            }
+        }
+        return null;
+    } 
+    public async Task<MalarkeyTokenValidationResult?> ValidateProfileToken(HttpContext context, string receiver)
     {
         using var scope = ServiceScopeFactory.CreateScope();
         if(!context.Request.Cookies.TryGetValue(MalarkeyConstants.Authentication.ProfileCookieName, out var profileCookie) || string.IsNullOrWhiteSpace(profileCookie))
             return null;
-        var publicKeyString = ExtractPublicKey(context, scope);
-        if(publicKeyString == null)
-            return new MalarkeyTokenValidationErrorResult(profileCookie, "No public key for validation");
-        return await ValidateToken(profileCookie, publicKeyString);
+        return await ValidateToken(profileCookie, receiver);
     }
 
-    public async Task<(IReadOnlyCollection<MalarkeyTokenValidationResult> Results, IReadOnlySet<string> FailedCookies)> ValidateIdentityTokens(HttpContext context)
+    public async Task<(IReadOnlyCollection<MalarkeyTokenValidationResult> Results, IReadOnlySet<string> FailedCookies)> ValidateIdentityTokens(HttpContext context, string receiver)
     {
         using var scope = ServiceScopeFactory.CreateScope();
         var results = new List<MalarkeyTokenValidationResult>();
@@ -63,10 +71,9 @@ public interface IMalarkeyTokenHandler
         var tokens = relevantCookies
             .Select(_ => _.Value)
             .ToList();
-        var publicKeyString = ExtractPublicKey(context, scope);
-        if (!relevantCookies.Any() || publicKeyString == null)
+        if (!relevantCookies.Any())
             return (results, failedCookies);
-        var returnee = await ValidateTokens(tokens.Select(tok => (tok, publicKeyString)));
+        var returnee = await ValidateTokens(tokens.Select(tok => (tok, receiver)));
         var succeeded = returnee
             .OfType<MalarkeyTokenValidationSuccessResult>()
             .Select(_ => _.TokenString)
@@ -79,38 +86,7 @@ public interface IMalarkeyTokenHandler
     }
 
 
-    public async Task BakeCookies(HttpContext context, MalarkeyProfile profile, IReadOnlyCollection<MalarkeyProfileIdentity> identities)
-    {
-        using var scope = ServiceScopeFactory.CreateScope();
-        var publicKeyString = ExtractPublicKey(context, scope);
-        if(publicKeyString != null)
-        {
-            var (profTok, profTokString) = await IssueToken(profile, publicKeyString);
-            context.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName, profTokString);
-            foreach(var (iden, indx) in identities.OrderBy(_ => _.GetType().Name).Select((_,indx) => (_,indx)))
-            {
-                var (idenTok, idenTokString) = await IssueToken(iden, publicKeyString);
-                context.Response.Cookies.Append($"{MalarkeyConstants.Authentication.IdentityCookieBaseName}.{indx}", idenTokString);
-            }
-        }
-    }
-
-    public void BakeCookies(HttpContext context, MalarkeyProfileToken profile, IReadOnlyCollection<MalarkeyIdentityToken> identities) => 
-        (BakeCookies(context, profile.Profile, identities.Select(_ => _.Identity).ToList())).Wait();
-
-
     protected IServiceScopeFactory ServiceScopeFactory { get; }
 
-    private string? ExtractPublicKey(HttpContext context, IServiceScope scope)
-    {
-        var publicKey = context.Connection.ClientCertificate?.PublicKey;
-        if (publicKey == null)
-        {
-            var config = scope.ServiceProvider.GetRequiredService<IOptions<MalarkeyApplicationConfiguration>>().Value;
-            publicKey = config.SigningCertificate.AsCertificate.PublicKey;
-        }
-        var returnee = publicKey.GetRSAPublicKey()?.ExportRSAPublicKeyPem()?.CleanCertificate();
-        return returnee;
-    }
 
 }
