@@ -1,4 +1,5 @@
 ﻿using Malarkey.Abstractions;
+using Malarkey.Abstractions.Authentication;
 using Malarkey.Integration.Authentication;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Malarkey.Integration.Configuration;
@@ -42,6 +43,7 @@ public static class DependencyInjectionIntegration
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyGoogleOAuthFlowHandler>();
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyFacebookOAuthFlowHandler>();
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeySpotifyOAuthFlowHandler>();
+        builder.Services.AddSingleton<MalarkeyAuthenticationRequestCache>();
         builder.Services.AddHttpClients();
         return builder;
     }

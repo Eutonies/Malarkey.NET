@@ -1,4 +1,8 @@
 @page "/profile"
+@using Malarkey.Abstractions
+@using Microsoft.AspNetCore.Authorization
+
+@attribute [Authorize(AuthenticationSchemes = MalarkeyConstants.MalarkeyAuthenticationScheme)]
 
 <div class="profile-page-bg">
     <button type="button" class="btn btn-primary" @onclick="@(() => OnForwardClick())">Forward me</button>

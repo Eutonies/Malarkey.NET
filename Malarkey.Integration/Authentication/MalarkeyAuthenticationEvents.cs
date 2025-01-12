@@ -16,7 +16,7 @@ public class MalarkeyAuthenticationEvents
     /// <summary>
     /// Invoked when the client needs to be redirected to the sign in url.
     /// </summary>
-    public Func<RedirectContext<MalarkeyServerAuthenticationHandlerOptions>, Task> OnRedirectToLogin { get; set; } = context =>
+    public Func<RedirectContext<MalarkeyServerAuthenticationHandlerOptions>, Task> OnRedirectToChallenge { get; set; } = context =>
     {
         context.Response.StatusCode = 302
 ;       context.Response.Redirect(context.RedirectUri);
@@ -26,9 +26,9 @@ public class MalarkeyAuthenticationEvents
     /// <summary>
     /// Invoked when the client needs to be redirected to the access denied url.
     /// </summary>
-    public Func<RedirectContext<MalarkeyServerAuthenticationHandlerOptions>, Task> OnRedirectToAccessDenied { get; set; } = context =>
+    public Func<RedirectContext<MalarkeyServerAuthenticationHandlerOptions>, Task> OnRedirectToLogin { get; set; } = context =>
     {
-        context.Response.StatusCode = 403;
+        context.Response.StatusCode = 302;
         context.Response.Redirect(context.RedirectUri);
         return Task.CompletedTask;
     };

@@ -27,7 +27,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly MalarkeyClientConfiguration _conf;
-    private readonly MalarkeyClientAuthenticationCache _cache;
+    private readonly MalarkeyAuthenticationRequestCache _cache;
 
     public MalarkeyClientAuthenticationHandler(
         IOptionsMonitor<MalarkeyClientAuthenticationSchemeOptions> options, 
@@ -35,7 +35,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         UrlEncoder encoder, 
         IHttpClientFactory httpClientFactory,
         IOptions<MalarkeyClientConfiguration> conf,
-        MalarkeyClientAuthenticationCache cache
+        MalarkeyAuthenticationRequestCache cache
         ) : base(options, logger, encoder)
     {
         _conf = conf.Value;
@@ -254,7 +254,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         if(identityToken != null)
             request.HttpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName + ".0", identityParam!);
 
-        MalarkeyClientAuthenticationContinuation? continuation = null;
+        MalarkeyAuthenticationRequestContinuation? continuation = null;
         var forwardedState = request.Query
             .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessParameters.ForwarderStateName)
             .Select(_ => _.Value.ToString())

@@ -10,7 +10,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Authentication;
-public record MalarkeyAuthenticationSuccessHttpResult(
+public record MalarkeyAuthenticationSuccessHttpResultExternal(
     string RedirectUrl,
     string ProfileToken,
     string IdentityToken,

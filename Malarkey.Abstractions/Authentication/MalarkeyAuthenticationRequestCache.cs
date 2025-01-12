@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Client.Authentication;
-public class MalarkeyClientAuthenticationCache
+namespace Malarkey.Abstractions.Authentication;
+public class MalarkeyAuthenticationRequestCache
 {
     private const int MaxEntriesInCache = 5000;
     private readonly SemaphoreSlim _updateLock = new SemaphoreSlim(1);
@@ -30,19 +30,25 @@ public class MalarkeyClientAuthenticationCache
                 foreach (var toRem in toRemove)
                     _entries.Remove(toRem.Key);
             }
-            var insertee = MalarkeyClientAuthenticationContinuation.From(request);
+            var insertee = MalarkeyAuthenticationRequestContinuation.From(request);
             _entries[state] = new CacheEntry(Continuation: insertee, CachedAt: DateTime.Now);
             returnee = state;
         });
         return returnee;
     }
 
-    public MalarkeyClientAuthenticationContinuation? Pop(string state)
+    public MalarkeyAuthenticationRequestContinuation? Pop(string state)
     {
         var returnee = _entries.GetValueOrDefault(state)?.Continuation;
         if(returnee != null)
             _ = WithUpdate(async () => _entries.Remove(state));
         return returnee;
+    }
+
+    public bool TryPop(string state, out MalarkeyAuthenticationRequestContinuation? cont)
+    {
+        cont = Pop(state);
+        return cont != null;
     }
 
 
@@ -62,6 +68,6 @@ public class MalarkeyClientAuthenticationCache
 
 
 
-    private record CacheEntry(MalarkeyClientAuthenticationContinuation Continuation, DateTime CachedAt);
+    private record CacheEntry(MalarkeyAuthenticationRequestContinuation Continuation, DateTime CachedAt);
 
 }

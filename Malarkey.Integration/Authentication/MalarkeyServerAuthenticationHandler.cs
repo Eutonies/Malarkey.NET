@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Malarkey.Abstractions;
 using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Components;
+using System.Text;
 
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
@@ -25,6 +26,8 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly IMalarkeyProfileRepository _profileRepo;
     private readonly MalarkeyIntegrationConfiguration _intConf;
     private readonly ILogger<MalarkeyServerAuthenticationHandler> _logger;
+    private readonly IAuthenticationUrlResolver _urlResolver;
+    private readonly MalarkeyAuthenticationRequestCache _requestCache;
 
     /// <summary>
     /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
@@ -43,8 +46,11 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         IEnumerable<IMalarkeyOAuthFlowHandler> flowHandlers,
         IMalarkeyProfileRepository profileRepo,
         IOptions<MalarkeyIntegrationConfiguration> intConf,
-        ILogger<MalarkeyServerAuthenticationHandler> logger) : base(options, loggerFactory, encoder)
+        ILogger<MalarkeyServerAuthenticationHandler> logger,
+        IAuthenticationUrlResolver urlResolver,
+        MalarkeyAuthenticationRequestCache requestCache) : base(options, loggerFactory, encoder)
     {
+        _urlResolver = urlResolver;
         _logger = logger;
         _events = new MalarkeyAuthenticationEvents();
         _intConf = intConf.Value;
@@ -53,6 +59,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         _flowHandlers = flowHandlers
             .ToDictionarySafe(_ => _.HandlerFor);
         _profileRepo = profileRepo;
+        _requestCache = requestCache;
     }
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync() => (await _tokenHandler.ExtractProfileAndIdentities(Context)) switch
@@ -68,33 +75,26 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
-        var forwarder = Request.Query
-            .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName)
-            .Select(_ => _.Value.ToString())
-            .FirstOrDefault();
-        var scopes = Request.Query
-            .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName)
-            .Select(_ => _.Value.ToString().Split(" "))
-            .FirstOrDefault();
-        var forwarderState = Request.Query
-            .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName)
-            .Select(_ => _.Value.ToString())
-            .FirstOrDefault();
-        var audience = ExtractPublicKeyOfReceiver();
         var idp = ExtractIdentityProvider();
-        if(idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
+        if (idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
         {
-            var accessDeniedUrl = BuildRedirectUri(Options.AccessDeniedUrl);
-            var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
-                context: Context,
-                scheme: Scheme,
-                options: Options,
-                properties: properties,
-                redirectUri: accessDeniedUrl);
-            await Events.OnRedirectToAccessDenied(redirContext);
+            await HandleAuthenticationRequestForwarding(properties);
         }
         else
         {
+            var forwarder = Request.Query
+                .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName)
+                .Select(_ => _.Value.ToString())
+                .FirstOrDefault();
+            var scopes = Request.Query
+                .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName)
+                .Select(_ => _.Value.ToString().Split(" "))
+                .FirstOrDefault();
+            var forwarderState = Request.Query
+                .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName)
+                .Select(_ => _.Value.ToString())
+                .FirstOrDefault();
+            var audience = ExtractPublicKeyOfReceiver();
             var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience, scopes, forwarderState);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(session);
             var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
@@ -103,9 +103,11 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
                 options: Options,
                 properties: properties,
                 redirectUri: redirectUrl);
-            await Events.OnRedirectToLogin(redirContext);
+            await Events.OnRedirectToChallenge(redirContext);
 
         }
+
+
 
     }
 
@@ -151,17 +153,25 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var (identityToken, identityTokenString) = await _tokenHandler.IssueToken(identity, session.Audience);
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
         _tokenHandler.BakeCookies(request.HttpContext, profileToken, [identityToken]);
-        var redirectUrl = session.Forwarder ?? $"/profile";
-        _logger.LogInformation($"Will redirect to URL: {redirectUrl} ");
-        var result = new MalarkeyAuthenticationSuccessHttpResult(
-            RedirectUrl: redirectUrl,
-            ProfileToken: profileTokenString,
-            IdentityToken: identityTokenString,
-            IdentityProviderAccessToken: identity.IdentityProviderTokenToUse?.Token,
-            ForwarderState: session.ForwarderState,
-            Logger: _logger
-        );
-        return result;
+        if(session.ForwarderState != null && _requestCache.TryPop(session.ForwarderState, out var conti))
+        {
+            var ret = new MalarkeyAuthenticationSuccessHttpResultInternal(conti!, _logger);
+            return ret;
+        }
+        else
+        {
+            var redirectUrl = session.Forwarder ?? $"";
+            _logger.LogInformation($"Will redirect to URL: {redirectUrl} ");
+            var result = new MalarkeyAuthenticationSuccessHttpResultExternal(
+                RedirectUrl: redirectUrl,
+                ProfileToken: profileTokenString,
+                IdentityToken: identityTokenString,
+                IdentityProviderAccessToken: identity.IdentityProviderTokenToUse?.Token,
+                ForwarderState: session.ForwarderState,
+                Logger: _logger
+            );
+            return result;
+        }
     }
 
     private Task<BadRequest<string>> ReturnError(string errorMessage) => Task.FromResult(
@@ -197,6 +207,26 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         if (!Request.Headers.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var pubKey))
             return _intConf.PublicKey;
         return pubKey.ToString();
+    }
+
+    private async Task HandleAuthenticationRequestForwarding(AuthenticationProperties props)
+    {
+        var state = await _requestCache.Cache(Request);
+        var authenticateUrl = new StringBuilder(_urlResolver.AuthenticateUrl);
+        if (OriginalPath.HasValue && OriginalPath.Value.Length > 0)
+            authenticateUrl.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={OriginalPath.Value.UrlEncoded()}");
+        if (state != null)
+            authenticateUrl.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName}={state.UrlEncoded()}");
+        var url = authenticateUrl.ToString();
+        var absoluteUrl = BuildRedirectUri(url);
+        var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
+            context: Context,
+            scheme: Scheme,
+            options: Options,
+            properties: props,
+            redirectUri: absoluteUrl);
+        await Events.OnRedirectToLogin(redirContext);
+
     }
 
 

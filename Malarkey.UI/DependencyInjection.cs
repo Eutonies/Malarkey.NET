@@ -9,6 +9,8 @@ using Malarkey.Persistence;
 using Malarkey.Integration;
 using Malarkey.UI.Configuration;
 using Malarkey.UI.Middleware;
+using Malarkey.Integration.Authentication;
+using Malarkey.UI.Components.Authentication;
 
 namespace Malarkey.UI;
 
@@ -50,6 +52,7 @@ public static class DependencyInjection
         builder.Services.AddHttpLogging();
         builder.AddSecurity();
         builder.AddApi();
+        builder.Services.AddSingleton<IAuthenticationUrlResolver, AuthenticateUrlResolver>();
         return builder;
     }
 

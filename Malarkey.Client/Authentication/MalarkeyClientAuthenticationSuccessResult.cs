@@ -1,4 +1,5 @@
 ﻿using Malarkey.Abstractions;
+using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Http;
 using System;
@@ -9,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Malarkey.Client.Authentication;
 public record MalarkeyClientAuthenticationSuccessResult(
-    MalarkeyClientAuthenticationContinuation Continuation
+    MalarkeyAuthenticationRequestContinuation Continuation
     ) : IResult
 {
     public Task ExecuteAsync(HttpContext httpContext)
