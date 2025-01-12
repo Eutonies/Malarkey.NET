@@ -1,0 +1,36 @@
+﻿<div class="malarkey-authenticate-idp-component-container container-fluid">
+    <div class="row malarkey-authenticate-idp-component-top-row">
+        <div class="col-12 malarkey-authenticate-idp-component-container-content">
+            <h1 class="malarkey-authenticate-idp-component-header">@(IsAuthenticated ? "Connect account" : "Sign in with")</h1>
+        </div>
+    </div>
+    <div class="row malarkey-authenticate-idp-component-button-row">
+        <div class="col-12 malarkey-authenticate-idp-component-container-content">
+            <button class="malarkey-authenticate-idp-component-button" @onclick="OnMicrosoftClick">
+                <img src="images/authenticate/microsoft.webp" />
+            </button>
+        </div>
+    </div>
+    <div class="row malarkey-authenticate-idp-component-button-row">
+        <div class="col-12 malarkey-authenticate-idp-component-container-content">
+            <button class="malarkey-authenticate-idp-component-button" @onclick="OnGoogleClick">
+                <img src="images/authenticate/google.webp" />
+            </button>
+        </div>
+    </div>
+    <div class="row malarkey-authenticate-idp-component-button-row">
+        <div class="col-12 malarkey-authenticate-idp-component-container-content">
+            <button class="malarkey-authenticate-idp-component-button" @onclick="OnFacebookClick">
+                <img src="images/authenticate/facebook.webp" />
+            </button>
+        </div>
+    </div>
+    <div class="row malarkey-authenticate-idp-component-button-row">
+        <div class="col-12 malarkey-authenticate-idp-component-container-content">
+            <button class="malarkey-authenticate-idp-component-button" @onclick="OnSpotifyClick">
+                <img src="images/authenticate/spotify.webp" />
+            </button>
+        </div>
+    </div>
+
+</div>

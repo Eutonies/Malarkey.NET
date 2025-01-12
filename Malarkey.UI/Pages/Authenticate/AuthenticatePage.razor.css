@@ -25,65 +25,6 @@
 }
 
 
-.malarkey-authenticate-page-container {
-    position: relative;
-    margin-left: 100px;
-    margin-top: 150px;
-    border-radius: 5px;
-    padding-left: 20px;
-    box-shadow: 5px 5px rgba(30,30,30,0.5);
-    background-color: rgba(195,185,185,0.74);
-    min-width: 200px;
-    max-width: 600px;
-    height: 600px;
-}
-
-.malarkey-authenticate-page-top-row{
-    margin-top: 30px;
-    margin-bottom: 30px;
-}
-
-.malarkey-authenticate-page-header {
-    display: flex;
-    justify-content: center;
-    font-family: 'Merienda';
-    font-size: 30px;
-    font-weight: 900;
-    color: black;
-}
-
-.malarkey-authenticate-page-button {
-    content: '';
-    width: 200px;
-    height: 50px;
-    border-top-left-radius: 15px;
-    border-bottom-right-radius: 15px;
-    display: flex;
-    padding: 0px;
-    background-color: rgb(255,255,255);
-    box-shadow: 2px 2px rgba(30,30,30,0.5);
-}
-
-.malarkey-authenticate-page-button:hover {
-    background-color: rgba(50,50,50,0.6);
-}
-
-.malarkey-authenticate-page-button img {
-    margin-left: 10px;
-    height:100%;
-}
-
-
-.malarkey-authenticate-page-button-row {
-    margin-top: 30px;
-    margin-bottom: 20px;
-}
-
-.malarkey-authenticate-page-container-content {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-}
 
 @keyframes bgblur {
     0% {
