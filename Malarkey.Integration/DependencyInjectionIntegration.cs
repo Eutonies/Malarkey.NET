@@ -55,31 +55,16 @@ public static class DependencyInjectionIntegration
         app.MapGet(
             conf.RedirectPath, 
             async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, 
-                   [FromServices] NavigationManager navManager,
-                    HttpRequest request) => await authHandler.HandleCallback(navManager, request)
+                    HttpRequest request) => await authHandler.HandleCallback(request)
         );
         app.MapPost(
             conf.RedirectPath, 
             async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, 
-                   [FromServices] NavigationManager navManager,
-                    HttpRequest request) => await authHandler.HandleCallback(navManager, request)
+                    HttpRequest request) => await authHandler.HandleCallback(request)
         );
         return app;
     }
 
-    private static async Task HandleCallback(this MalarkeyServerAuthenticationHandler authHandler, NavigationManager navManager, HttpRequest req) 
-    {
-        var result = await authHandler.HandleCallback(req);
-        if(result is MalarkeyAuthenticationSuccessHttpResult succ){
-            navManager.NavigateTo(succ.ForwardLocation, forceLoad: true);
-        }
-        else if(result is BadRequest<string> badReq) {
-            throw new Exception(badReq.Value);
-        }
-        else {
-            throw new Exception("Did not complete authentication flow correctly");
-        }
-    }
 
 
     private static MalarkeyIntegrationConfiguration IntegrationConfig(this IConfiguration conf)

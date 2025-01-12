@@ -23,7 +23,7 @@ public record MalarkeyAuthenticationSuccessHttpResult(
     public Task ExecuteAsync(HttpContext httpContext)
     {
         httpContext.Response.StatusCode = 302;
-        httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenName, ProfileToken);
+        /*httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenName, ProfileToken);
         httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenName, IdentityToken);
         if(IdentityProviderAccessToken != null)
         {
@@ -32,7 +32,7 @@ public record MalarkeyAuthenticationSuccessHttpResult(
         if (ForwarderState != null)
         {
             httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ForwarderStateName, ForwarderState);
-        }
+        }*/
         var newLocation = BuildRedirectString();
         Logger.LogInformation($"Authentication success redirect result redirecting to: {newLocation}");
         //httpContext.Response.Headers.Location = newLocation;
@@ -44,14 +44,14 @@ public record MalarkeyAuthenticationSuccessHttpResult(
     {
         var returnee = new StringBuilder();
         returnee.Append(RedirectUrl);
-        returnee.Append($"?{MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenName}={ProfileToken.UrlEncoded()}");
-        returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenName}={IdentityToken.UrlEncoded()}");
+        //returnee.Append($"?{MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenName}={ProfileToken.UrlEncoded()}");
+        /*returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenName}={IdentityToken.UrlEncoded()}");
         if (IdentityProviderAccessToken != null)
         {
             returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityProviderAccessTokenName}={IdentityProviderAccessToken.UrlEncoded()}");
         }
         if (ForwarderState != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.ForwarderStateName}={ForwarderState.UrlEncoded()}");
+            returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.ForwarderStateName}={ForwarderState.UrlEncoded()}");*/
         return returnee.ToString();
     }
 
