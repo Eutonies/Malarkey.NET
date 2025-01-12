@@ -153,7 +153,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         _tokenHandler.BakeCookies(request.HttpContext, profileToken, [identityToken]);
         var redirectUrl = session.Forwarder ?? $"/profile";
         _logger.LogInformation($"Will redirect to URL: {redirectUrl} ");
-        var redirect = new MalarkeyAuthenticationSuccessHttpResult(
+        var result = new MalarkeyAuthenticationSuccessHttpResult(
             RedirectUrl: redirectUrl,
             ProfileToken: profileTokenString,
             IdentityToken: identityTokenString,
@@ -161,8 +161,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             ForwarderState: session.ForwarderState,
             Logger: _logger
         );
-        _logger.LogInformation($"Created redirect result with forward URL: {redirect.ForwardLocation} ");
-        return redirect;
+        return result;
     }
 
     private Task<BadRequest<string>> ReturnError(string errorMessage) => Task.FromResult(

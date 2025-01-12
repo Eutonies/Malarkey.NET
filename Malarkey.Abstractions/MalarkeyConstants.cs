@@ -66,7 +66,7 @@ public static class MalarkeyConstants
     }
 
 
-    public static class AuthenticationSuccessQueryParameters
+    public static class AuthenticationSuccessParameters
     {
         /// <summary>
         /// If Malarkey authentication succeeds, profile token will returned as <see cref="ProfileTokenName"/> query parameter on forward
@@ -85,7 +85,7 @@ public static class MalarkeyConstants
         /// <summary>
         /// The state provided when initiating authentication.
         /// </summary>
-        public const string ForwarderStateName = "malarkeystate";
+        public const string ForwarderStateName = "state";
     }
 
     

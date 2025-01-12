@@ -224,8 +224,8 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
 
     public async Task<IResult> HandleCallback(HttpRequest request)
     {
-        var profileParam = request.Query
-            .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenName)
+        var profileParam = request.Form
+            .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessParameters.ProfileTokenName)
             .Select(_ => _.Value.ToString())
             .FirstOrDefault();
         if (profileParam == null)
@@ -241,7 +241,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         request.HttpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName, profileParam);
 
         var identityParam = request.Query
-            .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenName)
+            .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessParameters.IdentityTokenName)
             .Select(_ => _.Value.ToString())
             .FirstOrDefault();
         MalarkeyIdentityToken? identityToken = null;
@@ -256,7 +256,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
 
         MalarkeyClientAuthenticationContinuation? continuation = null;
         var forwardedState = request.Query
-            .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessQueryParameters.ForwarderStateName)
+            .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessParameters.ForwarderStateName)
             .Select(_ => _.Value.ToString())
             .FirstOrDefault();
         if (forwardedState != null)

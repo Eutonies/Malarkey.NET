@@ -20,44 +20,40 @@ public record MalarkeyAuthenticationSuccessHttpResult(
     ) : IResult
 {
     private string? _forwardLocation;
-    public string ForwardLocation => _forwardLocation ??= BuildRedirectString();
     public async Task ExecuteAsync(HttpContext httpContext)
     {
-        httpContext.Response.StatusCode = 302;
-        /*httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenName, ProfileToken);
-        httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenName, IdentityToken);
-        if(IdentityProviderAccessToken != null)
-        {
-            httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityProviderAccessTokenName, IdentityProviderAccessToken);
-        }
-        if (ForwarderState != null)
-        {
-            httpContext.Response.Headers.Append(MalarkeyConstants.AuthenticationSuccessQueryParameters.ForwarderStateName, ForwarderState);
-        }*/
-        var body = new MalarkeyAuthenticatedBody(
-            ProfileToken: ProfileToken,
-            IdentityTokens: [IdentityToken]
-        );
+        httpContext.Response.StatusCode = 200;
+        var body = BodyString(RedirectUrl, ProfileToken, IdentityToken, IdentityProviderAccessToken, ForwarderState);
         await httpContext.Response.WriteAsJsonAsync(body);
-        var newLocation = BuildRedirectString();
-        Logger.LogInformation($"Authentication success redirect result redirecting to: {newLocation}");
-        //httpContext.Response.Headers.Location = newLocation;
-        httpContext.Response.Redirect(newLocation);
     }
 
-    private string BuildRedirectString()
-    {
-        var returnee = new StringBuilder();
-        returnee.Append(RedirectUrl);
-        //returnee.Append($"?{MalarkeyConstants.AuthenticationSuccessQueryParameters.ProfileTokenName}={ProfileToken.UrlEncoded()}");
-        /*returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityTokenName}={IdentityToken.UrlEncoded()}");
-        if (IdentityProviderAccessToken != null)
-        {
-            returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.IdentityProviderAccessTokenName}={IdentityProviderAccessToken.UrlEncoded()}");
-        }
-        if (ForwarderState != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationSuccessQueryParameters.ForwarderStateName}={ForwarderState.UrlEncoded()}");*/
-        return returnee.ToString();
-    }
+
+    private static string BodyString(string redirectUrl, string profileToken, string identityToken, string? idpAccessToken, string? forwarderState) =>
+        $@"
+            <html>
+                <body onload='document.forms[""form""].submit()'>
+                    <form name='form' action='{redirectUrl}' method='post'>
+                        <input type='hidden' name='{MalarkeyConstants.AuthenticationSuccessParameters.ProfileTokenName}' value='{profileToken}'/>
+                        <input type='hidden' name='{MalarkeyConstants.AuthenticationSuccessParameters.IdentityTokenName}' value='{identityToken}'/>
+                        {(
+                            idpAccessToken == null ? 
+                                "" : 
+                                ($"<input type='hidden' name='{MalarkeyConstants.AuthenticationSuccessParameters.IdentityProviderAccessTokenName}' value='{idpAccessToken}'/>")
+            
+                        )}
+                        {(
+                            forwarderState == null ?
+                                "" :
+                                ($"<input type='hidden' name='{MalarkeyConstants.AuthenticationSuccessParameters.ForwarderStateName}' value='{forwarderState}'/>")
+
+                        )}
+
+                    </form>
+                </body>
+
+            </html>
+
+
+";
 
 }
