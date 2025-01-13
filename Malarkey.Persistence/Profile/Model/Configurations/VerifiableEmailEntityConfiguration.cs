@@ -13,11 +13,11 @@ internal class VerifiableEmailEntityConfiguration : MalarkeyEntityConfiguration<
     public override void Configure(EntityTypeBuilder<VerifiableEmailDbo> builder)
     {
         builder.ToTable("profile_email");
-        builder.Property(nameof(VerifiableEmailDbo.EmailAddressId)).HasColumnName("email_id");
+        builder.Property(nameof(VerifiableEmailDbo.EmailAddressId)).HasColumnName("email_address_id");
         builder.Property(nameof(VerifiableEmailDbo.ProfileId)).HasColumnName("profile_id");
         builder.Property(nameof(VerifiableEmailDbo.CodeString)).HasColumnName("code_string");
-        builder.Property(nameof(VerifiableEmailDbo.EmailAddress)).HasColumnName("email_address");
-        builder.Property(nameof(VerifiableEmailDbo.LastVerificationMailSent)).HasColumnName("last_send_time");
+        builder.Property(nameof(VerifiableEmailDbo.EmailAddress)).HasColumnName("email_address_string");
+        builder.Property(nameof(VerifiableEmailDbo.LastVerificationMailSent)).HasColumnName("last_verification_mail_sent");
         builder.Property(nameof(VerifiableEmailDbo.VerifiedAt)).HasColumnName("verified_at");
     }
 }

@@ -3,7 +3,7 @@
 
 .malarkey-profile-container {
     width: 800px;
-    height: 1000px;
+    height: 450px;
     display: flex;
     flex-direction: column;
 }
@@ -17,7 +17,7 @@
 
 .malarkey-profile-input-form {
     width: 600px;
-    height: 800px;
+    height: 400px;
     font-family: 'Ink Free';
     font-size: 14pt;
     margin-top: 40px;
@@ -55,4 +55,23 @@
 
 .input-error {
     border-color: rgb(220, 10, 10);
+}
+
+.malarkey-profile-flash-info{
+    font-family: 'Ink Free';
+    font-size: 20pt;
+    color: rgb(58, 172, 78, 0.9);
+    animation-delay: 0s;
+    animation-name: flashinfo;
+    animation-duration: 3s;
+    animation-fill-mode: both;
+}
+
+@keyframes flashinfo {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
 }

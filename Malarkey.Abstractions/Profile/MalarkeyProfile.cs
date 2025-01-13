@@ -14,6 +14,7 @@ public sealed record MalarkeyProfile(
     string? LastName,
     string? PrimaryEmail,
     bool PrimaryEmailIsVerified,
+    DateTime? NextVerificationSendTime,
     byte[]? ProfileImage = null,
     string? ProfileImageType = null
     );

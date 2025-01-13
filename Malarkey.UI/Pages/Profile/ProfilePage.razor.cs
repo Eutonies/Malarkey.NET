@@ -1,11 +1,13 @@
+using Malarkey.Abstractions.API.Profile.Email;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Application.Common;
+using Malarkey.Application.Profile;
 using Malarkey.Application.Profile.Persistence;
 using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components;
 using System.Net.Mail;
 namespace Malarkey.UI.Pages.Profile;
-public partial class ProfilePage 
+public partial class ProfilePage : IDisposable
 {
     [Inject]
     public NavigationManager NavManager { get; set; }
@@ -13,11 +15,14 @@ public partial class ProfilePage
     [Inject]
     public IMalarkeyProfileRepository ProfileRepo { get; set; }
 
+    [Inject]
+    public IVerificationEmailHandler EmailHandler { get; set; }
+    private bool _hasRegisteredForEmailUpdates = false;
+
     [CascadingParameter]
     public MalarkeySessionState SessionState { get; set; }
     private Guid? ProfileId => SessionState.User?.Profile?.ProfileId;
 
-    private DateTime _lastUpdate = DateTime.Now;
     private string? _infoMessage;
 
     private MalarkeyProfile? _profile;
@@ -107,7 +112,11 @@ public partial class ProfilePage
                 _identities = loaded.Identities;
             }
             await InvokeAsync(StateHasChanged);
-
+        }
+        if(!_hasRegisteredForEmailUpdates)
+        {
+            EmailHandler.OnUpdate += OnEmailVerification;
+            _hasRegisteredForEmailUpdates = true;
         }
     }
 
@@ -126,10 +135,38 @@ public partial class ProfilePage
         }
     });
 
+    private void OnEmailVerification(object? sender, VerifiableEmail email)
+    {
+        if(ProfileId != null && email.ProfileId == ProfileId && email.EmailAddress.ToLower().Trim() == _profile?.PrimaryEmail?.ToLower()?.Trim())
+        {
+            Task.Run(async () =>
+            {
+                var reloaded = await ProfileRepo.LoadProfileAndIdentities(ProfileId.Value);
+                if (reloaded != null)
+                {
+                    _profile = reloaded.Profile;
+                    _identities = reloaded.Identities;
+                    await InvokeAsync(StateHasChanged);
+                }
+            });
+        }
+    }
+
+    private void OnSendVerificationEmailClicked()
+    {
+        if(ProfileId != null && _profile?.PrimaryEmail != null)
+        {
+            Task.Run(async () =>
+            {
+                await EmailHandler.SendVerificationMail(_profile.PrimaryEmail, ProfileId.Value);
+            });
+
+        }
+    }
+
     private void FlashInfo(string infoText)
     {
         _infoMessage = infoText;
-        _lastUpdate = DateTime.Now;
         InvokeAsync(StateHasChanged);
         Task.Run(async () =>
         {
@@ -139,5 +176,12 @@ public partial class ProfilePage
         });
     }
 
-
+    public void Dispose()
+    {
+        if(_hasRegisteredForEmailUpdates)
+        {
+            EmailHandler.OnUpdate -= OnEmailVerification;
+            _hasRegisteredForEmailUpdates = false;
+        }
+    }
 }

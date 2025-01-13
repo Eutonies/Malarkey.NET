@@ -34,7 +34,8 @@ public static class MalarkeyTokenTsoExtensions
                 FirstName: token.Payload.firstname,
                 LastName: token.Payload.lastname,
                 PrimaryEmail: token.Payload.email,
-                PrimaryEmailIsVerified: false
+                PrimaryEmailIsVerified: false,
+                NextVerificationSendTime: null
                 )
             ),
         _ => new MalarkeyIdentityToken(

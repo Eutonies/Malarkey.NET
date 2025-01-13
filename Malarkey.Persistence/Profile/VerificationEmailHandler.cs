@@ -87,13 +87,6 @@ internal class VerificationEmailHandler : IVerificationEmailHandler
                 return loaded.ToDomain();
             loaded.VerifiedAt = DateTime.Now;
             cont.Update(loaded);
-            var profile = await cont.Profiles
-               .FirstAsync(_ => _.ProfileId == loaded.ProfileId);
-            if(profile.PrimaryEmail != null && profile.PrimaryEmail.ToLower().Trim() == loaded.EmailAddress.ToLower().Trim())
-            {
-                profile.PrimaryEmailIsVerified = true;
-                cont.Update(profile);
-            }
             await cont.SaveChangesAsync();
             return loaded.ToDomain();
         });

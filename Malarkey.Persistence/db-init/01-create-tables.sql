@@ -82,4 +82,14 @@ create table id_provider_token (
     scopes varchar(2000) not null
 );
 
+create table profile_email (
+    email_address_id bigint primary key generated always as identity,
+    profile_id uuid not null,
+    email_address_string varchar(200) not null,
+    code_string varchar(200) not null,
+    last_verification_mail_sent timestamp,
+    verified_at timestamp,
+    unique(profile_id,email_address_string),
+    constraint fk_profile_email_profid foreign key (profile_id) references profile(profile_id) on delete cascade
+);
 

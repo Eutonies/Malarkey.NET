@@ -18,11 +18,10 @@ internal class MalarkeyProfileDbo
     public string? FirstName { get; set; }
     public string? LastName { get; set; }
     public string? PrimaryEmail { get; set; }
-    public bool PrimaryEmailIsVerified { get; set; }
     public byte[]? ProfileImage { get; set; }
     public string? ProfileImageType { get; set; }
 
-    public MalarkeyProfile ToDomain() => new MalarkeyProfile(
+    public MalarkeyProfile ToDomain(bool primaryEmailIsVerified, DateTime? nextVerificationEmailSendTime) => new MalarkeyProfile(
         ProfileId,
         ProfileName,
         CreatedAt,
@@ -30,7 +29,8 @@ internal class MalarkeyProfileDbo
         FirstName,
         LastName,
         PrimaryEmail,
-        PrimaryEmailIsVerified,
+        primaryEmailIsVerified,
+        nextVerificationEmailSendTime,
         ProfileImage,
         ProfileImageType
         );

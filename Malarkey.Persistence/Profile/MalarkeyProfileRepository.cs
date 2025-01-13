@@ -19,6 +19,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
 {
     private readonly IDbContextFactory<MalarkeyDbContext> _dbContextFactory;
     private SemaphoreSlim _nameUniqueLock = new SemaphoreSlim(1);
+    private static readonly TimeSpan TimeBetweenVerificationEmails = TimeSpan.FromHours(2);
 
     public MalarkeyProfileRepository(IDbContextFactory<MalarkeyDbContext> dbContextFactory)
     {
@@ -67,8 +68,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         {
             identity = insertee.ToDomain(null);
         }
-
-        var profile = profileInsertee.ToDomain();
+        var profile = await ConvertWithEmailVerificationInfo(cont, profileInsertee);
         return new MalarkeyProfileAndIdentities(profile, [identity]);
     }
 
@@ -104,11 +104,8 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
             .Where(_ => _.ProfileId == activeProfileId)
             .Select(_ => _.Absorbee)
             .ToListAsync();
-        return new MalarkeyProfileAndIdentities(profile.ToDomain(), identities, Absorbees:  absorbees);
-            
-
-
-
+        var domainProfile = await ConvertWithEmailVerificationInfo(cont, profile);
+        return new MalarkeyProfileAndIdentities(domainProfile, identities, Absorbees:  absorbees);
     }
 
     public async Task SaveIdentityProviderToken(IdentityProviderToken token, Guid identityId)
@@ -191,15 +188,8 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         UpdateAndReturn(profileId, prof =>
         {
             prof.PrimaryEmail = email;
-            prof.PrimaryEmailIsVerified = false;
         });
 
-    public Task<ActionResult<MalarkeyProfile>> VerifyPrimaryEmail(Guid profileId, string email) =>
-        UpdateAndReturn(profileId, prof =>
-        {
-            if(prof.PrimaryEmail != null && prof.PrimaryEmail.ToLower() == email.ToLower())
-                prof.PrimaryEmailIsVerified = true;
-        });
 
     public Task<ActionResult<MalarkeyProfile>> UpdateProfileImage(Guid profileId, byte[] image, string imageType) =>
         UpdateAndReturn(profileId, prof =>
@@ -220,7 +210,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
             changer(loaded);
             cont.Update(loaded);
             await cont.SaveChangesAsync();
-            var returnee = loaded.ToDomain();
+            var returnee = await ConvertWithEmailVerificationInfo(cont, loaded);
             return new SuccessActionResult<MalarkeyProfile>(returnee);
         }
         catch(Exception ex) 
@@ -272,7 +262,31 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
             .Where(_ => _.ProfileId == profileId)
             .Select(_ => _.Absorbee)
             .ToListAsync();
-        var returnee = new MalarkeyProfileAndIdentities(profile!.ToDomain(), domainIdentities, absorbeeIds);
+        var domainProfile = await ConvertWithEmailVerificationInfo(cont, profile);
+        var returnee = new MalarkeyProfileAndIdentities(domainProfile, domainIdentities, absorbeeIds);
         return returnee;
     }
+
+    private static async Task<MalarkeyProfile> ConvertWithEmailVerificationInfo(MalarkeyDbContext cont, MalarkeyProfileDbo dbo)
+    {
+        var emailIsVerified = false;
+        DateTime? nextEmailVerificationTime = null;
+        if(!string.IsNullOrWhiteSpace(dbo.PrimaryEmail))
+        {
+            var emailInfo = await cont.Emails
+                .FirstOrDefaultAsync(_ => _.ProfileId == dbo.ProfileId && _.EmailAddress == dbo.PrimaryEmail.ToLower().Trim());
+            if (emailInfo != null && emailInfo.VerifiedAt != null)
+            {
+                emailIsVerified = true;
+            }
+            else if(emailInfo != null)
+            {
+                nextEmailVerificationTime = emailInfo.LastVerificationMailSent?.Add(TimeBetweenVerificationEmails) ?? DateTime.Now.AddMinutes(-1);
+            }
+        }
+        var returnee = dbo.ToDomain(emailIsVerified, nextEmailVerificationTime);
+        return returnee;
+    }
+
+
 }

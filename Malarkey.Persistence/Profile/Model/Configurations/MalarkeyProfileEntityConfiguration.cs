@@ -21,7 +21,6 @@ internal class MalarkeyProfileEntityConfiguration : MalarkeyEntityConfiguration<
         builder.Property(nameof(MalarkeyProfileDbo.FirstName)).HasColumnName("first_name");
         builder.Property(nameof(MalarkeyProfileDbo.LastName)).HasColumnName("last_name");
         builder.Property(nameof(MalarkeyProfileDbo.PrimaryEmail)).HasColumnName("primary_email");
-        builder.Property(nameof(MalarkeyProfileDbo.PrimaryEmailIsVerified)).HasColumnName("primary_email_is_verified");
         builder.Property(nameof(MalarkeyProfileDbo.ProfileImage)).HasColumnName("profile_image");
         builder.Property(nameof(MalarkeyProfileDbo.ProfileImage)).HasColumnType("bytea");
         builder.Property(nameof(MalarkeyProfileDbo.ProfileImageType)).HasColumnName("profile_image_type");
