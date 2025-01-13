@@ -25,10 +25,7 @@ public record MalarkeyAuthenticationRequestContinuation(
     {
         try
         {
-            var body = request.Body;
-            using var reader = new StreamReader(body);
-            var returnee = reader.ReadToEnd();
-            return returnee;
+            return null;
         }
         catch
         {

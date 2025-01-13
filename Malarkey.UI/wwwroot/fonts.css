@@ -5,3 +5,37 @@
     src: url('fonts/Merienda.ttf');
 }
 
+@font-face {
+    font-family: 'Elite';
+    font-weight: 400;
+    font-style: normal;
+    src: url('fonts/SpecialElite-Regular.ttf');
+}
+
+@font-face {
+    font-family: 'OldStandard';
+    font-weight: 400;
+    font-style: normal;
+    src: url('fonts/OLDSTANDARDTT-BOLD.TTF');
+}
+
+@font-face {
+    font-family: 'Trade Winds';
+    font-weight: 400;
+    font-style: normal;
+    src: url('fonts/TRADEWINDS-REGULAR.TTF');
+}
+
+@font-face {
+    font-family: 'Ink Free';
+    font-weight: 400;
+    font-style: normal;
+    src: url('fonts/INKFREE.TTF');
+}
+
+@font-face {
+    font-family: 'FreeStyle';
+    font-weight: 400;
+    font-style: normal;
+    src: url('fonts/FREESCPT.TTF');
+}

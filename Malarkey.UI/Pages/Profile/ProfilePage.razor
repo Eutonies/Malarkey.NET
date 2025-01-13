@@ -10,22 +10,35 @@
         <div class="malarkey-profile-input-form">
             <div class="malarkey-profile-input-container">
                 <label class="malarkey-profile-input-label" for="malarkey-profile-name">User ID</label>
-                <input type="text" class="malarkey-profile-input" id="malarkey-profile-name" @bind="ProfileName" />
-                @if(_profileNameError != null) {
-                    <div class="malarkey-profile-input-error">@_profileNameError</div>
-                }
+                <div class="malarkey-profile-input-component">
+                    <input type="text" class="malarkey-profile-input @ProfileNameExtraClass" id="malarkey-profile-name" @bind="ProfileName" />
+                    @if (_profileNameError != null)
+                    {
+                        <div class="malarkey-profile-input-error">@_profileNameError</div>
+                    }
+                </div>
             </div>
             <div class="malarkey-profile-input-container">
                 <label class="malarkey-profile-input-label" for="malarkey-profile-first-name">First name</label>
-                <input type="text" class="malarkey-profile-input" id="malarkey-profile-first-name" @bind="FirstName" />
+                <div class="malarkey-profile-input-component">
+                    <input type="text" class="malarkey-profile-input" id="malarkey-profile-first-name" @bind="FirstName" />
+                </div>
             </div>
             <div class="malarkey-profile-input-container">
                 <label class="malarkey-profile-input-label" for="malarkey-profile-last-name">Last name</label>
-                <input type="text" class="malarkey-profile-input" id="malarkey-profile-last-name" @bind="LastName" />
+                <div class="malarkey-profile-input-component">
+                    <input type="text" class="malarkey-profile-input" id="malarkey-profile-last-name" @bind="LastName" />
+                </div>
             </div>
             <div class="malarkey-profile-input-container">
                 <label class="malarkey-profile-input-label" for="malarkey-profile-email">Email</label>
-                <input type="email" class="malarkey-profile-input" id="malarkey-profile-email" @bind="PrimaryEmail" />
+                <div class="malarkey-profile-input-component">
+                    <input type="email" class="malarkey-profile-input @EmailExtraClass" id="malarkey-profile-email" @bind="PrimaryEmail" />
+                    @if (_primaryEmailError != null)
+                    {
+                        <div class="malarkey-profile-input-error">@_primaryEmailError</div>
+                    }
+                </div>
             </div>
 
         </div>

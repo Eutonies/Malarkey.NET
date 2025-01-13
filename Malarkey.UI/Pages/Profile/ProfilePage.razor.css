@@ -11,31 +11,48 @@
 .malarkey-profile-header {
     font-family: 'Merienda';
     font-size: 20pt;
-    width: 100%;
+    width: 600px;
     text-align: center;
 }
 
 .malarkey-profile-input-form {
     width: 600px;
     height: 800px;
+    font-family: 'Ink Free';
+    font-size: 14pt;
+    margin-top: 40px;
 }
 
 .malarkey-profile-input-container {
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    margin-top: 20px;
-    margin-bottom: 20px;
+    height: 60px;
 }
 
 .malarkey-profile-input-label {
 
 }
 
+.malarkey-profile-input-component {
+    display: flex;
+    flex-direction: column;
+    justify-content: start;
+}
+
 .malarkey-profile-input {
     border-radius: 5px;
     width: 200px;
+    font-family: 'FreeStyle';
+    font-size: 10pt;
 }
 
 .malarkey-profile-input-error {
+    font-family: 'Ink Free';
+    font-size: 10pt;
+    color: rgb(220, 10, 10);
+}
+
+.input-error {
+    border-color: rgb(220, 10, 10);
 }

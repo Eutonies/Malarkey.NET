@@ -9,6 +9,8 @@ public class MalarkeyIntegrationConfiguration
 {
     public const string ConfigurationElementName = "Integration";
 
+    public MalarkeyEmailVerificationConfiguration Email { get; set; }
+
     public string ServerBasePath { get; set; }
 
     public string AuthenticationPath { get; set; }

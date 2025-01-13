@@ -1,8 +1,10 @@
 ﻿using Malarkey.Abstractions;
 using Malarkey.Abstractions.Authentication;
+using Malarkey.Application.Profile;
 using Malarkey.Integration.Authentication;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Malarkey.Integration.Configuration;
+using Malarkey.Integration.Profile;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
@@ -44,6 +46,7 @@ public static class DependencyInjectionIntegration
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyFacebookOAuthFlowHandler>();
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeySpotifyOAuthFlowHandler>();
         builder.Services.AddSingleton<MalarkeyAuthenticationRequestCache>();
+        builder.Services.AddSingleton<IVerificationEmailSender, VerificationEmailSender>();
         builder.Services.AddHttpClients();
         return builder;
     }

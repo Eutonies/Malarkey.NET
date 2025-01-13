@@ -1,0 +1,13 @@
+﻿.sundo-verify-email-page {
+    font-family: 'Ink Free';
+    font-size: 30pt;
+    padding: 100px;
+}
+
+.sundo-verify-email-error {
+    color: rgb(220,53,69);
+}
+
+.sundo-verify-email-success {
+    color: rgb(25,135,84);
+}

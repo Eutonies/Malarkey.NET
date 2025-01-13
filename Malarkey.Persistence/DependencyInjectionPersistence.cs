@@ -17,6 +17,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Malarkey.Application.Profile;
 
 namespace Malarkey.Persistence;
 public static class DependencyInjectionPersistence
@@ -34,6 +35,7 @@ public static class DependencyInjectionPersistence
         builder.Services.AddSingleton<IMalarkeySessionRepository, MalarkeyAuthenticationSessionRepository>();
         builder.Services.AddSingleton<IMalarkeyProfileRepository, MalarkeyProfileRepository>();
         builder.Services.AddSingleton<IMalarkeyTokenRepository, MalarkeyTokenRepository>();
+        builder.Services.AddSingleton<IVerificationEmailHandler, VerificationEmailHandler>();
         return builder;
     }
 

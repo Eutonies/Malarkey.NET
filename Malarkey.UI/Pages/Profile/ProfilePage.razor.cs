@@ -22,8 +22,11 @@ public partial class ProfilePage
 
     private MalarkeyProfile? _profile;
     private IReadOnlyCollection<MalarkeyProfileIdentity> _identities = [];
+
+    private string? _intermediateName;
+    private bool _useIntermediateName = false;
     public string? ProfileName { 
-        get => _profile?.ProfileName; 
+        get => _useIntermediateName ? _intermediateName : _profile?.ProfileName; 
         set {
             var newValue = value;
             if(ProfileId != null && newValue != null)
@@ -33,12 +36,16 @@ public partial class ProfilePage
                     var saveResult = await ProfileRepo.UpdateProfileName(ProfileId.Value, newValue);
                     if (saveResult is SuccessActionResult<MalarkeyProfile> succ)
                     {
+                        _useIntermediateName = false;
                         _profile = succ.Result;
                         _profileNameError = null;
+                        _intermediateName = null;
                     }
                     else if(saveResult is ErrorActionResult<MalarkeyProfile> err)
                     {
                         _profileNameError = err.ErrorMessage;
+                        _intermediateName = newValue;
+                        _useIntermediateName = true;
                     }
                     await InvokeAsync(StateHasChanged);
                 });
@@ -60,25 +67,34 @@ public partial class ProfilePage
         set => UpdateAndReload((repo, profId) => repo.UpdateLastName(profId, value), "last name");
     }
 
+    private string? _intermediateEmail;
+    private bool _useIntermediateEmail = false;
     public string? PrimaryEmail
     {
-        get => _profile?.PrimaryEmail;
+        get => _useIntermediateEmail ? _intermediateEmail : _profile?.PrimaryEmail;
         set
         {
             if(!string.IsNullOrWhiteSpace(value) && !IsValidEmail(value))
             {
+                _useIntermediateEmail = true;
+                _intermediateEmail = value;
                 _primaryEmailError = "Invalid email";
             }
             else
             {
                 UpdateAndReload((repo, profId) => repo.UpdatePrimaryEmail(profId, value), "email");
                 _primaryEmailError = null;
+                _useIntermediateEmail = false;
+                _intermediateEmail = null;
             }
 
         }
     }
     private string? _primaryEmailError;
     private bool IsValidEmail(string email) => MailAddress.TryCreate(email, out _);
+
+    private string ProfileNameExtraClass => _profileNameError == null ? "" : "input-error";
+    private string EmailExtraClass => _primaryEmailError == null ? "" : "input-error";
 
     protected override async Task OnInitializedAsync()
     {
