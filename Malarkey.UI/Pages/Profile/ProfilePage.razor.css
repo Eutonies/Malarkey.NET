@@ -43,8 +43,21 @@
 .malarkey-profile-input {
     border-radius: 5px;
     width: 200px;
-    font-family: 'FreeStyle';
+    height: 20px;
+    font-family: 'Ink Free';
+    font-weight: 700;
     font-size: 10pt;
+}
+
+#malarkey-profile-send-verification-button {
+    margin-left: 20px;
+    width: 120px;
+    height: 20px;
+    font-family: 'Ink Free';
+    font-weight: 900;
+    font-size: 10px;
+    background-color: rgba(192, 194, 203, 0.5);
+    border-radius: 5px;
 }
 
 .malarkey-profile-input-error {

@@ -1,5 +1,6 @@
 using Malarkey.Abstractions.API.Profile.Email;
 using Malarkey.Abstractions.Profile;
+using Malarkey.Abstractions.Util;
 using Malarkey.Application.Common;
 using Malarkey.Application.Profile;
 using Malarkey.Application.Profile.Persistence;
@@ -98,8 +99,13 @@ public partial class ProfilePage : IDisposable
     private string? _primaryEmailError;
     private bool IsValidEmail(string email) => MailAddress.TryCreate(email, out _);
 
+    private bool CanSendVerifyEmail => !(_profile?.PrimaryEmailIsVerified ?? false) &&
+        (_profile?.PrimaryEmail?.Pipe(IsValidEmail) ?? false) &&
+        (_profile?.NextVerificationSendTime?.Pipe(tim => tim < DateTime.Now) ?? true);
+
     private string ProfileNameExtraClass => _profileNameError == null ? "" : "input-error";
-    private string EmailExtraClass => _primaryEmailError == null ? "" : "input-error";
+    private string EmailClasses =>  "malarkey-profile-input" + " " + 
+        (_primaryEmailError == null ? "" : "input-error");
 
     protected override async Task OnInitializedAsync()
     {

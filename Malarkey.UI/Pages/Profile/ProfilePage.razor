@@ -33,7 +33,13 @@
             <div class="malarkey-profile-input-container">
                 <label class="malarkey-profile-input-label" for="malarkey-profile-email">Email</label>
                 <div class="malarkey-profile-input-component">
-                    <input type="email" class="malarkey-profile-input @EmailExtraClass" id="malarkey-profile-email" @bind="PrimaryEmail" />
+                    <div class="malarkey-profile-input-container">
+                        <input type="email" class="@EmailClasses" id="malarkey-profile-email" @bind="PrimaryEmail" />
+                        @if(CanSendVerifyEmail) {
+                            <button id="malarkey-profile-send-verification-button" @onclick="OnSendVerificationEmailClicked" type="button">Send verification mail</button>
+                        }
+
+                    </div>
                     @if (_primaryEmailError != null)
                     {
                         <div class="malarkey-profile-input-error">@_primaryEmailError</div>
