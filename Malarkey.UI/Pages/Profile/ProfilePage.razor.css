@@ -1,24 +1,37 @@
 ﻿.malarkey-profile-page-bg {
+    position: absolute;
+    content: '';
+    top: 0px;
+    left: 0px;
+    width: 1800px;
+    background-image: url('images/profile/waves-background.webp');
+    background-size: cover;
+    background-repeat: no-repeat;
 }
 
 .malarkey-profile-container {
     width: 800px;
-    height: 450px;
     display: flex;
     flex-direction: column;
+    background-color: rgba(240,240,240, 0.7);
+    margin: 20px;
+    border-radius: 8px;
+    box-shadow: 5px 5px rgba(60,60,60,0.5);
 }
 
 .malarkey-profile-header {
     font-family: 'Merienda';
-    font-size: 20pt;
-    width: 600px;
+    font-size: 50pt;
+    width: 800px;
     text-align: center;
+    margin-top: 30px;
+    margin-bottom:0px;
 }
 
 .malarkey-profile-image-container {
     position: relative;
     content:'';
-    margin: 20px;
+    margin-left: 20px;
     display: flex;
     flex-direction: row;
     width: 750px;
@@ -38,34 +51,45 @@
     z-index: 100;
 }
 .malarkey-profile-image-container-inner {
-    position: relative;
+    position: absolute;
     content: '';
-    top: 0px;
     width: 750px;
     height: 750px;
     z-index: 10;
     display: flex;
     flex-direction: row;
     justify-content: center;
-    align-items: end;
-    overflow: hidden;
+    align-items: center;
+    border-radius: 10px;
+    border-style: none;
 }
 
 #malarkey-profile-image {
-    position: relative;
-    content: '';
-    width: 700px;
-    min-height: 500px;
-    max-height: 700px;
+    width: 500px;
+    height: 500px;
     background-repeat: no-repeat;
-    z-index: 11;
+    background-size: cover;
+    border-radius: 250px;
+    border-style: none;
+    border-width: 1px;
 }
 
 #malarkey-profile-image-input {
-    position: relative;
+    position: absolute;
     content: '';
-    z-index: 20;
-    bottom: 0px;
+    z-index: 120;
+    left: 230px;
+    top: 810px;
+    width: 350px;
+    height: 50px;
+    background-color: rgba(240,240,240, 0.9);
+    font-family: 'Ink Free';
+    padding: 10px;
+    padding-left: 50px;
+    border-radius: 8px;
+    border-style: solid;
+    border-width: 0.2px;
+    box-shadow: 3px 3px rgba(60,60,60,0.5);
 }
 
 .malarkey-profile-input-form {
@@ -74,7 +98,8 @@
     height: 400px;
     font-family: 'Ink Free';
     font-size: 14pt;
-    margin-top: 40px;
+    margin-top: 20px;
+    margin-left: 30px;
 }
 
 .malarkey-profile-input-container {
