@@ -15,6 +15,55 @@
     text-align: center;
 }
 
+.malarkey-profile-image-container {
+    position: relative;
+    margin: 20px;
+    display: flex;
+    flex-direction: row;
+    width: 750px;
+    height: 750px;
+}
+
+.malarkey-profile-image-frame {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    background-image: url('images/profile/wave-frame.webp');
+    background-repeat: no-repeat;
+    background-size: contain;
+    width: 750px;
+    height: 750px;
+    z-index: 100;
+}
+.malarkey-profile-image-container-inner {
+    position: absolute;
+    content: '';
+    top: 0px;
+    left: 0px;
+    width: 750px;
+    height: 750px;
+    z-index: 10;
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+}
+
+#malarkey-profile-image {
+    width: 700px;
+    min-height: 500px;
+    max-height: 700px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position-x: center;
+    background-position-y: center;
+}
+
+#malarkey-profile-image-input {
+    z-index: 20;
+    bottom: 0px;
+    left: 270px;
+}
+
 .malarkey-profile-input-form {
     width: 600px;
     height: 400px;

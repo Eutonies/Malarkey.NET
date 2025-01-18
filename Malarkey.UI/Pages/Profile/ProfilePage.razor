@@ -4,9 +4,17 @@
 
 @attribute [Authorize(AuthenticationSchemes = MalarkeyConstants.MalarkeyAuthenticationScheme)]
 
+
 <div class="malarkey-profile-page-bg">
     <div class="malarkey-profile-container">
         <div class="malarkey-profile-header">Profile</div>
+        <div class="malarkey-profile-image-container">
+            <div class="malarkey-profile-image-frame"></div>
+            <div class="malarkey-profile-image-container-inner">
+                <div id="malarkey-profile-image" title="Profile image" style="background-image: url('images/profile/image-sample.png');" />
+                <input type="file" id="malarkey-profile-image-input" title="Select profile image" />
+            </div>
+        </div>
         <div class="malarkey-profile-input-form">
             <div class="malarkey-profile-input-container">
                 <label class="malarkey-profile-input-label" for="malarkey-profile-name">User ID</label>
