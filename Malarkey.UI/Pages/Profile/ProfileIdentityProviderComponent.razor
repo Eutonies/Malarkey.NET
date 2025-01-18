@@ -1,0 +1,21 @@
+﻿<div class="malarkey-profile-identity-provider-component">
+    <div class="malarkey-profile-identity-provider-title" style="background-image: url('@(ImageFile)');"></div>
+    <div class="malarkey-profile-identities-container">
+        <div class="malarkey-profile-identities-identity">
+            <button class="malarkey-profile-identities-add-button" type="button">
+                <i class="bi bi-plus-circle malarkey-add-button-icon"></i>
+            </button>
+            <div>Add Identity</div>
+        </div>
+        @foreach(var id in _identities) 
+        {
+            <div class="malarkey-profile-identities-identity">
+                <div class="malarkey-profile-identities-identity-lines">
+                    @foreach(var lin in id.Lines) {
+                        <div class="malarkey-profile-identities-identity-line">@lin</div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>

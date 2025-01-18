@@ -29,6 +29,10 @@ public partial class ProfilePage : IDisposable
     private MalarkeyProfile? _profile;
     private IReadOnlyCollection<MalarkeyProfileIdentity> _identities = [];
 
+    private IReadOnlyCollection<ProfileIdentityProviderEntry> _identityEntries = MalarkeyIdentityProviders.AllProviders
+        .Select(prov => new ProfileIdentityProviderEntry(prov, []))
+        .ToList();
+
     private string? _intermediateName;
     private bool _useIntermediateName = false;
     public string? ProfileName { 
@@ -116,6 +120,16 @@ public partial class ProfilePage : IDisposable
             {
                 _profile = loaded.Profile;
                 _identities = loaded.Identities;
+                var identityMap = _identities
+                    .GroupBy(_ => _.IdentityProvider)
+                    .ToDictionary(
+                      _ => _.Key, 
+                      _ => _.OrderBy(_ => _.EmailToUse ?? _.ProviderId)
+                            .ToReadOnlyCollection()
+                     );
+                _identityEntries = MalarkeyIdentityProviders.AllProviders
+                    .Select(prov => new ProfileIdentityProviderEntry(prov, identityMap.GetValueOrDefault(prov, [])))
+                    .ToList();
             }
             await InvokeAsync(StateHasChanged);
         }

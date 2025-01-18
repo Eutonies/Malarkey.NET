@@ -7,6 +7,8 @@
     background-image: url('images/profile/waves-background.webp');
     background-size: cover;
     background-repeat: no-repeat;
+    display: flex;
+    flex-direction: row;
 }
 
 .malarkey-profile-container {
@@ -158,6 +160,25 @@
     animation-duration: 3s;
     animation-fill-mode: both;
 }
+
+.malarkey-profile-identities-container {
+    width: 90%;
+    height: 1000px;
+    margin: 20px;
+    background-color: rgba(80,80,80,0.8);
+    border-radius: 7px;
+    padding: 10px;
+    padding-top: 30px;
+
+}
+
+.malarkey-profile-identity-container {
+    width: 100%;
+    height: 200px;
+    margin: 20px;
+}
+
+
 
 @keyframes flashinfo {
     0% {

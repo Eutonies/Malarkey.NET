@@ -12,3 +12,13 @@ public enum MalarkeyIdentityProvider
     Facebook = 20,
     Spotify = 30
 }
+
+public static class MalarkeyIdentityProviders
+{
+    public static readonly IReadOnlyCollection<MalarkeyIdentityProvider> AllProviders = [
+        MalarkeyIdentityProvider.Microsoft,
+        MalarkeyIdentityProvider.Google,
+        MalarkeyIdentityProvider.Facebook,
+        MalarkeyIdentityProvider.Spotify
+        ];
+}

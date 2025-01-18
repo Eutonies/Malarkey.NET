@@ -56,9 +56,23 @@
                 </div>
             </div>
         </div>
+        @if (_infoMessage != null)
+        {
+            <div class="malarkey-profile-flash-info">@_infoMessage</div>
+        }
     </div>
-    @if(_infoMessage != null) {
-        <div class="malarkey-profile-flash-info">@_infoMessage</div>
-    }
+    <div class="malarkey-profile-container">
+        <div class="malarkey-profile-header">Identification</div>
 
+        <div class="malarkey-profile-identities-container">
+            @foreach(var ent in _identityEntries) 
+            {
+                <div class="malarkey-profile-identity-container">
+                    <ProfileIdentityProviderComponent ProviderEntry="ent"></ProfileIdentityProviderComponent>
+                </div>
+            }
+        </div>
+
+
+    </div>
 </div>
