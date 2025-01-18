@@ -17,6 +17,7 @@
 
 .malarkey-profile-image-container {
     position: relative;
+    content:'';
     margin: 20px;
     display: flex;
     flex-direction: row;
@@ -26,45 +27,49 @@
 
 .malarkey-profile-image-frame {
     position: absolute;
+    content:'';
     top: 0px;
     left: 0px;
     background-image: url('images/profile/wave-frame.webp');
     background-repeat: no-repeat;
-    background-size: contain;
+    background-size: cover;
     width: 750px;
     height: 750px;
     z-index: 100;
 }
 .malarkey-profile-image-container-inner {
-    position: absolute;
+    position: relative;
     content: '';
     top: 0px;
-    left: 0px;
     width: 750px;
     height: 750px;
     z-index: 10;
     display: flex;
     flex-direction: row;
     justify-content: center;
+    align-items: end;
+    overflow: hidden;
 }
 
 #malarkey-profile-image {
+    position: relative;
+    content: '';
     width: 700px;
     min-height: 500px;
     max-height: 700px;
-    background-size: contain;
     background-repeat: no-repeat;
-    background-position-x: center;
-    background-position-y: center;
+    z-index: 11;
 }
 
 #malarkey-profile-image-input {
+    position: relative;
+    content: '';
     z-index: 20;
     bottom: 0px;
-    left: 270px;
 }
 
 .malarkey-profile-input-form {
+    position: relative;
     width: 600px;
     height: 400px;
     font-family: 'Ink Free';
