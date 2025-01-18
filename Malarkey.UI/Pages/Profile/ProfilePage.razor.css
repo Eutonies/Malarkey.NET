@@ -179,6 +179,30 @@
 }
 
 
+.malarkey-profile-connect-identity-container {
+    margin: 5%;
+    width: 90%;
+    height: 90%;
+    display: flex;
+    flex-direction: column;
+}
+
+.malarkey-profile-connect-identity-buttons {
+    margin-bottom: 10px;
+}
+
+.malarkey-profile-connect-identity-button {
+    font-family: 'Ink Free';
+    font-weight: 700;
+    border-radius: 4px;
+    background-color: rgba(230,148,71, 0.2);
+}
+
+.malarkey-profile-connect-identity-iframe {
+    width: 100%;
+    height: 80%;
+}
+
 
 @keyframes flashinfo {
     0% {

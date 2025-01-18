@@ -9,6 +9,9 @@ public partial class ProfileIdentityProviderComponent
     [Parameter]
     public ProfileIdentityProviderEntry ProviderEntry { get; set; }
 
+    [Parameter]
+    public Action<MalarkeyIdentityProvider> OnAddIdentityClicked { get; set; }
+
     private MalarkeyIdentityProvider Provider => ProviderEntry.Provider;
 
     private IReadOnlyCollection<ShowIdentity> _identities = [];
@@ -58,4 +61,5 @@ public partial class ProfileIdentityProviderComponent
             return splitted;
         }
     }
+
 }
