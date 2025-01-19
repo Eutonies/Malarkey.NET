@@ -64,6 +64,8 @@ public static class MalarkeyConstants
         public const string ScopesName = "scopes";
         public const string IdProviderName = "idprovider";
         public const string ForwarderStateName = "forwarderstate";
+        public const string ExistingProfileIdName = "profileid";
+
     }
 
 

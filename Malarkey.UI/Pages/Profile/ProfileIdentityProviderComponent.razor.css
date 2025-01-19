@@ -40,10 +40,13 @@
     margin-top: 10px;
     margin-bottom: 5px;
     padding: 1px;
-    padding-left: 4px;
-    padding-bottom: 3px;
-    border-width: 0.1px;
+    padding-left: 8px;
+    padding-bottom: 1px;
+    border-width: 1px;
     border-radius: 3px;
+    border-color: rgb(40,40,40);
+    border-style: solid;
+    color: rgb(40,40,40);
     background-color: rgba(230,148,71,0.1);
 }
 

@@ -28,7 +28,8 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         string? forwarder, 
         string audiencePublicKey,
         string[]? scopes,
-        string? forwarderState)
+        string? forwarderState, 
+        Guid? existingProfileId)
     {
         var nonce = GenerateNonce();
         var (verifier, challenge) = GenerateChallengeAndVerifier();
@@ -41,7 +42,8 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
             initTime: DateTime.Now,
             audience: audiencePublicKey,
             scopes: scopes,
-            forwarderState: forwarderState
+            forwarderState: forwarderState,
+            existingProfileId: existingProfileId
         );
         return session;
     }

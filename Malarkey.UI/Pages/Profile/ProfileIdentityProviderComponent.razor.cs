@@ -1,4 +1,6 @@
-﻿using Malarkey.Abstractions.Profile;
+﻿using Malarkey.Abstractions;
+using Malarkey.Abstractions.Profile;
+using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Components;
 
 namespace Malarkey.UI.Pages.Profile;
@@ -10,7 +12,10 @@ public partial class ProfileIdentityProviderComponent
     public ProfileIdentityProviderEntry ProviderEntry { get; set; }
 
     [Parameter]
-    public Action<MalarkeyIdentityProvider> OnAddIdentityClicked { get; set; }
+    public Guid ProfileId { get; set; }
+
+    [Parameter]
+    public Guid IdentityConnectionState { get; set; }
 
     private MalarkeyIdentityProvider Provider => ProviderEntry.Provider;
 
@@ -25,6 +30,11 @@ public partial class ProfileIdentityProviderComponent
             .OrderBy(_ => _.NameToUse)
             .ToList();
     }
+
+    private string IdentityConnectUrl => $"{MalarkeyConstants.Authentication.ServerAuthenticationPath}?" + 
+        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={Provider.ToString()}&" +
+        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName}={IdentityConnectionState.ToString().UrlEncoded()}&" +
+        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={ProfileIdentityConnectionSucceededPage.SucceededPagePath.UrlEncoded()}";
 
 
     private record ShowIdentity(MalarkeyProfileIdentity Identity)

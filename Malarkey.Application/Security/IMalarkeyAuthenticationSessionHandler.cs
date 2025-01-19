@@ -16,7 +16,8 @@ public interface IMalarkeyAuthenticationSessionHandler
         string? forwarder, 
         string audiencePublicKey,
         string[]? scopes,
-        string? forwarderState
+        string? forwarderState,
+        Guid? existingProfileId
         );
     Task<MalarkeyAuthenticationSession?> SessionForState(string state);
 

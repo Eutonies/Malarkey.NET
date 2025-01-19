@@ -29,6 +29,8 @@ internal class MalarkeyAuthenticationSessionDbo
     public string Audience { get; set; }
     public string? ForwarderState { get; set; }
 
+    public Guid? ExistingProfileId { get; set; }
+    
 
 
     public MalarkeyAuthenticationSession ToDomain() => new MalarkeyAuthenticationSession(
@@ -45,7 +47,8 @@ internal class MalarkeyAuthenticationSessionDbo
         IdentityTokenId: IdentityTokenId,
         Audience: Audience,
         Scopes: Scopes?.Split(" "),
-        ForwarderState: ForwarderState
+        ForwarderState: ForwarderState,
+        ExistingProfileId: ExistingProfileId
     );
 
 

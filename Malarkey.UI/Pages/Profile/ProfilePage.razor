@@ -62,31 +62,19 @@
         }
     </div>
     <div class="malarkey-profile-container">
-        @if (_connectingIdentityFor != null)
-        {
-            <div class="malarkey-profile-header">Connect new @(_connectingIdentityFor) account</div>
-            <div class="malarkey-profile-connect-identity-container">
-                <div class="malarkey-profile-connect-identity-buttons">
-                    <button class="malarkey-profile-connect-identity-button" type="button" @onclick="OnCancelConnectIdentityClicked">Cancel</button>
+        <div class="malarkey-profile-header">Identification</div>
+        <div class="malarkey-profile-identities-container">
+            @foreach (var ent in _identityEntries)
+            {
+                <div class="malarkey-profile-identity-container">
+                    <ProfileIdentityProviderComponent 
+                        ProviderEntry="ent"
+                        ProfileId="@(ProfileId ?? Guid.NewGuid())"
+                        IdentityConnectionState="_connectionState">
+                    </ProfileIdentityProviderComponent>
                 </div>
-                <iframe src="@ConnectIdentityUrl" class="malarkey-profile-connect-identity-iframe"></iframe>
-            </div>
-        }
-        else
-        {
-            <div class="malarkey-profile-header">Identification</div>
-
-            <div class="malarkey-profile-identities-container">
-                @foreach (var ent in _identityEntries)
-                {
-                    <div class="malarkey-profile-identity-container">
-                        <ProfileIdentityProviderComponent ProviderEntry="ent"
-                                                          OnAddIdentityClicked="OnConnectIdentityClicked">
-                        </ProfileIdentityProviderComponent>
-                    </div>
-                }
-            </div>
-        }
+            }
+        </div>
 
     </div>
 </div>

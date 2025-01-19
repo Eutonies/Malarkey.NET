@@ -34,7 +34,9 @@ public partial class ProfilePage : IDisposable
         .Select(prov => new ProfileIdentityProviderEntry(prov, []))
         .ToList();
 
-    private MalarkeyIdentityProvider? _connectingIdentityFor;
+    private readonly Guid _connectionState = Guid.NewGuid();
+
+
 
     private string? _intermediateName;
     private bool _useIntermediateName = false;
@@ -186,21 +188,6 @@ public partial class ProfilePage : IDisposable
 
         }
     }
-
-    private void OnConnectIdentityClicked(MalarkeyIdentityProvider provider)
-    {
-        _connectingIdentityFor = provider;
-        InvokeAsync(StateHasChanged);
-    }
-
-    private void OnCancelConnectIdentityClicked()
-    {
-        _connectingIdentityFor = null;
-        InvokeAsync(StateHasChanged);
-    }
-
-    private string ConnectIdentityUrl => $"{MalarkeyConstants.Authentication.ServerAuthenticationPath}?" +
-        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={_connectingIdentityFor?.ToString() ?? ""}";
 
 
     private void FlashInfo(string infoText)

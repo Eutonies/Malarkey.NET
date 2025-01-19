@@ -37,6 +37,9 @@ public partial class AuthenticatePage
     [Parameter]
     public string? ForwarderState { get; set; }
 
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName)]
+    [Parameter]
+    public string? ProfileId { get; set; }
 
 
     protected async override Task OnAfterRenderAsync(bool firstRender)

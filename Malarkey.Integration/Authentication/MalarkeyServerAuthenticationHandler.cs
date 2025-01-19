@@ -100,8 +100,13 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
                 .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName)
                 .Select(_ => _.Value.ToString())
                 .FirstOrDefault();
+            var existingProfileId = Request.Query
+                .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName)
+                .Select(_ => _.Value.ToString())
+                .Select(_ => Guid.TryParse(_, out var profId) ? (Guid?) profId : null)
+                .FirstOrDefault();
             var audience = ExtractPublicKeyOfReceiver();
-            var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience, scopes, forwarderState);
+            var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience, scopes, forwarderState, existingProfileId);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(session);
             var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
                 context: Context,

@@ -68,6 +68,7 @@ create table authentication_session (
     audience varchar(2000) not null,
     scopes varchar(2000),
     forwarder_state varchar(2000),
+    existing_profile_id uuid,
     unique(state)
 );
 
