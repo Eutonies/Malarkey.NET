@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Malarkey.Abstractions.Token;
 using Malarkey.Application.Common;
+using System.Security.Principal;
 
 namespace Malarkey.Application.Profile.Persistence;
 public interface IMalarkeyProfileRepository
@@ -24,20 +25,22 @@ public interface IMalarkeyProfileRepository
     public async Task<MalarkeyProfileAndIdentities?> LoadBySpotify(string spotifyId) =>
         await LoadByProviderId(MalarkeyIdentityProvider.Spotify, spotifyId);
 
-    Task SaveIdentityProviderToken(IdentityProviderToken token, Guid identityId); 
-
-    Task<MalarkeyProfileAndIdentities?> CreateByIdentity(MalarkeyProfileIdentity identity);
-
-
-
-    async Task<MalarkeyProfileAndIdentities?> LoadOrCreateByIdentity(MalarkeyProfileIdentity identity) => identity switch
+    public async Task<MalarkeyProfileAndIdentities?> LoadByIdentity(MalarkeyProfileIdentity identity) => identity switch
     {
         MicrosoftIdentity micr => await LoadByMicrosoft(micr.MicrosoftId),
         GoogleIdentity goog => await LoadByGoogle(goog.GoogleId),
         FacebookIdentity fac => await LoadByFacebook(fac.FacebookId),
         SpotifyIdentity spot => await LoadBySpotify(spot.SpotifyId),
         _ => null
-    } switch
+    };
+
+    Task SaveIdentityProviderToken(IdentityProviderToken token, Guid identityId); 
+
+    Task<MalarkeyProfileAndIdentities?> CreateByIdentity(MalarkeyProfileIdentity identity);
+
+    Task<MalarkeyProfileAndIdentities> AttachIdentityToProfile(MalarkeyProfileIdentity identity, Guid profileId);
+
+    async Task<MalarkeyProfileAndIdentities?> LoadOrCreateByIdentity(MalarkeyProfileIdentity identity) => (await LoadByIdentity(identity)) switch
     {
         null => await CreateByIdentity(identity),
         MalarkeyProfileAndIdentities profId => await SaveAndAddIdentityProviderToken(profId, identity.ProviderId, identity.IdentityProviderTokenToUse)

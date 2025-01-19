@@ -81,10 +81,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
             .FirstOrDefaultAsync();
         if (ident == null)
             return null;
-        var activeProfileId = (await cont.ProfileAbsorbers
-            .Where(_ => _.ProfileId == ident.ProfileId)
-            .Select(_ => _.Absorber)
-            .FirstOrDefaultAsync()) ?? ident.ProfileId;
+        var activeProfileId = await FindUnAbsorbedProfileId(cont, ident.ProfileId);
         var profile = await cont.Profiles
             .Where(_ => _.ProfileId == activeProfileId)
             .FirstOrDefaultAsync();
@@ -114,6 +111,39 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         var insertee = token.ToDbo(identityId);
         cont.Add(insertee);
         await cont.SaveChangesAsync();
+    }
+
+    public async Task<MalarkeyProfileAndIdentities> AttachIdentityToProfile(MalarkeyProfileIdentity identity, Guid profileId)
+    {
+        var asRepo = (IMalarkeyProfileRepository)this;
+        var existing = await asRepo.LoadByIdentity(identity);
+        var existingIdentity = existing?.Identities?
+            .FirstOrDefault(id => id.IdentityProvider == identity.IdentityProvider && id.ProviderId == identity.ProviderId);
+        if (existing != null && existing.Profile.ProfileId == profileId)
+        {
+            if (identity.IdentityProviderTokenToUse != null && existingIdentity != null)
+            {
+                await SaveIdentityProviderToken(identity.IdentityProviderTokenToUse, existingIdentity.IdentityId);
+                var reloaded = await LoadProfileAndIdentities(profileId);
+                return reloaded!;
+            }
+            return existing;
+        }
+        await using (var cont = await _dbContextFactory.CreateDbContextAsync()) {
+            // Identity is attached to other profile
+            if (existing != null)
+            {
+                var parentProfileId = await FindUnAbsorbedProfileId(cont, existing.Profile.ProfileId);
+                var toUpdate = await cont.Profiles
+                    .FirstAsync(_ => _.ProfileId == parentProfileId);
+                toUpdate.AbsorbedBy = profileId;
+                cont.Update(toUpdate);
+                await cont.SaveChangesAsync();
+            }
+        }
+        var returnee = await LoadProfileAndIdentities(profileId);
+        return returnee!;
+
     }
 
     private async Task<MalarkeyProfileDbo> SaveAndEnsureUniqueName(MalarkeyProfileDbo profile, MalarkeyDbContext cont) 
@@ -222,24 +252,20 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
     public async Task<MalarkeyProfileAndIdentities?> LoadProfileAndIdentities(Guid profileId)
     {
         await using var cont = await _dbContextFactory.CreateDbContextAsync();
+        var parentProfileId = await FindUnAbsorbedProfileId(cont, profileId);
         var profile = await cont.Profiles
             .AsNoTracking()
-            .FirstOrDefaultAsync(_ => _.ProfileId == profileId);
+            .FirstOrDefaultAsync(_ => _.ProfileId == parentProfileId);
         if(profile == null)
             return null;
         var profileIdQuery = cont.ProfileAbserbees
             .AsNoTracking()
-            .Where(_ => _.ProfileId == profileId)
+            .Where(_ => _.ProfileId == parentProfileId)
             .Select(_ => _.Absorbee)
             .Union(
-                cont.ProfileAbsorbers
-                   .AsNoTracking()
-                   .Where(_ => _.ProfileId == profileId && _.Absorber != null)
-                   .Select(_ => _.Absorber!.Value)
-            ).Union(
                 cont.Profiles
                    .AsNoTracking()
-                   .Where(_ => _.ProfileId == profileId)
+                   .Where(_ => _.ProfileId == parentProfileId)
                    .Select(_ => _.ProfileId)
             );
         var identityQuery = from profId in profileIdQuery
@@ -266,6 +292,19 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         var returnee = new MalarkeyProfileAndIdentities(domainProfile, domainIdentities, absorbeeIds);
         return returnee;
     }
+
+    private static async Task<Guid> FindUnAbsorbedProfileId(MalarkeyDbContext cont,  Guid profileId)
+    {
+        var query = from absInfo in cont.ProfileAbserbees
+                    join prof in cont.Profiles.Where(_ => _.AbsorbedBy == null)
+                    on absInfo.Absorbee equals prof.ProfileId
+                    select prof;
+        var loaded = await query.AsNoTracking().FirstOrDefaultAsync();
+        if (loaded == null)
+            return profileId;
+        return loaded.ProfileId;
+    }
+
 
     private static async Task<MalarkeyProfile> ConvertWithEmailVerificationInfo(MalarkeyDbContext cont, MalarkeyProfileDbo dbo)
     {

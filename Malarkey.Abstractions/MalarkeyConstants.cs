@@ -65,6 +65,7 @@ public static class MalarkeyConstants
         public const string IdProviderName = "idprovider";
         public const string ForwarderStateName = "forwarderstate";
         public const string ExistingProfileIdName = "profileid";
+        public const string AlwaysChallengeName = "alwayschallenge";
 
     }
 

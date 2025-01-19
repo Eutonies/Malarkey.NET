@@ -31,6 +31,9 @@ public partial class IdpSelectionComponent
     [Parameter]
     public string? ExistingProfileId { get; set; }
 
+    [Parameter]
+    public string? AlwaysChallenge { get; set; }
+
 
     private bool IsAuthenticated => SessionState.User != null;
 
@@ -77,6 +80,9 @@ public partial class IdpSelectionComponent
             returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName}={ForwarderState.UrlEncoded()}");
         if (ExistingProfileId != null)
             returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName}={ExistingProfileId.UrlEncoded()}");
+        if (AlwaysChallenge != null)
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName}={AlwaysChallenge}");
+
         return returnee.ToString();
     }
 

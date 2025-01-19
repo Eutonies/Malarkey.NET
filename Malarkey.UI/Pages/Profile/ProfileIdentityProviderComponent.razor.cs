@@ -33,6 +33,8 @@ public partial class ProfileIdentityProviderComponent
 
     private string IdentityConnectUrl => $"{MalarkeyConstants.Authentication.ServerAuthenticationPath}?" + 
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={Provider.ToString()}&" +
+        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName}={ProfileId.ToString().UrlEncoded()}&" +
+        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName}={true}&" +
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName}={IdentityConnectionState.ToString().UrlEncoded()}&" +
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={ProfileIdentityConnectionSucceededPage.SucceededPagePath.UrlEncoded()}";
 

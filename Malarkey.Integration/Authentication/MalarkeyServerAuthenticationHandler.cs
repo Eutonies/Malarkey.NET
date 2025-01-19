@@ -68,10 +68,15 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         audience.ToString() :
         _malarkeyTokenReceiver;
 
-    protected override async Task<AuthenticateResult> HandleAuthenticateAsync() => (await _tokenHandler.ExtractProfileAndIdentities(Context, TokenReceiver)) switch
+    protected override async Task<AuthenticateResult> HandleAuthenticateAsync() => 
+        (await _tokenHandler.ExtractProfileAndIdentities(Context, TokenReceiver), Context.Request.ToAuthenticationParameters()) switch
         {
-            null => AuthenticateResult.Fail("No profile info found"),
-            MalarkeyProfileAndIdentities p => AuthenticateResult.Success(new AuthenticationTicket(
+            (_, MalarkeyAuthenticationRequestParameters pars) when pars.AlwaysChallenge ?? false => AuthenticateResult.Fail("Asked to always challenge"),
+            (null,_) => AuthenticateResult.Fail("No profile info found"),
+            (MalarkeyProfileAndIdentities p, MalarkeyAuthenticationRequestParameters pars) 
+               when pars.Provider != null && !p.Identities.Any(_ => _.IdentityProvider == pars.Provider) => 
+                   AuthenticateResult.Fail($"ID Provider: {pars.Provider} was specifically requested and not present in tokens"),
+            (MalarkeyProfileAndIdentities p,_) => AuthenticateResult.Success(new AuthenticationTicket(
                 principal: p.Profile.ToClaimsPrincipal(p.Identities),
                 MalarkeyConstants.MalarkeyAuthenticationScheme
                 ))
@@ -81,30 +86,14 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
-        var idp = ExtractIdentityProvider();
+        var (idp, scopes, forwarder, forwarderState, existingProfileId, alwaysChallenge) = Request.ToAuthenticationParameters();
+
         if (idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
         {
             await HandleAuthenticationRequestForwarding(properties);
         }
         else
         {
-            var forwarder = Request.Query
-                .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName)
-                .Select(_ => _.Value.ToString())
-                .FirstOrDefault();
-            var scopes = Request.Query
-                .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName)
-                .Select(_ => _.Value.ToString().Split(" "))
-                .FirstOrDefault();
-            var forwarderState = Request.Query
-                .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName)
-                .Select(_ => _.Value.ToString())
-                .FirstOrDefault();
-            var existingProfileId = Request.Query
-                .Where(_ => _.Key == MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName)
-                .Select(_ => _.Value.ToString())
-                .Select(_ => Guid.TryParse(_, out var profId) ? (Guid?) profId : null)
-                .FirstOrDefault();
             var audience = ExtractPublicKeyOfReceiver();
             var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience, scopes, forwarderState, existingProfileId);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(session);
@@ -149,7 +138,15 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             _logger.LogError($"Unable to load identity from state: {redirData.State} and redirect data: {redirData.ToString()}");
             return await ReturnError($"Could not resolve identity by {session.IdProvider} for callback request with URL={request.GetDisplayUrl()}");
         }
-        var profileAndIdentities = await _profileRepo.LoadOrCreateByIdentity(identity);
+        MalarkeyProfileAndIdentities? profileAndIdentities = null;
+        if(session.ExistingProfileId != null)
+        {
+            profileAndIdentities = await _profileRepo.AttachIdentityToProfile(identity, session.ExistingProfileId.Value);
+        }
+        else
+        {
+            profileAndIdentities = await _profileRepo.LoadOrCreateByIdentity(identity);
+        }
         if (profileAndIdentities == null)
         {
             _logger.LogError($"Unable to load/create profile and/or identities for identity {identity.ProvidersIdForIdentity} from provider: {identity.IdentityProvider}");
@@ -191,30 +188,6 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private Task<BadRequest<string>> ReturnError(string errorMessage) => Task.FromResult(
         TypedResults.BadRequest(errorMessage)
         );
-
-    private MalarkeyIdentityProvider? ExtractIdentityProvider()
-    {
-        var inHeaders = Request.Headers.TryGetValue(MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName, out var idpHeaderString);
-        var fromQuery = Request.Query
-            .Where(_ => _.Key.ToLower() == MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName.ToLower())
-            .Select(_ => _.Value.ToString())
-            .FirstOrDefault();
-
-        var idpList = new List<MalarkeyIdentityProvider> {
-            MalarkeyIdentityProvider.Microsoft,
-            MalarkeyIdentityProvider.Google,
-            MalarkeyIdentityProvider.Facebook,
-            MalarkeyIdentityProvider.Spotify
-        }.Select(_ => (Key: _.ToString().ToLower(), Value: _))
-        .Where(_ => _.Key == (inHeaders ? idpHeaderString.ToString().ToLower() : fromQuery?.ToLower()))
-        .Select(_ => _.Value)
-        .ToList();
-        if (!idpList.Any())
-            return null;
-
-        return idpList.First();
-    }
-
 
     private string ExtractPublicKeyOfReceiver()
     {

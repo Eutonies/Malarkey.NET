@@ -15,7 +15,6 @@ internal class MalarkeyDbContext : DbContext
 
     public DbSet<MalarkeyProfileDbo> Profiles { get; set; }
     public DbSet<MalarkeyProfileAbsorbeeDbo> ProfileAbserbees { get; set; }
-    public DbSet<MalarkeyProfileAbsorberDbo> ProfileAbsorbers { get; set; }
 
     public DbSet<MalarkeyIdentityDbo> Identities { get; set; }
     public DbSet<MalarkeyTokenDbo> Tokens { get; set; }

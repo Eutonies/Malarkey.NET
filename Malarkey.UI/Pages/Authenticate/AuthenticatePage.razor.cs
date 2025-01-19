@@ -41,6 +41,10 @@ public partial class AuthenticatePage
     [Parameter]
     public string? ProfileId { get; set; }
 
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName)]
+    [Parameter]
+    public string? AlwaysChallenge { get; set; }
+
 
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
