@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Components;
 using System.Text;
 
 namespace Malarkey.Integration.Authentication;
-public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
+public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler, IMalarkeyServerAuthenticationEventHandler
 {
     private readonly IMalarkeyTokenHandler _tokenHandler;
     private readonly IMalarkeyAuthenticationSessionHandler _sessionHandler;
@@ -36,6 +36,9 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     /// </summary>
 
     private MalarkeyAuthenticationEvents _events;
+
+    public event EventHandler<(MalarkeyProfileIdentity Identity, string State)> OnIdentificationRegistrationCompleted;
+
     protected new MalarkeyAuthenticationEvents Events => _events;
 
     public MalarkeyServerAuthenticationHandler(
@@ -162,6 +165,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
         if(session.ForwarderState != null && _requestCache.TryPop(session.ForwarderState, out var conti))
         {
+            OnIdentificationRegistrationCompleted?.Invoke(this, (identity, session.ForwarderState));
             var ret = new MalarkeyAuthenticationSuccessHttpResultInternal(
                 Continuation: conti!, 
                 ProfileToken: profileTokenString,

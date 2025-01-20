@@ -5,12 +5,16 @@ using Malarkey.Abstractions.Util;
 using Malarkey.Application.Common;
 using Malarkey.Application.Profile;
 using Malarkey.Application.Profile.Persistence;
+using Malarkey.Integration.Authentication;
 using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components;
 using System.Net.Mail;
 namespace Malarkey.UI.Pages.Profile;
 public partial class ProfilePage : IDisposable
 {
+    [Inject]
+    public IMalarkeyServerAuthenticationEventHandler AuthenticationEvents { get; set; }
+
     [Inject]
     public NavigationManager NavManager { get; set; }
 
@@ -20,6 +24,7 @@ public partial class ProfilePage : IDisposable
     [Inject]
     public IVerificationEmailHandler EmailHandler { get; set; }
     private bool _hasRegisteredForEmailUpdates = false;
+    private bool _hasRegisteredForIdentityRegistrationUpdates = false;
 
     [CascadingParameter]
     public MalarkeySessionState SessionState { get; set; }
@@ -29,6 +34,7 @@ public partial class ProfilePage : IDisposable
 
     private MalarkeyProfile? _profile;
     private IReadOnlyCollection<MalarkeyProfileIdentity> _identities = [];
+    private HashSet<string> _authenticationStates = [];
 
     private IReadOnlyCollection<ProfileIdentityProviderEntry> _identityEntries = MalarkeyIdentityProviders.AllProviders
         .Select(prov => new ProfileIdentityProviderEntry(prov, []))
@@ -143,6 +149,11 @@ public partial class ProfilePage : IDisposable
             EmailHandler.OnUpdate += OnEmailVerification;
             _hasRegisteredForEmailUpdates = true;
         }
+        if(!_hasRegisteredForIdentityRegistrationUpdates)
+        {
+            AuthenticationEvents.OnIdentificationRegistrationCompleted += OnIdentityRegistrationCompleted;
+            _hasRegisteredForIdentityRegistrationUpdates = true;
+        }
     }
 
     private void UpdateAndReload(Func<IMalarkeyProfileRepository, Guid, Task<ActionResult<MalarkeyProfile>>> repoAction, string fieldName) => Task.Run(async () =>
@@ -189,6 +200,24 @@ public partial class ProfilePage : IDisposable
         }
     }
 
+    private void OnIdentityRegistrationCompleted(object? sender, (MalarkeyProfileIdentity Identity, string State) data)
+    {
+        if(_authenticationStates.Contains(data.State) && ProfileId != null)
+        {
+            _ = Task.Run(async () =>
+            {
+                var reloaded = await ProfileRepo.LoadProfileAndIdentities(ProfileId.Value);
+                if (reloaded != null)
+                {
+                    _profile = reloaded.Profile;
+                    _identities = reloaded.Identities;
+                    await InvokeAsync(StateHasChanged);
+                }
+                _authenticationStates.Remove(data.State);
+            });
+        }
+    }
+
 
     private void FlashInfo(string infoText)
     {
@@ -209,5 +238,12 @@ public partial class ProfilePage : IDisposable
             EmailHandler.OnUpdate -= OnEmailVerification;
             _hasRegisteredForEmailUpdates = false;
         }
+        if(_hasRegisteredForIdentityRegistrationUpdates)
+        {
+            AuthenticationEvents.OnIdentificationRegistrationCompleted -= OnIdentityRegistrationCompleted;
+            _hasRegisteredForIdentityRegistrationUpdates = false;
+        }
+
+
     }
 }

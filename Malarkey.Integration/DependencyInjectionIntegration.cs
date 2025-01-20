@@ -47,6 +47,7 @@ public static class DependencyInjectionIntegration
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeySpotifyOAuthFlowHandler>();
         builder.Services.AddSingleton<MalarkeyAuthenticationRequestCache>();
         builder.Services.AddSingleton<IVerificationEmailSender, VerificationEmailSender>();
+        builder.Services.AddSingleton<IMalarkeyServerAuthenticationEventHandler>(_ => _.GetRequiredService<MalarkeyServerAuthenticationHandler>());
         builder.Services.AddHttpClients();
         return builder;
     }

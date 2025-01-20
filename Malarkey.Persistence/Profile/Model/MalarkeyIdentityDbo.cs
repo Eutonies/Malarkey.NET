@@ -34,3 +34,19 @@ internal class MalarkeyIdentityDbo
 
 
 }
+
+
+internal static class MalarkeyIdentityDboExtensions
+{
+    public static MalarkeyIdentityDbo ToDbo(this MalarkeyProfileIdentity identity, Guid profileId, MalarkeyIdentityProviderDbo provider) => new MalarkeyIdentityDbo
+    {
+        ProfileId = profileId,
+        IdentityName = identity.FirstName,
+        MiddleNames = identity.MiddleNames,
+        LastName = identity.LastName,
+        Provider = provider,
+        ProviderId = identity.ProviderId,
+        PreferredName = identity.PreferredNameToUse,
+        Email = identity.EmailToUse
+    };
+}

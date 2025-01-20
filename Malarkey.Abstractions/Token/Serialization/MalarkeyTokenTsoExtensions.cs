@@ -236,7 +236,7 @@ public static class MalarkeyTokenTsoExtensions
         _ => MalarkeyTokenIdentityTypeTso.Facebook.ToString()
     };
 
-    public static long ToJwtTime(this DateTime tim) => (long)(tim - DateTime.UnixEpoch).TotalSeconds;
+    public static long ToJwtTime(this DateTime tim) => (long)(tim.ToUniversalTime() - DateTime.UnixEpoch.ToUniversalTime()).TotalSeconds;
 
     #endregion
 

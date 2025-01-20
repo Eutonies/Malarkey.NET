@@ -43,17 +43,7 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
         };
         profileInsertee = await SaveAndEnsureUniqueName(profileInsertee, cont);
 
-        var insertee = new MalarkeyIdentityDbo
-        {
-            ProfileId = profileInsertee.ProfileId,
-            IdentityName = identity.FirstName,
-            MiddleNames = identity.MiddleNames,
-            LastName = identity.LastName,
-            Provider = provider,
-            ProviderId = identity.ProviderId,
-            PreferredName = identity.PreferredNameToUse,
-            Email = identity.EmailToUse
-        };
+        var insertee = identity.ToDbo(profileInsertee.ProfileId, provider);
         cont.Identities.Add(insertee);
         await cont.SaveChangesAsync();
         var idProviderToken = identity.IdentityProviderTokenToUse;
@@ -138,6 +128,13 @@ internal class MalarkeyProfileRepository : IMalarkeyProfileRepository
                     .FirstAsync(_ => _.ProfileId == parentProfileId);
                 toUpdate.AbsorbedBy = profileId;
                 cont.Update(toUpdate);
+                await cont.SaveChangesAsync();
+            }
+            else
+            {
+                var provider = ProviderFor(identity);
+                var insertee = identity.ToDbo(profileId, provider);
+                cont.Add(insertee);
                 await cont.SaveChangesAsync();
             }
         }
