@@ -5,6 +5,7 @@ using Malarkey.Integration.Authentication;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Malarkey.Integration.Configuration;
 using Malarkey.Integration.Profile;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Components;
@@ -33,6 +34,7 @@ public static class DependencyInjectionIntegration
     public static WebApplicationBuilder AddIntegrationServices(this WebApplicationBuilder builder)
     {
         var conf = builder.Configuration.IntegrationConfig();
+        builder.Services.AddSingleton<IMalarkeyServerAuthenticationEventHandler, MalarkeyServerAuthenticationEvents>();
         builder.Services.AddAuthentication(MalarkeyConstants.MalarkeyAuthenticationScheme)
             .AddScheme<MalarkeyServerAuthenticationHandlerOptions, MalarkeyServerAuthenticationHandler>(
                authenticationScheme: MalarkeyConstants.MalarkeyAuthenticationScheme,
@@ -47,7 +49,6 @@ public static class DependencyInjectionIntegration
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeySpotifyOAuthFlowHandler>();
         builder.Services.AddSingleton<MalarkeyAuthenticationRequestCache>();
         builder.Services.AddSingleton<IVerificationEmailSender, VerificationEmailSender>();
-        builder.Services.AddSingleton<IMalarkeyServerAuthenticationEventHandler>(_ => _.GetRequiredService<MalarkeyServerAuthenticationHandler>());
         builder.Services.AddHttpClients();
         return builder;
     }

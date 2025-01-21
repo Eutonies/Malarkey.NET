@@ -28,7 +28,7 @@ public record MalarkeyAuthenticationSuccessHttpResultInternal(
             url.Append("?" + (Continuation.QueryParameters
                 .Select(par => $"{par.Name}={par.Value.UrlEncoded()}")
                 .MakeString("&")));
-        httpContext.Response.Redirect(url.ToString());
+        httpContext.Response.Redirect(url.ToString(), permanent: false, preserveMethod: false);
     }
 
 

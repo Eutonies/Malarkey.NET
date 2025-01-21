@@ -1,3 +1,4 @@
+using Malarkey.UI.Pages.Profile;
 using Microsoft.AspNetCore.Http.Extensions;
 
 namespace Malarkey.UI.Middleware;
@@ -17,6 +18,10 @@ internal class MalarkeyRequestLoggingMiddleware
     public async Task InvokeAsync(HttpContext context)
     {
         Log(logger => logger.LogInformation($"Received request: {context.Request.GetDisplayUrl()}"));
+        if(context.Request.Path.HasValue && context.Request.Path.Value.ToLower().Contains(ProfileIdentityConnectionSucceededPage.SucceededPagePath.ToLower()))
+        {
+            context.Request.Method = "GET";
+        }
         try {
             await _next(context);
         }

@@ -18,7 +18,7 @@ using Microsoft.AspNetCore.Components;
 using System.Text;
 
 namespace Malarkey.Integration.Authentication;
-public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler, IMalarkeyServerAuthenticationEventHandler
+public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
 {
     private readonly IMalarkeyTokenHandler _tokenHandler;
     private readonly IMalarkeyAuthenticationSessionHandler _sessionHandler;
@@ -29,17 +29,12 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly IAuthenticationUrlResolver _urlResolver;
     private readonly MalarkeyAuthenticationRequestCache _requestCache;
     private readonly string _malarkeyTokenReceiver;
+    private readonly IMalarkeyServerAuthenticationEventHandler _events;
 
     /// <summary>
     /// The handler calls methods on the events which give the application control at certain points where processing is occurring.
     /// If it is not provided a default instance is supplied which does nothing when the methods are called.
     /// </summary>
-
-    private MalarkeyAuthenticationEvents _events;
-
-    public event EventHandler<(MalarkeyProfileIdentity Identity, string State)> OnIdentificationRegistrationCompleted;
-
-    protected new MalarkeyAuthenticationEvents Events => _events;
 
     public MalarkeyServerAuthenticationHandler(
         IOptionsMonitor<MalarkeyServerAuthenticationHandlerOptions> options,
@@ -52,11 +47,13 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         IOptions<MalarkeyIntegrationConfiguration> intConf,
         ILogger<MalarkeyServerAuthenticationHandler> logger,
         IAuthenticationUrlResolver urlResolver,
-        MalarkeyAuthenticationRequestCache requestCache) : base(options, loggerFactory, encoder)
+        MalarkeyAuthenticationRequestCache requestCache,
+        IMalarkeyServerAuthenticationEventHandler events) : base(options, loggerFactory, encoder)
     {
+        _events = events;
         _urlResolver = urlResolver;
         _logger = logger;
-        _events = new MalarkeyAuthenticationEvents();
+        _events = new MalarkeyServerAuthenticationEvents();
         _intConf = intConf.Value;
         _tokenHandler = tokenHandler;
         _sessionHandler = sessionHandler;
@@ -90,23 +87,20 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
         var (idp, scopes, forwarder, forwarderState, existingProfileId, alwaysChallenge) = Request.ToAuthenticationParameters();
+        var state = (forwarder?.ToLower()?.StartsWith("http") ?? false) ? null : await _requestCache.Cache(Request);
 
         if (idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
         {
-            await HandleAuthenticationRequestForwarding(properties);
+            await HandleAuthenticationRequestForwarding(properties, state);
         }
         else
         {
             var audience = ExtractPublicKeyOfReceiver();
             var session = await _sessionHandler.InitSession(idp.Value, forwarder, audience, scopes, forwarderState, existingProfileId);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(session);
-            var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
-                context: Context,
-                scheme: Scheme,
-                options: Options,
-                properties: properties,
-                redirectUri: redirectUrl);
-            await Events.OnRedirectToChallenge(redirContext);
+            Context.Response.StatusCode = 302; 
+            Context.Response.Redirect(redirectUrl);
+
 
         }
 
@@ -165,7 +159,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
         if(session.ForwarderState != null && _requestCache.TryPop(session.ForwarderState, out var conti))
         {
-            OnIdentificationRegistrationCompleted?.Invoke(this, (identity, session.ForwarderState));
+            _events.RegisterIdentificationCompleted(identity, session.ForwarderState);
             var ret = new MalarkeyAuthenticationSuccessHttpResultInternal(
                 Continuation: conti!, 
                 ProfileToken: profileTokenString,
@@ -200,9 +194,9 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         return pubKey.ToString();
     }
 
-    private async Task HandleAuthenticationRequestForwarding(AuthenticationProperties props)
+    private async Task HandleAuthenticationRequestForwarding(AuthenticationProperties props, string? state)
     {
-        var state = await _requestCache.Cache(Request);
+        await Task.CompletedTask;
         var authenticateUrl = new StringBuilder(_urlResolver.AuthenticateUrl);
         if (OriginalPath.HasValue && OriginalPath.Value.Length > 0)
             authenticateUrl.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={OriginalPath.Value.UrlEncoded()}");
@@ -210,13 +204,8 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             authenticateUrl.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName}={state.UrlEncoded()}");
         var url = authenticateUrl.ToString();
         var absoluteUrl = BuildRedirectUri(url);
-        var redirContext = new RedirectContext<MalarkeyServerAuthenticationHandlerOptions>(
-            context: Context,
-            scheme: Scheme,
-            options: Options,
-            properties: props,
-            redirectUri: absoluteUrl);
-        await Events.OnRedirectToLogin(redirContext);
+        Context.Response.StatusCode = 302;
+        Context.Response.Redirect(absoluteUrl);
 
     }
 

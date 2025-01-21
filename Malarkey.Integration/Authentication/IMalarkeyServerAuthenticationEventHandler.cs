@@ -10,5 +10,6 @@ public interface IMalarkeyServerAuthenticationEventHandler
 {
     event EventHandler<(MalarkeyProfileIdentity Identity, string State)> OnIdentificationRegistrationCompleted;
 
+    void RegisterIdentificationCompleted(MalarkeyProfileIdentity identity, string state);
 
 }

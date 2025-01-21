@@ -11,9 +11,8 @@ public partial class ProfileIdentityConnectionSucceededPage
     [Inject]
     public IJSRuntime JS { get; set; }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         await JS.InvokeVoidAsync("closeTab");
     }
-
 }

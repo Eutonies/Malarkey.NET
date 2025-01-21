@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Malarkey.Abstractions.Util;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,26 +13,22 @@ public record MalarkeyAuthenticationRequestContinuation(
     string? Body
     )
 {
-    public static MalarkeyAuthenticationRequestContinuation From(HttpRequest request) => new MalarkeyAuthenticationRequestContinuation(
-        Path: request.Path.Value!,
-        QueryParameters: request.Query
-           .Where(_ => !string.IsNullOrWhiteSpace(_.Value.ToString()))
-           .Select(_ => (Name: _.Key, Value: _.Value.ToString()))
-           .ToList(),
-        Body: ReadBody(request)
-        );
-
-    private static string? ReadBody(HttpRequest request)
+    public static MalarkeyAuthenticationRequestContinuation From(HttpRequest request)
     {
-        try
-        {
-            return null;
-        }
-        catch
-        {
-            return null;
-        }
-    }
+        var queryParams = request.Query
+               .Where(_ => !string.IsNullOrWhiteSpace(_.Value.ToString()))
+               .Select(_ => (Name: _.Key, Value: _.Value.ToString()))
+               .ToList();
+        var paramsMap = queryParams
+            .ToDictionarySafe(_ => _.Name, _ => _.Value);
+
+        var returnee = new MalarkeyAuthenticationRequestContinuation(
+            Path: paramsMap.TryGetValue(MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName, out var forwarder) ? forwarder : request.Path.Value!,
+            QueryParameters: queryParams,
+            Body: null
+        );
+        return returnee;
+    } 
 
 
 

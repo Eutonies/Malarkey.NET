@@ -11,6 +11,7 @@ using Malarkey.UI.Configuration;
 using Malarkey.UI.Middleware;
 using Malarkey.Integration.Authentication;
 using Malarkey.UI.Components.Authentication;
+using Malarkey.UI.Pages.Profile;
 
 namespace Malarkey.UI;
 
@@ -66,8 +67,8 @@ public static class DependencyInjection
         app.UseRouting();
         app.UseStaticFiles();
         app.UseIntegration();
-        app.UseAntiforgery();
         app.MapRazorComponents<App>()
+            .DisableAntiforgery()
             .AddInteractiveServerRenderMode();
         app.UseApi();
         app.MapRazorPages();

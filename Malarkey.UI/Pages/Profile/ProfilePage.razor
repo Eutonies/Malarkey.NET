@@ -70,7 +70,8 @@
                     <ProfileIdentityProviderComponent 
                         ProviderEntry="ent"
                         ProfileId="@(ProfileId ?? Guid.NewGuid())"
-                        IdentityConnectionState="_connectionState">
+                        IdentityConnectionState="_connectionState"
+                        AuthenticationStates="_authenticationStates">
                     </ProfileIdentityProviderComponent>
                 </div>
             }
