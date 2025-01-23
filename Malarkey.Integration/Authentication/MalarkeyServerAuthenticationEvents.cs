@@ -14,10 +14,10 @@ using Malarkey.Abstractions.Profile;
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationEvents : IMalarkeyServerAuthenticationEventHandler
 {
-    public event EventHandler<(MalarkeyProfileIdentity Identity, string State)> OnIdentificationRegistrationCompleted;
+    public event EventHandler<MalarkeyProfileIdentity> OnIdentificationRegistrationCompleted;
 
-    public void RegisterIdentificationCompleted(MalarkeyProfileIdentity identity, string state)
+    public void RegisterIdentificationCompleted(MalarkeyProfileIdentity identity)
     {
-        OnIdentificationRegistrationCompleted?.Invoke(this,(identity, state));
+        OnIdentificationRegistrationCompleted?.Invoke(this,identity);
     }
 }

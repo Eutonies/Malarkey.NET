@@ -34,7 +34,6 @@ public partial class ProfilePage : IDisposable
 
     private MalarkeyProfile? _profile;
     private IReadOnlyCollection<MalarkeyProfileIdentity> _identities = [];
-    private HashSet<string> _authenticationStates = [];
 
     private IReadOnlyCollection<ProfileIdentityProviderEntry> _identityEntries = MalarkeyIdentityProviders.AllProviders
         .Select(prov => new ProfileIdentityProviderEntry(prov, []))
@@ -200,9 +199,9 @@ public partial class ProfilePage : IDisposable
         }
     }
 
-    private void OnIdentityRegistrationCompleted(object? sender, (MalarkeyProfileIdentity Identity, string State) data)
+    private void OnIdentityRegistrationCompleted(object? sender, MalarkeyProfileIdentity identity)
     {
-        if(_authenticationStates.Contains(data.State) && ProfileId != null)
+        if(ProfileId != null && identity.ProfileId == ProfileId)
         {
             _ = Task.Run(async () =>
             {
@@ -213,7 +212,6 @@ public partial class ProfilePage : IDisposable
                     _identities = reloaded.Identities;
                     await InvokeAsync(StateHasChanged);
                 }
-                _authenticationStates.Remove(data.State);
             });
         }
     }

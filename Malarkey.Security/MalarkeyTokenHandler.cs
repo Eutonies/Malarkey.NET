@@ -67,7 +67,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
             IssuedTo: receiverPublicKey,
             IssuedAt: MalarkeySecurityConstants.Now.ToUniversalTime(),
             ValidUntil: MalarkeySecurityConstants.Now.ToUniversalTime() + MalarkeySecurityConstants.TokenLifeTime,
-        Identity: identity
+            Identity: identity
             );
         var tokenString = CreateTokenString(token, receiverPublicKey);
         using var scope = _scopeFactory.CreateScope();
@@ -166,6 +166,7 @@ internal static class MalarkeyTokenHandlerExtensions
     {
         (nameof(payload.identid), payload.identid),
         (nameof(payload.identtyp), payload.identtyp),
+        (nameof(payload.id), payload.id),
         (nameof(payload.jti), payload.jti),
         (nameof(payload.name), payload.name),
         (nameof(payload.midnames), payload.midnames),

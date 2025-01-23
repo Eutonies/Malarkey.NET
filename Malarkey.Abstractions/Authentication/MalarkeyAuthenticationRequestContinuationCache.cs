@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Abstractions.Authentication;
-public class MalarkeyAuthenticationRequestCache
+public class MalarkeyAuthenticationRequestContinuationCache
 {
     private const int MaxEntriesInCache = 5000;
     private readonly SemaphoreSlim _updateLock = new SemaphoreSlim(1);

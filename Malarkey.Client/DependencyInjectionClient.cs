@@ -25,7 +25,7 @@ public static class DependencyInjectionClient
 
     public static WebApplicationBuilder AddMalarkeyClientAuthentication(this WebApplicationBuilder builder)
     {
-        builder.Services.AddSingleton<MalarkeyAuthenticationRequestCache>();
+        builder.Services.AddSingleton<MalarkeyAuthenticationRequestContinuationCache>();
         builder.Services.AddScoped<IMalarkeyClientAuthenticatedCallback, MalarkeyClientAuthenticationHandler>();
         builder.Services.AddAuthentication(MalarkeyConstants.MalarkeyAuthenticationScheme)
             .AddScheme<MalarkeyClientAuthenticationSchemeOptions, MalarkeyClientAuthenticationHandler>(

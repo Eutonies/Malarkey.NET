@@ -17,9 +17,6 @@ public partial class ProfileIdentityProviderComponent
     [Parameter]
     public Guid IdentityConnectionState { get; set; }
 
-    [Parameter]
-    public HashSet<string> AuthenticationStates { get; set; }
-
     private MalarkeyIdentityProvider Provider => ProviderEntry.Provider;
 
     private IReadOnlyCollection<ShowIdentity> _identities = [];
@@ -32,7 +29,6 @@ public partial class ProfileIdentityProviderComponent
             .Select(_ => new ShowIdentity(_))
             .OrderBy(_ => _.NameToUse)
             .ToList();
-        AuthenticationStates.Add(IdentityConnectionState.ToString());
     }
 
     private string IdentityConnectUrl => $"{MalarkeyConstants.Authentication.ServerAuthenticationPath}?" + 

@@ -27,7 +27,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly MalarkeyClientConfiguration _conf;
-    private readonly MalarkeyAuthenticationRequestCache _cache;
+    private readonly MalarkeyAuthenticationRequestContinuationCache _cache;
 
     public MalarkeyClientAuthenticationHandler(
         IOptionsMonitor<MalarkeyClientAuthenticationSchemeOptions> options, 
@@ -35,7 +35,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         UrlEncoder encoder, 
         IHttpClientFactory httpClientFactory,
         IOptions<MalarkeyClientConfiguration> conf,
-        MalarkeyAuthenticationRequestCache cache
+        MalarkeyAuthenticationRequestContinuationCache cache
         ) : base(options, logger, encoder)
     {
         _conf = conf.Value;

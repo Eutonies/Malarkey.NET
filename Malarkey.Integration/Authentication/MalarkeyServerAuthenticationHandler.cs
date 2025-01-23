@@ -27,7 +27,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly MalarkeyIntegrationConfiguration _intConf;
     private readonly ILogger<MalarkeyServerAuthenticationHandler> _logger;
     private readonly IAuthenticationUrlResolver _urlResolver;
-    private readonly MalarkeyAuthenticationRequestCache _requestCache;
+    private readonly MalarkeyAuthenticationRequestContinuationCache _requestCache;
     private readonly string _malarkeyTokenReceiver;
     private readonly IMalarkeyServerAuthenticationEventHandler _events;
 
@@ -47,13 +47,12 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         IOptions<MalarkeyIntegrationConfiguration> intConf,
         ILogger<MalarkeyServerAuthenticationHandler> logger,
         IAuthenticationUrlResolver urlResolver,
-        MalarkeyAuthenticationRequestCache requestCache,
+        MalarkeyAuthenticationRequestContinuationCache requestCache,
         IMalarkeyServerAuthenticationEventHandler events) : base(options, loggerFactory, encoder)
     {
         _events = events;
         _urlResolver = urlResolver;
         _logger = logger;
-        _events = new MalarkeyServerAuthenticationEvents();
         _intConf = intConf.Value;
         _tokenHandler = tokenHandler;
         _sessionHandler = sessionHandler;
@@ -157,9 +156,10 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var (profileToken, profileTokenString) = await _tokenHandler.IssueToken(profileAndIdentities.Profile, session.Audience);
         var (identityToken, identityTokenString) = await _tokenHandler.IssueToken(identity, session.Audience);
         await _sessionHandler.UpdateSessionWithTokenInfo(session, profileToken, identityToken);
-        if(session.ForwarderState != null && _requestCache.TryPop(session.ForwarderState, out var conti))
+        _events.RegisterIdentificationCompleted(identity);
+
+        if (session.ForwarderState != null && _requestCache.TryPop(session.ForwarderState, out var conti))
         {
-            _events.RegisterIdentificationCompleted(identity, session.ForwarderState);
             var ret = new MalarkeyAuthenticationSuccessHttpResultInternal(
                 Continuation: conti!, 
                 ProfileToken: profileTokenString,

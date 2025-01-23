@@ -8,8 +8,8 @@ using System.Threading.Tasks;
 namespace Malarkey.Integration.Authentication;
 public interface IMalarkeyServerAuthenticationEventHandler
 {
-    event EventHandler<(MalarkeyProfileIdentity Identity, string State)> OnIdentificationRegistrationCompleted;
+    event EventHandler<MalarkeyProfileIdentity> OnIdentificationRegistrationCompleted;
 
-    void RegisterIdentificationCompleted(MalarkeyProfileIdentity identity, string state);
+    void RegisterIdentificationCompleted(MalarkeyProfileIdentity identity);
 
 }
