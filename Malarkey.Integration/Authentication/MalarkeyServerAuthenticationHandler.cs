@@ -104,7 +104,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         {
             var idpSession = flowHandler.PopulateIdpSession(authSession);
             authSession = await _sessionRepo.RequestInitiateIdpSession(authSession.SessionId, idpSession);
-            var redirectUrl = flowHandler.ProduceAuthorizationUrl(authSession);
+            var redirectUrl = flowHandler.ProduceAuthorizationUrl(authSession, idpSession);
             Context.Response.StatusCode = 302;
             Context.Response.Redirect(redirectUrl);
         }

@@ -32,7 +32,7 @@ public static class DependencyInjectionPersistence
     {
         builder.Services.AddDbContextFactory<MalarkeyDbContext>(ConfigureDb, lifetime: ServiceLifetime.Singleton);
         //builder.Services.AddDbContext<MalarkeyDbContext>(ConfigureDb, contextLifetime : ServiceLifetime.Scoped);
-        builder.Services.AddSingleton<IMalarkeySessionRepository, MalarkeyAuthenticationSessionRepository>();
+        builder.Services.AddSingleton<IMalarkeyAuthenticationSessionRepository, MalarkeyAuthenticationSessionRepository>();
         builder.Services.AddSingleton<IMalarkeyProfileRepository, MalarkeyProfileRepository>();
         builder.Services.AddSingleton<IMalarkeyTokenRepository, MalarkeyTokenRepository>();
         builder.Services.AddSingleton<IVerificationEmailHandler, VerificationEmailHandler>();

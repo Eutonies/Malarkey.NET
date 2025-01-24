@@ -10,15 +10,15 @@ using Microsoft.Extensions.DependencyInjection;
 using Malarkey.Application.Authentication;
 
 namespace Malarkey.Security;
-internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSessionRepository
+internal class MalarkeyAuthenticationSessionHandler : Application.Authentication.IMalarkeyAuthenticationSessionRepository
 {
     private static readonly char[] CodeVerifierAllowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
         .ToCharArray();
 
-    private readonly IMalarkeySessionRepository _repo;
+    private readonly Persistence.IMalarkeyAuthenticationSessionRepository _repo;
     private readonly IServiceScopeFactory _scopeFactory;
 
-    public MalarkeyAuthenticationSessionHandler(IMalarkeySessionRepository repo, IServiceScopeFactory scopeFactory)
+    public MalarkeyAuthenticationSessionHandler(Persistence.IMalarkeyAuthenticationSessionRepository repo, IServiceScopeFactory scopeFactory)
     {
         _scopeFactory = scopeFactory;
         _repo = repo;
@@ -99,5 +99,25 @@ internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSes
         await _repo.SaveRefreshedToken(refreshed, loadedInfo.IdentityId);
         return refreshed;
 
+    }
+
+    public async Task<MalarkeyAuthenticationSession> RequestInitiateSession(MalarkeyAuthenticationSession session)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<MalarkeyAuthenticationSession> RequestUpdateSession(long sessionId, MalarkeyIdentityProvider identityProvider)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<MalarkeyAuthenticationSession> RequestInitiateIdpSession(long sessionId, MalarkeyAuthenticationIdpSession session)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<MalarkeyAuthenticationSession?> RequestLoadByState(string state)
+    {
+        throw new NotImplementedException();
     }
 }

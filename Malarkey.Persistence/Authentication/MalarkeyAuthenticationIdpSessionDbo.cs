@@ -22,7 +22,7 @@ internal class MalarkeyAuthenticationIdpSessionDbo
     public string CodeVerifier { get; set; }
     public DateTime InitTime { get; set; }
     public DateTime? AuthenticatedTime { get; set; }
-    public string? Scopes { get; set; }
+    public string Scopes { get; set; }
 
 
 
@@ -39,7 +39,7 @@ internal class MalarkeyAuthenticationIdpSessionDbo
         CodeVerifier: CodeVerifier,
         InitTime: InitTime,
         AuthenticatedTime: AuthenticatedTime,
-        Scopes: Scopes?.Split(" ")
+        Scopes: Scopes.Split(" ")
     );
 
 
@@ -59,7 +59,7 @@ internal static class MalarkeyAuthenticationIdpSessionDboExtensions
         CodeVerifier = sess.CodeVerifier,
         InitTime = sess.InitTime,
         AuthenticatedTime = sess.AuthenticatedTime,
-        Scopes = sess.Scopes?.MakeString(" ")
+        Scopes = sess.Scopes.MakeString(" ")
     };
 
 

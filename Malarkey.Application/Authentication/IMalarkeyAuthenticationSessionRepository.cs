@@ -19,18 +19,6 @@ public interface IMalarkeyAuthenticationSessionRepository
 
     Task<MalarkeyAuthenticationSession?> RequestLoadByState(string state);
 
-
-
-    Task<MalarkeyAuthenticationSession> InitSession(
-        MalarkeyIdentityProvider idProvider,
-        string? forwarder,
-        string audiencePublicKey,
-        string[]? scopes,
-        string? forwarderState,
-        Guid? existingProfileId
-        );
-    Task<MalarkeyAuthenticationSession?> SessionForState(string state);
-
     Task<MalarkeyAuthenticationSession> UpdateSessionWithTokenInfo(
         MalarkeyAuthenticationSession session,
         MalarkeyProfileToken profileToken,

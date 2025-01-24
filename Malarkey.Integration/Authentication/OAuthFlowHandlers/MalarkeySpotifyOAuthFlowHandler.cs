@@ -29,16 +29,16 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMala
     protected override MalarkeyOAuthNamingScheme ProduceNamingScheme() => MalarkeySpotifyOAuthNamingScheme.Init(_conf.NamingSchemeOverwrites);
     protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Spotify;
 
-    public override IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session)
+    public override IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session, MalarkeyAuthenticationIdpSession idpSession)
     {
         var returnee = new Dictionary<string, string>();
         returnee[_namingScheme.ClientId] = _conf.ClientId;
         returnee[_namingScheme.ResponseType] = _conf.ResponseType!;
         returnee[_namingScheme.RedirectUri] = _intConf.RedirectUrl;
-        returnee[_namingScheme.Scope] = (session.Scopes ?? ( _conf.Scopes ?? DefaultScopes))
+        returnee[_namingScheme.Scope] = idpSession.Scopes
             .MakeString(" ")
             .UrlEncoded();
-        returnee[_namingScheme.CodeChallenge] = session.CodeChallenge
+        returnee[_namingScheme.CodeChallenge] = idpSession.CodeChallenge
             .Replace('+','-')
             .Replace('/','_');
         returnee[_namingScheme.CodeChallengeMethod] = DefaultCodeChallengeMethod;
@@ -68,6 +68,7 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMala
         if (redirectData.Code == null)
             return null;
         var url = _conf.TokenEndpointTemplate!;
+        var codeVerifier = session.IdpSession!.CodeVerifier;
         var request = new HttpRequestMessage(HttpMethod.Post, url);
         var formParameters = new List<(string, string)>
         {
@@ -75,7 +76,7 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMala
             ("code", redirectData.Code!),
             ("redirect_uri", _intConf.RedirectUrl),
             ("client_id", _conf.ClientId),
-            ("code_verifier", session.CodeVerifier)
+            ("code_verifier", codeVerifier)
         };
         request.Content = formParameters.ToFormContent();
         IdentityProviderToken? accessToken = null;

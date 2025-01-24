@@ -15,7 +15,7 @@ namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 public interface IMalarkeyOAuthFlowHandler
 {
     public MalarkeyIdentityProvider HandlerFor { get; }
-    public string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session);
+    public string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session, MalarkeyAuthenticationIdpSession idpSession);
 
     public MalarkeyAuthenticationIdpSession PopulateIdpSession(MalarkeyAuthenticationSession session);
 

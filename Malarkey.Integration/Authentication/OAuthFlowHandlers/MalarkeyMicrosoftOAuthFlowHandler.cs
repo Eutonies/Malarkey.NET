@@ -59,7 +59,7 @@ internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
             .ToDictionarySafe(_ => _.Type, _ => _.Value);
         if(!claimsMap.TryGetValue("nonce", out var nonce))
             return null;
-        var sessionNonce = session?.Nonce?.UrlDecoded();
+        var sessionNonce = session?.IdpSession?.Nonce?.UrlDecoded();
         if (sessionNonce != null && sessionNonce != nonce)
             return null;
         if (!claimsMap.TryGetValue("oid", out var userId))

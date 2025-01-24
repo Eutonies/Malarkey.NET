@@ -25,7 +25,7 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
     protected override MalarkeyOAuthNamingScheme ProduceNamingScheme() => MalarkeyFacebookOAuthNamingScheme.Init(_conf.NamingSchemeOverwrites);
     protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Facebook;
 
-    public override IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session) => new List<(string, string?)>
+    public override IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session, MalarkeyAuthenticationIdpSession idpSession) => new List<(string, string?)>
     {
         (_namingScheme.ClientId, _conf.ClientId),
         (_namingScheme.Scope, _conf.Scopes?.MakeString(",") ?? ""),
@@ -35,9 +35,9 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
             .Replace('+','-')
             .Replace('/','_')
         ),
-        (_namingScheme.CodeChallenge, session.CodeChallenge),
+        (_namingScheme.CodeChallenge, idpSession.CodeChallenge),
         (_namingScheme.CodeChallengeMethod, _conf.CodeChallengeMethod),
-        (_namingScheme.Nonce, session.Nonce)
+        (_namingScheme.Nonce, idpSession.Nonce)
     }
     .Where(_ => _.Item2 != null)
     .ToDictionarySafe(_ => _.Item1, _ => _.Item2!);
@@ -58,10 +58,11 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
 
     public override async Task<MalarkeyProfileIdentity?> ResolveIdentity(MalarkeyAuthenticationSession session, IMalarkeyOAuthFlowHandler.RedirectData redirectData)
     {
+        var codeVerifier = session.IdpSession!.CodeVerifier.UrlEncoded();
         var urlBuilder = new StringBuilder(_conf.TokenEndpointTemplate!);
         urlBuilder.Append($"?{_namingScheme.ClientId}={_conf.ClientId.UrlEncoded()}");
         urlBuilder.Append($"&{_namingScheme.RedirectUri}={_intConf.RedirectUrl.UrlEncoded()}");
-        urlBuilder.Append($"&{_namingScheme.RedemptionCodeVerifier}={session.CodeVerifier.UrlEncoded()}");
+        urlBuilder.Append($"&{_namingScheme.RedemptionCodeVerifier}={codeVerifier}");
         urlBuilder.Append($"&{_namingScheme.RedemptionCode}={redirectData.Code!.UrlEncoded()}");
         var url = urlBuilder.ToString();
 

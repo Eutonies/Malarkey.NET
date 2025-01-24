@@ -42,28 +42,20 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
     protected abstract MalarkeyIdentityProviderConfiguration ProduceConfiguration();
 
 
-    public virtual RedirectHttpResult ProduceRedirect(MalarkeyAuthenticationSession session)
-    {
-        var url = ProduceAuthorizationUrl(session);
-        var res = TypedResults.Redirect(url);
-        return res;
-    }
 
-
-
-    public virtual IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session)
+    public virtual IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(
+        MalarkeyAuthenticationSession session,
+        MalarkeyAuthenticationIdpSession idpSession)
     {
         var returnee = new Dictionary<string, string>();
         returnee[_namingScheme.ClientId] = _conf.ClientId;
         returnee[_namingScheme.ResponseType] = _conf.ResponseType!;
         returnee[_namingScheme.ResponseMode] = _conf.ResponseMode ?? "form_post";
         returnee[_namingScheme.RedirectUri] = _intConf.RedirectUrl;
-        returnee[_namingScheme.Scope] = (session.Scopes ?? (_conf.Scopes ?? DefaultScopes))
-            .MakeString()
-            .UrlEncoded();
-        if (session.Nonce != null)
-            returnee[_namingScheme.Nonce] = session.Nonce;
-        returnee[_namingScheme.CodeChallenge] = session.CodeChallenge;
+        returnee[_namingScheme.Scope] = idpSession.Scopes.MakeString(" ").UrlEncoded();
+        if (idpSession.Nonce != null)
+            returnee[_namingScheme.Nonce] = idpSession.Nonce;
+        returnee[_namingScheme.CodeChallenge] = idpSession.CodeChallenge;
         returnee[_namingScheme.CodeChallengeMethod] = DefaultCodeChallengeMethod;
         returnee[_namingScheme.State] = session.State;
         return returnee;
@@ -74,9 +66,9 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
 
 
 
-    public virtual string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session)
+    public virtual string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session, MalarkeyAuthenticationIdpSession idpSession)
     {
-        var queryParameters = ProduceRequestQueryParameters(session);
+        var queryParameters = ProduceRequestQueryParameters(session, idpSession);
         var queryString = ProduceAuthorizationRequestQueryString(queryParameters);
         var baseUrl = AuthorizationEndpoint;
         var returnee = $"{baseUrl}?{queryString}";

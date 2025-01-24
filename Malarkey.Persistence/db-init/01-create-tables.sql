@@ -90,7 +90,7 @@ create table authentication_idp_session (
     code_verifier varchar(2000) not null,
     init_time timestamp not null,
     authenticated_time timestamp,
-    scopes varchar(2000),
+    scopes varchar(2000) not null,
     constraint fk_authentication_idp_session_sessid foreign key (session_id) references authentication_session(session_id) on delete cascade
 );
 

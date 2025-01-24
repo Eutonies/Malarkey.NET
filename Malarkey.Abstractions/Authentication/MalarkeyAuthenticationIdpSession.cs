@@ -15,5 +15,5 @@ public record MalarkeyAuthenticationIdpSession(
     string CodeVerifier,
     DateTime InitTime,
     DateTime? AuthenticatedTime,
-    string[]? Scopes
+    string[] Scopes
     );
