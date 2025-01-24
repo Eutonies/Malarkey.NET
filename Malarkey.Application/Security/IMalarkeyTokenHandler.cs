@@ -15,6 +15,20 @@ public interface IMalarkeyTokenHandler
 
     public Task<(MalarkeyProfileToken Token, string TokenString)> IssueToken(MalarkeyProfile profile, string receiverPublicKey);
     public Task<(MalarkeyIdentityToken Token, string TokenString)> IssueToken(MalarkeyProfileIdentity identity, string receiverPublicKey);
+
+    public async Task<IReadOnlyCollection<(MalarkeyIdentityToken Token, string TokenString)>> IssueTokens(
+        IEnumerable<MalarkeyProfileIdentity> tokens, 
+        string audience)
+    {
+        if (!tokens.Any())
+            return [];
+        var tasks = tokens
+            .Select(_ => IssueToken(_, audience))
+            .ToList();
+        var returnee = (await Task.WhenAll(tasks))
+            .ToList();
+        return returnee;
+    }
     public Task RecallToken(string tokenString);
     public Task<IReadOnlyCollection<MalarkeyTokenValidationResult>> ValidateTokens(IEnumerable<(string Token, string ReceiverPublicKey)> tokens);
 

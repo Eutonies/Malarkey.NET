@@ -7,9 +7,10 @@ using System.Security.Cryptography;
 using System.Text;
 using Malarkey.Abstractions.Profile;
 using Microsoft.Extensions.DependencyInjection;
+using Malarkey.Application.Authentication;
 
 namespace Malarkey.Security;
-internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSessionHandler
+internal class MalarkeyAuthenticationSessionHandler : IMalarkeyAuthenticationSessionRepository
 {
     private static readonly char[] CodeVerifierAllowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~"
         .ToCharArray();

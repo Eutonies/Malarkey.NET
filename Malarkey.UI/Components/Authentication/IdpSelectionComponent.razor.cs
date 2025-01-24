@@ -5,6 +5,7 @@ using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
 using System.Text;
+using Malarkey.Abstractions.Authentication;
 
 namespace Malarkey.UI.Components.Authentication;
 
@@ -17,22 +18,11 @@ public partial class IdpSelectionComponent
     public MalarkeySessionState SessionState { get; set; }
 
     [Parameter]
-    public string? Forwarder { get; set; }
-
-    [Parameter]
-    public string? IdProvider { get; set; }
-
-    [Parameter]
-    public string? Scopes { get; set; }
-
-    [Parameter]
-    public string? ForwarderState { get; set; }
-
-    [Parameter]
-    public string? ExistingProfileId { get; set; }
+    public MalarkeyAuthenticationSession Session { get; set; }
 
     [Parameter]
     public string? AlwaysChallenge { get; set; }
+
 
 
     private bool IsAuthenticated => SessionState.User != null;
@@ -40,7 +30,8 @@ public partial class IdpSelectionComponent
     protected async override Task OnAfterRenderAsync(bool firstRender)
     {
         await Task.CompletedTask;
-        if (IdProvider != null)
+        var idProvider = Session.RequestedIdProvider?.ToString();
+        if (idProvider != null)
         {
             var provMap = new List<MalarkeyIdentityProvider> {
                 MalarkeyIdentityProvider.Microsoft,
@@ -49,7 +40,7 @@ public partial class IdpSelectionComponent
                 MalarkeyIdentityProvider.Spotify
             }.Select(_ => (Key: _.ToString().ToLower(), Value: _))
             .ToDictionarySafe(_ => _.Key, _ => _.Value);
-            if (provMap.TryGetValue(IdProvider.ToLower().Trim(), out var prov))
+            if (provMap.TryGetValue(idProvider.ToLower().Trim(), out var prov))
             {
                 GoTo(prov);
             }
@@ -72,14 +63,13 @@ public partial class IdpSelectionComponent
     private string BuildChallengeUrl(MalarkeyIdentityProvider provider)
     {
         var returnee = new StringBuilder($"challenge?{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
-        if (Forwarder != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={Forwarder.UrlEncoded()}");
-        if (Scopes != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={Scopes.UrlEncoded()}");
-        if (ForwarderState != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName}={ForwarderState.UrlEncoded()}");
-        if (ExistingProfileId != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName}={ExistingProfileId.UrlEncoded()}");
+        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={Session.SendTo.UrlEncoded()}");
+        if (Session.RequestedScopes != null)
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={Session.RequestedScopes.MakeString(" ").UrlEncoded()}");
+        if (Session.RequestState != null)
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName}={Session.RequestState.UrlEncoded()}");
+        if (Session.ExistingProfileId != null)
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName}={Session.ExistingProfileId.Value.ToString().UrlEncoded()}");
         if (AlwaysChallenge != null)
             returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName}={AlwaysChallenge}");
 

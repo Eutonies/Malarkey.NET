@@ -7,6 +7,10 @@ using Malarkey.Integration;
 using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
+using Malarkey.Application.Authentication;
+using Malarkey.Integration.Authentication;
+using Microsoft.Extensions.Options;
+using Malarkey.Integration.Configuration;
 
 namespace Malarkey.UI.Pages.Authenticate;
 
@@ -18,12 +22,18 @@ public partial class AuthenticatePage
     [Inject]
     public IHttpContextAccessor ContextAccessor { get; set; }
 
+    [Inject]
+    public IMalarkeyAuthenticationSessionRepository AuthenticationSessionRepo { get; set; }
+
+    [Inject]
+    public IOptions<MalarkeyIntegrationConfiguration> IntegrationConfiguration { get; set; }
+
     [CascadingParameter]
     public MalarkeySessionState SessionState { get; set; }
 
-    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName)]
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName)]
     [Parameter]
-    public string? Forwarder { get; set; }
+    public string? SendTo { get; set; }
 
     [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName)]
     [Parameter]
@@ -33,9 +43,9 @@ public partial class AuthenticatePage
     [Parameter]
     public string? Scopes { get; set; }
 
-    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName)]
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName)]
     [Parameter]
-    public string? ForwarderState { get; set; }
+    public string? SendToState { get; set; }
 
     [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName)]
     [Parameter]
@@ -45,12 +55,23 @@ public partial class AuthenticatePage
     [Parameter]
     public string? AlwaysChallenge { get; set; }
 
+    private MalarkeyAuthenticationSession? _authenticationSession;
 
-    protected async override Task OnAfterRenderAsync(bool firstRender)
+
+    protected override async Task OnParametersSetAsync()
     {
-        await Task.CompletedTask;
+        if (_authenticationSession == null)
+        {
+            var audience = IntegrationConfiguration.Value
+                .PublicKey.CleanCertificate();
+            var context = ContextAccessor.HttpContext!;
+            var sess = context.Request.ResolveSession(audience);
+            _authenticationSession = await AuthenticationSessionRepo.RequestInitiateSession(sess);
+            await InvokeAsync(StateHasChanged);
+        }
 
     }
+
 
 
 }

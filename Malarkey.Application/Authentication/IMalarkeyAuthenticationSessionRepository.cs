@@ -8,12 +8,22 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Application.Security;
-public interface IMalarkeyAuthenticationSessionHandler
+namespace Malarkey.Application.Authentication;
+public interface IMalarkeyAuthenticationSessionRepository
 {
+
+    Task<MalarkeyAuthenticationSession> RequestInitiateSession(MalarkeyAuthenticationSession session);
+    Task<MalarkeyAuthenticationSession> RequestUpdateSession(long sessionId, MalarkeyIdentityProvider identityProvider);
+
+    Task<MalarkeyAuthenticationSession> RequestInitiateIdpSession(long sessionId, MalarkeyAuthenticationIdpSession session);
+
+    Task<MalarkeyAuthenticationSession?> RequestLoadByState(string state);
+
+
+
     Task<MalarkeyAuthenticationSession> InitSession(
-        MalarkeyIdentityProvider idProvider, 
-        string? forwarder, 
+        MalarkeyIdentityProvider idProvider,
+        string? forwarder,
         string audiencePublicKey,
         string[]? scopes,
         string? forwarderState,
@@ -23,7 +33,7 @@ public interface IMalarkeyAuthenticationSessionHandler
 
     Task<MalarkeyAuthenticationSession> UpdateSessionWithTokenInfo(
         MalarkeyAuthenticationSession session,
-        MalarkeyProfileToken profileToken, 
+        MalarkeyProfileToken profileToken,
         MalarkeyIdentityToken identityToken);
 
     Task<IdentityProviderToken?> Refresh(string accessToken, string audiencePublicKey);

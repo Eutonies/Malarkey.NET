@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Malarkey.Application;
+using Malarkey.Application.Authentication;
 using Malarkey.Application.Security;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
@@ -19,7 +20,7 @@ public static class DependencyInjectionSecurity
     {
 
         builder.Services.AddSingleton<IMalarkeyTokenHandler, MalarkeyTokenHandler>();
-        builder.Services.AddSingleton<IMalarkeyAuthenticationSessionHandler, MalarkeyAuthenticationSessionHandler>();
+        builder.Services.AddSingleton<IMalarkeyAuthenticationSessionRepository, MalarkeyAuthenticationSessionHandler>();
         return builder;
     }
 

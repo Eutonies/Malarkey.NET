@@ -10,10 +10,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Authentication;
-public record MalarkeyAuthenticationSuccessHttpResultInternal(
-    MalarkeyAuthenticationRequestContinuation Continuation,
+public record MalarkeyAuthenticationSuccessHttpResult(
+    MalarkeyAuthenticationSession Session,
     string ProfileToken,
-    string IdentityToken,
+    IReadOnlyCollection<string> IdentityTokens,
     ILogger Logger
     ) : IResult
 {
@@ -22,12 +22,17 @@ public record MalarkeyAuthenticationSuccessHttpResultInternal(
         await Task.CompletedTask;
         httpContext.Response.StatusCode = 302;
         httpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName, ProfileToken);
-        httpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.IdentityCookieName(0), IdentityToken);
-        var url = new StringBuilder($"{Continuation.Path}");
-        if (Continuation.QueryParameters.Any())
-            url.Append("?" + (Continuation.QueryParameters
-                .Select(par => $"{par.Name}={par.Value.UrlEncoded()}")
-                .MakeString("&")));
+        var identList = IdentityTokens.ToList();
+        for(var identIndx = 0; identIndx < identList.Count; identIndx++)
+           httpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.IdentityCookieName(identIndx), identList[identIndx]);
+        var url = new StringBuilder($"{Session.SendTo}");
+        if(Session.IsInternal && Session.RequestParameters.Any())
+        {
+            url.Append("?" + Session.RequestParameters
+                 .Select(_ => $"{_.Name}=${_.Value.UrlEncoded()}")
+                 .MakeString("&")
+            );
+        }
         httpContext.Response.Redirect(url.ToString(), permanent: false, preserveMethod: false);
     }
 

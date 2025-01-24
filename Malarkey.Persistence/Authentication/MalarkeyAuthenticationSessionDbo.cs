@@ -28,12 +28,13 @@ internal class MalarkeyAuthenticationSessionDbo
     public Guid? IdentityTokenId { get; set; }
     public string Audience { get; set; }
     public Guid? ExistingProfileId { get; set; }
+    public bool AlwaysChallenge { get; set; }
 
 
 
     public MalarkeyAuthenticationSession ToDomain(IEnumerable<MalarkeyAuthenticationSessionParameterDbo> pars, MalarkeyAuthenticationIdpSessionDbo? idpSession) => new MalarkeyAuthenticationSession(
         SessionId: SessionId,
-        State: State,
+        State: State.ToString(),
         IsInternal: IsInternal,
         InitTime: InitTime,
         SendTo: SendTo,
@@ -46,6 +47,7 @@ internal class MalarkeyAuthenticationSessionDbo
         IdentityTokenId: IdentityTokenId,
         Audience: Audience,
         ExistingProfileId: ExistingProfileId,
+        AlwaysChallenge: AlwaysChallenge,
         RequestParameters: pars.Select(_ => _.ToDomain()).ToList(),
         IdpSession: idpSession?.ToDomain()
     );
@@ -63,7 +65,7 @@ internal static class MalarkeyAuthenticationSessionDboExtensions
            Session: new MalarkeyAuthenticationSessionDbo
            {
                SessionId = sess.SessionId,
-               State = sess.State,
+               State = Guid.Parse(sess.State),
                IsInternal = sess.IsInternal,
                InitTime = sess.InitTime,
                SendTo = sess.SendTo,
@@ -75,7 +77,8 @@ internal static class MalarkeyAuthenticationSessionDboExtensions
                ProfileTokenId = sess.ProfileTokenId,
                IdentityTokenId = sess.IdentityTokenId,
                Audience = sess.Audience,
-               ExistingProfileId = sess.ExistingProfileId
+               ExistingProfileId = sess.ExistingProfileId,
+               AlwaysChallenge = sess.AlwaysChallenge
            },
            Parameters: sess.RequestParameters.Select(par => par.ToDbo()).ToList(),
            IdpSession: sess.IdpSession?.ToDbo()

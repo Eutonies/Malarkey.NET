@@ -2,7 +2,7 @@
 using Malarkey.Abstractions.API.Profile;
 using Malarkey.Abstractions.API.Profile.Requests;
 using Malarkey.API.Common;
-using Malarkey.Application.Security;
+using Malarkey.Application.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Server.HttpSys;
@@ -19,7 +19,7 @@ public class ProfileController : MalarkeyController
 
     [HttpPost(MalarkeyConstants.API.Paths.Profile.RefreshTokenRelativePath)]
     public Task<Results<BadRequest<string>, Ok<MalarkeyIdentityProviderTokenDto>>> RefreshIdentityProviderToken(
-           [FromServices] IMalarkeyAuthenticationSessionHandler sessionHandler,
+           [FromServices] IMalarkeyAuthenticationSessionRepository sessionHandler,
            [FromBody] MalarkeyProfileRefreshProviderTokenRequest request) =>
         RequireClientCertificate(async clientCertificate => 
         {

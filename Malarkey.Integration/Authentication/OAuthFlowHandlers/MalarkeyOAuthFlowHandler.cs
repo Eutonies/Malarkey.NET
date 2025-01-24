@@ -10,12 +10,15 @@ using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
 {
+    protected static readonly char[] CodeVerifierAllowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~".ToCharArray();
+
     protected readonly MalarkeyOAuthNamingScheme _namingScheme;
     protected readonly MalarkeyIdentityProviderConfiguration _conf;
     protected readonly MalarkeyIntegrationConfiguration _intConf;
@@ -25,6 +28,7 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
     protected virtual string[] DefaultScopes => ["openid"];
     protected virtual string DefaultResponseType => "code";
     protected virtual string DefaultCodeChallengeMethod => "S256";
+    protected virtual int NumberOfCharsInCodeVerifier => 43;
 
     public MalarkeyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf)
     {
@@ -95,6 +99,50 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler
         return keyValued;
     }
 
+    public virtual MalarkeyAuthenticationIdpSession PopulateIdpSession(MalarkeyAuthenticationSession session)
+    {
+        var (verifier, challenge) = GenerateChallengeAndVerifier();
+        var returnee = new MalarkeyAuthenticationIdpSession(
+            IdpSessionId: 0L,
+            SessionId: session.SessionId,
+            IdProvider: HandlerFor,
+            Nonce: GenerateNonce(),
+            CodeChallenge: challenge,
+            CodeVerifier: verifier,
+            InitTime: DateTime.Now,
+            AuthenticatedTime: null,
+            Scopes: ScopesFor(session)
+            );
+        return returnee;
+    }
+
+    protected virtual string[] ScopesFor(MalarkeyAuthenticationSession session) => session.RequestedScopes ?? DefaultScopes;
+
+    protected virtual (string Verifier, string Challenge) GenerateChallengeAndVerifier()
+    {
+        using var random = RandomNumberGenerator.Create();
+        var randomBytes = new byte[NumberOfCharsInCodeVerifier];
+        random.GetBytes(randomBytes);
+        randomBytes = randomBytes
+            .Select(_ => (byte)(_ % CodeVerifierAllowedChars.Length))
+            .ToArray();
+        var verifier = randomBytes
+            .Select(byt => CodeVerifierAllowedChars[byt])
+            .MakeString("");
+        var verifierBytes = UTF8Encoding.UTF8.GetBytes(verifier);
+        var challengeBytes = SHA256.HashData(verifierBytes);
+        var challenge = Convert.ToBase64String(challengeBytes).Substring(0, NumberOfCharsInCodeVerifier);
+        return (verifier, challenge);
+    }
+
+    protected virtual string GenerateNonce()
+    {
+        using var random = RandomNumberGenerator.Create();
+        var randomBytes = new byte[32];
+        random.GetBytes(randomBytes);
+        var returnee = Convert.ToBase64String(randomBytes);
+        return returnee;
+    }
 
 
 

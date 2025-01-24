@@ -66,7 +66,7 @@ public static class MalarkeyConstants
         public const string SendToStateName = "sendtostate";
         public const string ExistingProfileIdName = "profileid";
         public const string AlwaysChallengeName = "alwayschallenge";
-
+        public const string SessionStateName = "sessionstate";
     }
 
 

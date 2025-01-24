@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 using ParDefs = Malarkey.Abstractions.MalarkeyConstants.AuthenticationRequestQueryParameters;
 
 namespace Malarkey.Integration.Authentication;
-internal static class MalarkeyServerAuthenticationSessionResolver
+public static class MalarkeyServerAuthenticationSessionResolver
 {
 
     private static readonly string SendToLookup = ParDefs.SendToName.ToLower();
@@ -65,7 +65,7 @@ internal static class MalarkeyServerAuthenticationSessionResolver
             .ToList();
         var returnee = new MalarkeyAuthenticationSession(
               SessionId: 0L,
-              State: Guid.Empty,
+              State: Guid.Empty.ToString(),
               IsInternal: isInternal,
               InitTime: DateTime.Now,
               SendTo: sendTo,

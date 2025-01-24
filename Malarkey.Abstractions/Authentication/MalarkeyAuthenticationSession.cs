@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Malarkey.Abstractions.Authentication;
 public record MalarkeyAuthenticationSession(
     long SessionId,
-    Guid State,
+    string State,
     bool IsInternal,
     DateTime InitTime,
     string SendTo,
@@ -21,6 +21,7 @@ public record MalarkeyAuthenticationSession(
     Guid? IdentityTokenId,
     string Audience,
     Guid? ExistingProfileId,
+    bool AlwaysChallenge,
     IReadOnlyCollection<MalarkeyAuthenticationSessionParameter> RequestParameters,
     MalarkeyAuthenticationIdpSession? IdpSession
     );

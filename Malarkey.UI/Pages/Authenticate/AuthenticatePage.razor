@@ -3,12 +3,8 @@
 
 <div class="malarkey-authenticate-page-bg">
     <IdpSelectionComponent
-        Forwarder="@Forwarder"
-        IdProvider="@IdProvider"
         NavManager="NavManager"
-        Scopes="@Scopes"
-        ForwarderState="@ForwarderState"
-        ExistingProfileId="@ProfileId"
+        Session="_authenticationSession"
         AlwaysChallenge="@AlwaysChallenge"
     ></IdpSelectionComponent>
 </div>
