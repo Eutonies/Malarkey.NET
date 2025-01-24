@@ -16,18 +16,17 @@ internal class MalarkeyAuthenticationSessionEntityConfiguration : MalarkeyEntity
         builder.ToTable("authentication_session");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.SessionId)).HasColumnName("session_id");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.State)).HasColumnName("state");
-        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.IdProvider)).HasColumnName("id_provider");
-        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.Nonce)).HasColumnName("nonce");
-        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.Forwarder)).HasColumnName("forwarder");
-        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.CodeChallenge)).HasColumnName("code_challenge");
-        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.CodeVerifier)).HasColumnName("code_verifier");
+        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.IsInternal)).HasColumnName("is_internal");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.InitTime)).HasColumnName("init_time");
+        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.SendTo)).HasColumnName("send_to");
+        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.RequestedSendTo)).HasColumnName("req_send_to");
+        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.RequestedIdentityProvider)).HasColumnName("req_id_provider");
+        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.RequestState)).HasColumnName("req_state");
+        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.RequestedScopes)).HasColumnName("req_scopes");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.AuthenticatedTime)).HasColumnName("authenticated_time");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.ProfileTokenId)).HasColumnName("profile_token_id");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.IdentityTokenId)).HasColumnName("identity_token_id");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.Audience)).HasColumnName("audience");
-        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.Scopes)).HasColumnName("scopes");
-        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.ForwarderState)).HasColumnName("forwarder_state");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.ExistingProfileId)).HasColumnName("existing_profile_id");
 
     }

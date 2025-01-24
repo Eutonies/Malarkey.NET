@@ -16,41 +16,68 @@ internal class MalarkeyAuthenticationSessionDbo
     public long SessionId { get; set; }
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public Guid State { get; set; }
-    public MalarkeyIdentityProviderDbo IdProvider { get; set; }
-    public string? Nonce { get; set; }
-    public string? Forwarder { get; set; }
-    public string CodeVerifier { get; set; }
-    public string CodeChallenge { get; set; }
+    public bool IsInternal { get; set; }
     public DateTime InitTime { get; set; }
+    public string SendTo { get; set; }
+    public string? RequestedSendTo { get; set; }
+    public MalarkeyIdentityProviderDbo? RequestedIdentityProvider { get; set; }
+    public string? RequestState { get; set; }
+    public string[]? RequestedScopes { get; set; }
     public DateTime? AuthenticatedTime { get; set; }
     public Guid? ProfileTokenId { get; set; }
     public Guid? IdentityTokenId { get; set; }
-    public string? Scopes { get; set; }
     public string Audience { get; set; }
-    public string? ForwarderState { get; set; }
-
     public Guid? ExistingProfileId { get; set; }
-    
 
 
-    public MalarkeyAuthenticationSession ToDomain() => new MalarkeyAuthenticationSession(
+
+    public MalarkeyAuthenticationSession ToDomain(IEnumerable<MalarkeyAuthenticationSessionParameterDbo> pars, MalarkeyAuthenticationIdpSessionDbo? idpSession) => new MalarkeyAuthenticationSession(
         SessionId: SessionId,
-        State: State.ToString(),
-        IdProvider: IdProvider.ToDomain(),
-        Nonce: Nonce,
-        Forwarder: Forwarder,
-        CodeChallenge: CodeChallenge,
-        CodeVerifier: CodeVerifier,
+        State: State,
+        IsInternal: IsInternal,
         InitTime: InitTime,
+        SendTo: SendTo,
+        RequestedSendTo: RequestedSendTo,
+        RequestedIdProvider: RequestedIdentityProvider?.ToDomain(),
+        RequestState: RequestState,
+        RequestedScopes: RequestedScopes,
         AuthenticatedTime: AuthenticatedTime,
         ProfileTokenId: ProfileTokenId,
         IdentityTokenId: IdentityTokenId,
         Audience: Audience,
-        Scopes: Scopes?.Split(" "),
-        ForwarderState: ForwarderState,
-        ExistingProfileId: ExistingProfileId
+        ExistingProfileId: ExistingProfileId,
+        RequestParameters: pars.Select(_ => _.ToDomain()).ToList(),
+        IdpSession: idpSession?.ToDomain()
     );
 
+}
 
 
+internal static class MalarkeyAuthenticationSessionDboExtensions
+{
+    public static (
+        MalarkeyAuthenticationSessionDbo Session,
+        IReadOnlyCollection<MalarkeyAuthenticationSessionParameterDbo> Parameters,
+        MalarkeyAuthenticationIdpSessionDbo? IdpSession
+        ) ToDbo(this MalarkeyAuthenticationSession sess) => (
+           Session: new MalarkeyAuthenticationSessionDbo
+           {
+               SessionId = sess.SessionId,
+               State = sess.State,
+               IsInternal = sess.IsInternal,
+               InitTime = sess.InitTime,
+               SendTo = sess.SendTo,
+               RequestedSendTo = sess.RequestedSendTo,
+               RequestedIdentityProvider = sess.RequestedIdProvider?.ToDbo(),
+               RequestState = sess.RequestState,
+               RequestedScopes = sess.RequestedScopes,
+               AuthenticatedTime = sess.AuthenticatedTime,
+               ProfileTokenId = sess.ProfileTokenId,
+               IdentityTokenId = sess.IdentityTokenId,
+               Audience = sess.Audience,
+               ExistingProfileId = sess.ExistingProfileId
+           },
+           Parameters: sess.RequestParameters.Select(par => par.ToDbo()).ToList(),
+           IdpSession: sess.IdpSession?.ToDbo()
+           );
 }

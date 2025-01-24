@@ -60,10 +60,10 @@ public static class MalarkeyConstants
 
     public static class AuthenticationRequestQueryParameters
     {
-        public const string ForwarderName = "forwarder";
+        public const string SendToName = "sendto";
         public const string ScopesName = "scopes";
         public const string IdProviderName = "idprovider";
-        public const string ForwarderStateName = "forwarderstate";
+        public const string SendToStateName = "sendtostate";
         public const string ExistingProfileIdName = "profileid";
         public const string AlwaysChallengeName = "alwayschallenge";
 

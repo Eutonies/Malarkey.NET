@@ -21,6 +21,9 @@ internal class MalarkeyDbContext : DbContext
 
 
     public DbSet<MalarkeyAuthenticationSessionDbo> AuthenticationSessions { get; set; }
+    public DbSet<MalarkeyAuthenticationSessionParameterDbo> AuthenticationSessionParameters { get; set; }
+    public DbSet<MalarkeyAuthenticationIdpSessionDbo> AuthenticationIdpSessions { get; set; }
+
     public DbSet<IdentityProviderTokenDbo> IdentityProviderTokens { get; set; }
 
     public DbSet<VerifiableEmailDbo> Emails { get; set; }

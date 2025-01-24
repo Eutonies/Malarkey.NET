@@ -8,18 +8,20 @@ using System.Threading.Tasks;
 namespace Malarkey.Abstractions.Authentication;
 public record MalarkeyAuthenticationSession(
     long SessionId,
-    string State,
-    MalarkeyIdentityProvider IdProvider,
-    string? Nonce,
-    string? Forwarder,
-    string CodeChallenge,
-    string CodeVerifier,
+    Guid State,
+    bool IsInternal,
     DateTime InitTime,
+    string SendTo,
+    string? RequestedSendTo,
+    MalarkeyIdentityProvider? RequestedIdProvider,
+    string? RequestState,
+    string[]? RequestedScopes,
     DateTime? AuthenticatedTime,
     Guid? ProfileTokenId,
     Guid? IdentityTokenId,
     string Audience,
-    string[]? Scopes,
-    string? ForwarderState,
-    Guid? ExistingProfileId
+    Guid? ExistingProfileId,
+    IReadOnlyCollection<MalarkeyAuthenticationSessionParameter> RequestParameters,
+    MalarkeyAuthenticationIdpSession? IdpSession
     );
+

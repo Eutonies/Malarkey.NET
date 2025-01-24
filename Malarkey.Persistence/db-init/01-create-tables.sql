@@ -56,20 +56,41 @@ create table token (
 create table authentication_session (
     session_id bigint primary key generated always as identity,
     state uuid default gen_random_uuid(),
-    id_provider provider_type not null,
-    nonce varchar(200),
-    forwarder varchar(2000),
-    code_challenge varchar(2000) not null,
-    code_verifier varchar(2000) not null,
+    is_internal boolean not null,
     init_time timestamp not null,
+    send_to varchar(2000) not null,
+    req_send_to varchar(2000),
+    req_id_provider provider_type,
+    req_state varchar(2000),
+    req_scopes varchar(2000),
     authenticated_time timestamp,
     profile_token_id uuid ,
     identity_token_id uuid ,
     audience varchar(2000) not null,
-    scopes varchar(2000),
-    forwarder_state varchar(2000),
     existing_profile_id uuid,
     unique(state)
+);
+
+create table authentication_session_parameter (
+    session_id bigint not null,
+    parameter_name_unique varchar(200) not null,
+    parameter_name varchar(200) not null,
+    parameter_value varchar(2000) not null,
+    constraint primary key pk_authentication_session_parameter(session_id, parameter_name_unique),
+    constraint fk_authentication_session_parameter_sessid foreign key (session_id) references authentication_session(session_id) on delete cascade
+);
+
+create table authentication_idp_session (
+    idp_session_id bigint primary key generated always as identity,
+    session_id bigint not null,
+    id_provider provider_type not null,
+    nonce varchar(200),
+    code_challenge varchar(2000) not null,
+    code_verifier varchar(2000) not null,
+    init_time timestamp not null,
+    authenticated_time timestamp,
+    scopes varchar(2000),
+    constraint fk_authentication_idp_session_sessid foreign key (session_id) references authentication_session(session_id) on delete cascade
 );
 
 
