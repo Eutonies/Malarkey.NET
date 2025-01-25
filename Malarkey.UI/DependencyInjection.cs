@@ -66,10 +66,10 @@ public static class DependencyInjection
         app.UseHttpLogging();
         app.UseRouting();
         app.UseStaticFiles();
-        app.UseIntegration();
         app.MapRazorComponents<App>()
             .DisableAntiforgery()
             .AddInteractiveServerRenderMode();
+        app.UseIntegration();
         app.UseApi();
         app.MapRazorPages();
 

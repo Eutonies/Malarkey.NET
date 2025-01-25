@@ -77,7 +77,7 @@ create table authentication_session_parameter (
     parameter_name_unique varchar(200) not null,
     parameter_name varchar(200) not null,
     parameter_value varchar(2000) not null,
-    constraint primary key pk_authentication_session_parameter(session_id, parameter_name_unique),
+    constraint pk_authentication_session_parameter primary key (session_id, parameter_name_unique),
     constraint fk_authentication_session_parameter_sessid foreign key (session_id) references authentication_session(session_id) on delete cascade
 );
 

@@ -34,10 +34,16 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthentication
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var (insSession, insPars, insIdpSession) = session.ToDbo();
         cont.Add(insSession);
-        if(insPars.Any())
+        await cont.SaveChangesAsync();
+        foreach (var insPar in insPars)
+            insPar.SessionId = insSession.SessionId;
+        if (insPars.Any())
             cont.AddRange(insPars);
         if(insIdpSession != null)
+        {
+            insIdpSession.SessionId = insSession.SessionId;
             cont.Add(insIdpSession);
+        }
         await cont.SaveChangesAsync();
         var returnee = insSession.ToDomain(insPars, insIdpSession);
         return returnee;

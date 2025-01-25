@@ -2,9 +2,9 @@
 @using Malarkey.UI.Components.Authentication
 
 <div class="malarkey-authenticate-page-bg">
-    <IdpSelectionComponent
-        NavManager="NavManager"
-        Session="_authenticationSession"
-        AlwaysChallenge="@AlwaysChallenge"
-    ></IdpSelectionComponent>
+    @if(_authenticationSession != null) {
+        <IdpSelectionComponent NavManager="NavManager"
+                               Session="_authenticationSession"
+                               AlwaysChallenge="@AlwaysChallenge"></IdpSelectionComponent>
+    }
 </div>

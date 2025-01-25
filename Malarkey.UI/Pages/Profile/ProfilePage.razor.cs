@@ -1,3 +1,4 @@
+using Azure.Core;
 using Malarkey.Abstractions;
 using Malarkey.Abstractions.API.Profile.Email;
 using Malarkey.Abstractions.Profile;
@@ -123,7 +124,7 @@ public partial class ProfilePage : IDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        if(_profile == null && SessionState.User != null)
+        if (_profile == null && SessionState.User != null)
         {
             var loaded = await ProfileRepo.LoadProfileAndIdentities(SessionState.User!.Profile.ProfileId);
             if(loaded != null)

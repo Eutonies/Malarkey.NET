@@ -19,4 +19,13 @@ public static class RoutingExtensions
         return route;
     }
 
+
+    public static bool IsBlazorRequest(this HttpRequest request) =>
+        request.Path.ToString().ToLower().StartsWith("/_blazor") ||
+        request.Method.ToLower() == "connect";
+
+    public static bool IsBlazorRequest(this IHttpContextAccessor accessor) =>
+        accessor?.HttpContext?.Request?.IsBlazorRequest() ?? false;
+
+
 }

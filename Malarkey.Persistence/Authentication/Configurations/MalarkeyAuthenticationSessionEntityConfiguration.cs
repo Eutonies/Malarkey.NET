@@ -28,6 +28,7 @@ internal class MalarkeyAuthenticationSessionEntityConfiguration : MalarkeyEntity
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.IdentityTokenId)).HasColumnName("identity_token_id");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.Audience)).HasColumnName("audience");
         builder.Property(nameof(MalarkeyAuthenticationSessionDbo.ExistingProfileId)).HasColumnName("existing_profile_id");
+        builder.Property(nameof(MalarkeyAuthenticationSessionDbo.AlwaysChallenge)).HasColumnName("always_challenge");
 
     }
 }

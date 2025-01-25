@@ -38,6 +38,8 @@ public static class MalarkeyAuthenticationSessionResolver
             .ToDictionarySafe(_ => _.Key, grp => grp.First() with { Value = grp.Select(_ => _.Value).Order().MakeString(" ")});
         var requestedSendTo = queryPars
             .GetValueOrDefault(SendToLookup)?.Value;
+        if (requestedSendTo == null)
+            requestedSendTo = req.Path;
         var sendTo = requestedSendTo ?? $"/{MalarkeyConstants.Authentication.ServerAuthenticationPath}";
         var isInternal = !sendTo.ToLower().StartsWith("http");
         var requestedIdProviderString = queryPars

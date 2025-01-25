@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http.HttpResults;
 using Malarkey.Abstractions;
 using Malarkey.Application.Authentication;
 using Malarkey.Abstractions.Token;
+using System.Text;
 
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
@@ -65,13 +66,18 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var profileAndIdentities = await _tokenHandler.ExtractProfileAndIdentities(Context, TokenReceiver);
         if(profileAndIdentities == null)
             return AuthenticateResult.Fail("No profile found in cookies");
-        var authSession = await LoadSession();
-        if(authSession != null)
+        if(!IsBlazorRequest)
         {
-            if (authSession.AlwaysChallenge)
-                return AuthenticateResult.Fail("Asked to always challenge");
-            if(authSession.RequestedIdProvider != null && !profileAndIdentities.Identities.Any(_ => _.IdentityProvider == authSession.RequestedIdProvider))
-                return AuthenticateResult.Fail($"No identity token for: {authSession.RequestedIdProvider} found");
+            var authSession = await LoadSession();
+            if (authSession == null)
+                authSession = Request.ResolveSession(ExtractPublicKeyOfReceiver());
+            if (authSession != null && !IsBlazorRequest)
+            {
+                if (authSession.AlwaysChallenge)
+                    return AuthenticateResult.Fail("Asked to always challenge");
+                if (authSession.RequestedIdProvider != null && !profileAndIdentities.Identities.Any(_ => _.IdentityProvider == authSession.RequestedIdProvider))
+                    return AuthenticateResult.Fail($"No identity token for: {authSession.RequestedIdProvider} found");
+            }
         }
         var (prof, idents, _) = profileAndIdentities;
         var returnee = AuthenticateResult.Success(new AuthenticationTicket(
@@ -84,6 +90,8 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
+        if (IsBlazorRequest)
+            return;
         var authSession = await LoadSession();
         if(authSession == null)
         {
@@ -99,14 +107,17 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
                 await _sessionRepo.UpdateSession(authSession.SessionId, idp.Value);
         }
         if (idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
-            await CompleteInError("Failed to resolve desired identity provider");
+        {
+            var redirUrl = new StringBuilder($"{MalarkeyConstants.Authentication.ServerAuthenticationPath}");
+            redirUrl.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.SessionStateName}={authSession.State.UrlEncoded()}");
+            RedirectTo(redirUrl.ToString());
+        }
         else
         {
             var idpSession = flowHandler.PopulateIdpSession(authSession);
             authSession = await _sessionRepo.InitiateIdpSession(authSession.SessionId, idpSession);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(authSession, idpSession);
-            Context.Response.StatusCode = 302;
-            Context.Response.Redirect(redirectUrl);
+            RedirectTo(redirectUrl);
         }
     }
 
@@ -159,7 +170,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         identity = profileAndIdentities.Identities
             .First(_ => _.IdentityProvider == identity.IdentityProvider && _.ProviderId == identity.ProviderId);
         var (profileToken, profileTokenString) = await _tokenHandler.IssueToken(profileAndIdentities.Profile, session.Audience);
-        var existingIdentityTokens = (await _tokenHandler.ValidateIdentityTokens(Context, session.Audience)).Results
+        var existingIdentityTokens = (await _tokenHandler.ValidateIdentityTokens(request.HttpContext, session.Audience)).Results
             .Select(_ => _ as MalarkeyTokenValidationSuccessResult)
             .Where(_ => _ != null)
             .Select(_ => (Identity: (_!.ValidToken as MalarkeyIdentityToken)!.Identity, TokenString: _.TokenString))
@@ -200,6 +211,12 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         TypedResults.BadRequest(errorMessage)
         );
 
+    private void RedirectTo(string url)
+    {
+        Context.Response.StatusCode = 302;
+        Context.Response.Redirect(url, permanent: false);
+    }
+
     private string ExtractPublicKeyOfReceiver()
     {
         if (!Request.Headers.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var pubKey))
@@ -219,15 +236,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         return returnee;
     }
 
-
-
-    private async Task CompleteInError(string errorMessage)
-    {
-        Context.Response.StatusCode = 403;
-        await Context.Response.WriteAsync( errorMessage );
-    }
-
-
+    private bool IsBlazorRequest => Request.Path.ToString().ToLower().StartsWith("/_blazor");
 
 
 }
