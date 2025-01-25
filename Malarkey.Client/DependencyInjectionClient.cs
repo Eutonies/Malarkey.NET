@@ -1,5 +1,6 @@
 ﻿using Malarkey.Abstractions;
 using Malarkey.Abstractions.Authentication;
+using Malarkey.Abstractions.Util;
 using Malarkey.Client.Authentication;
 using Malarkey.Client.Configuration;
 using Microsoft.AspNetCore.Builder;
@@ -23,9 +24,9 @@ public static class DependencyInjectionClient
         return builder;
     }
 
-    public static WebApplicationBuilder AddMalarkeyClientAuthentication(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddMalarkeyClientAuthentication(this WebApplicationBuilder builder, int requestCacheCapacity = 3_000)
     {
-        builder.Services.AddSingleton<MalarkeyAuthenticationRequestContinuationCache>();
+        builder.Services.AddMalarkeyCaching<string, MalarkeyAuthenticationSession>(requestCacheCapacity);
         builder.Services.AddScoped<IMalarkeyClientAuthenticatedCallback, MalarkeyClientAuthenticationHandler>();
         builder.Services.AddAuthentication(MalarkeyConstants.MalarkeyAuthenticationScheme)
             .AddScheme<MalarkeyClientAuthenticationSchemeOptions, MalarkeyClientAuthenticationHandler>(

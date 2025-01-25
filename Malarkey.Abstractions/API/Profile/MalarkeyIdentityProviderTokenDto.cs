@@ -13,8 +13,9 @@ public record MalarkeyIdentityProviderTokenDto(
     string[] Scopes
     )
 {
-    public IdentityProviderToken ToDomain() => new IdentityProviderToken(
+    public IdentityProviderToken ToDomain(MalarkeyIdentityProviderDto provider) => new IdentityProviderToken(
         Token: Token,
+        Provider: provider.ToDomain(),
         Issued: Issued,
         Expires: Expires,
         RefreshToken: null,

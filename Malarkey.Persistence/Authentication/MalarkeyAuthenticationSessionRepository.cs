@@ -1,20 +1,12 @@
 ﻿using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Token;
 using Malarkey.Application.Profile.Persistence;
-using Malarkey.Application.Security;
 using Malarkey.Abstractions.Authentication;
-using Malarkey.Abstractions.Util;
 using Malarkey.Persistence.Context;
 using Malarkey.Persistence.Token.Model;
-using Malarkey.Security.Persistence;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Malarkey.Application.Authentication;
+using Malarkey.Persistence.Authentication.Model;
 
 namespace Malarkey.Persistence.Authentication;
 internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthenticationSessionRepository
@@ -37,7 +29,7 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthentication
         await cont.SaveChangesAsync();
     }
 
-    public async Task<MalarkeyAuthenticationSession> RequestInitiateSession(MalarkeyAuthenticationSession session)
+    public async Task<MalarkeyAuthenticationSession> InitiateSession(MalarkeyAuthenticationSession session)
     {
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var (insSession, insPars, insIdpSession) = session.ToDbo();
@@ -51,7 +43,7 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthentication
         return returnee;
     }
 
-    public async Task<MalarkeyAuthenticationSession> RequestUpdateSession(long sessionId, MalarkeyIdentityProvider identityProvider)
+    public async Task<MalarkeyAuthenticationSession> UpdateSession(long sessionId, MalarkeyIdentityProvider identityProvider)
     {
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var loaded = await cont.AuthenticationSessions
@@ -63,7 +55,7 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthentication
         return returnee;
     }
 
-    public async Task<MalarkeyAuthenticationSession> RequestInitiateIdpSession(long sessionId, MalarkeyAuthenticationIdpSession session)
+    public async Task<MalarkeyAuthenticationSession> InitiateIdpSession(long sessionId, MalarkeyAuthenticationIdpSession session)
     {
         await using var cont = await _contectFactory.CreateDbContextAsync();
         var insertee = session.ToDbo();
@@ -74,7 +66,7 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthentication
         return returnee;
     }
 
-    public async Task<MalarkeyAuthenticationSession?> RequestLoadByState(string state)
+    public async Task<MalarkeyAuthenticationSession?> LoadByState(string state)
     {
         await using var cont = await _contectFactory.CreateDbContextAsync();
         if (!Guid.TryParse(state, out var guidState))
@@ -132,13 +124,13 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthentication
         var relevantToken = await relevantTokenQuery.FirstOrDefaultAsync();
         if (relevantToken == null)
             return null;
-        var scopesSet = relevantToken.Token.ToDomain().Scopes.ToHashSet();
+        var scopesSet = relevantToken.Token.ToDomain(relevantToken.Provider).Scopes.ToHashSet();
         var issuedTokens = await cont.IdentityProviderTokens
             .Where(_ => _.IdentityId == relevantToken.Token.IdentityId && _.RefreshToken != null)
             .OrderByDescending(_ => _.Expires)
             .ToListAsync();
         var bestToken = issuedTokens
-            .FirstOrDefault(_ => _.ToDomain().Scopes.ToHashSet().IsSupersetOf(scopesSet));
+            .FirstOrDefault(_ => _.ToDomain(relevantToken.Provider).Scopes.ToHashSet().IsSupersetOf(scopesSet));
         if (bestToken?.RefreshToken == null)
             return null;
         var returnee = new MalarkeyRefreshTokenData(

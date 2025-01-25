@@ -7,8 +7,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Malarkey.Persistence.Authentication.Model;
 
-namespace Malarkey.Persistence.Authentication;
+namespace Malarkey.Persistence.Authentication.Model;
 internal class MalarkeyAuthenticationSessionDbo
 {
     [Key]

@@ -127,7 +127,14 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMala
         var accessTokenExpires = tokenResponse.Expires;
         var refreshToken = tokenResponse.RefreshToken;
         var accessTokenScopes = tokenResponse.Scopes;
-        var returnee = new IdentityProviderToken(Token: accessToken, Issued: accessTokenIssued, Expires: accessTokenExpires, RefreshToken: refreshToken, Scopes: accessTokenScopes);
+        var returnee = new IdentityProviderToken(
+            Token: accessToken, 
+            Provider: MalarkeyIdentityProvider.Google,
+            Issued: accessTokenIssued, 
+            Expires: accessTokenExpires, 
+            RefreshToken: refreshToken, 
+            Scopes: accessTokenScopes
+        );
         return returnee;
     }
 

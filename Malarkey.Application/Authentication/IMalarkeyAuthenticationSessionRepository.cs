@@ -12,12 +12,12 @@ namespace Malarkey.Application.Authentication;
 public interface IMalarkeyAuthenticationSessionRepository
 {
 
-    Task<MalarkeyAuthenticationSession> RequestInitiateSession(MalarkeyAuthenticationSession session);
-    Task<MalarkeyAuthenticationSession> RequestUpdateSession(long sessionId, MalarkeyIdentityProvider identityProvider);
+    Task<MalarkeyAuthenticationSession> InitiateSession(MalarkeyAuthenticationSession session);
+    Task<MalarkeyAuthenticationSession> UpdateSession(long sessionId, MalarkeyIdentityProvider identityProvider);
 
-    Task<MalarkeyAuthenticationSession> RequestInitiateIdpSession(long sessionId, MalarkeyAuthenticationIdpSession session);
+    Task<MalarkeyAuthenticationSession> InitiateIdpSession(long sessionId, MalarkeyAuthenticationIdpSession session);
 
-    Task<MalarkeyAuthenticationSession?> RequestLoadByState(string state);
+    Task<MalarkeyAuthenticationSession?> LoadByState(string state);
 
     Task<MalarkeyAuthenticationSession> UpdateSessionWithTokenInfo(
         MalarkeyAuthenticationSession session,

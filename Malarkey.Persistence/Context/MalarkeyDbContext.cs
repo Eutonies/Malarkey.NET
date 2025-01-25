@@ -1,5 +1,5 @@
 ﻿using Malarkey.Abstractions.Authentication;
-using Malarkey.Persistence.Authentication;
+using Malarkey.Persistence.Authentication.Model;
 using Malarkey.Persistence.Profile.Model;
 using Malarkey.Persistence.Token.Model;
 using Microsoft.EntityFrameworkCore;

@@ -25,10 +25,41 @@ internal class MalarkeyIdentityDbo
 
     public MalarkeyProfileIdentity ToDomain(IdentityProviderTokenDbo? idProviderToken) => Provider switch
     {
-        MalarkeyIdentityProviderDbo.Microsoft => new MicrosoftIdentity(IdentityId, ProfileId, ProviderId, PreferredName!, IdentityName, MiddleNames, LastName),
-        MalarkeyIdentityProviderDbo.Google => new GoogleIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName, Email, idProviderToken?.ToDomain()),
-        MalarkeyIdentityProviderDbo.Facebook => new FacebookIdentity(IdentityId, ProfileId, ProviderId, PreferredName ?? "", IdentityName, MiddleNames, LastName, Email),
-        MalarkeyIdentityProviderDbo.Spotify => new SpotifyIdentity(IdentityId, ProfileId, ProviderId, IdentityName, MiddleNames, LastName, Email, idProviderToken?.ToDomain()),
+        MalarkeyIdentityProviderDbo.Microsoft => new MicrosoftIdentity(
+            IdentityId, 
+            ProfileId, 
+            ProviderId, 
+            PreferredName!, 
+            IdentityName, 
+            MiddleNames, 
+            LastName),
+        MalarkeyIdentityProviderDbo.Google => new GoogleIdentity(
+            IdentityId, 
+            ProfileId, 
+            ProviderId, 
+            IdentityName, 
+            MiddleNames, 
+            LastName, 
+            Email, 
+            AccessToken: idProviderToken?.ToDomain(Provider)),
+        MalarkeyIdentityProviderDbo.Facebook => new FacebookIdentity(
+            IdentityId, 
+            ProfileId, 
+            ProviderId, 
+            PreferredName ?? "", 
+            IdentityName, 
+            MiddleNames, 
+            LastName, 
+            Email),
+        MalarkeyIdentityProviderDbo.Spotify => new SpotifyIdentity(
+            IdentityId, 
+            ProfileId, 
+            ProviderId, 
+            IdentityName, 
+            MiddleNames, 
+            LastName, 
+            Email, 
+            AccessToken: idProviderToken?.ToDomain(MalarkeyIdentityProviderDbo.Spotify)),
         _ => throw new NotImplementedException()
     };
 

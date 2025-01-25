@@ -64,6 +64,7 @@ public static class MalarkeyTokenTsoExtensions
                     Email: token.Payload.email,
                     AccessToken: token.Payload.idptoken?.Pipe(idpt => new IdentityProviderToken(
                         Token: idpt.token,
+                        Provider: MalarkeyIdentityProvider.Google,
                         Issued: idpt.iat.ParseJwtTime(),
                         Expires: idpt.exp.ParseJwtTime(),
                         RefreshToken: idpt.refresh,
@@ -80,6 +81,7 @@ public static class MalarkeyTokenTsoExtensions
                     Email: token.Payload.email,
                     AccessToken: token.Payload.idptoken?.Pipe(idpt => new IdentityProviderToken(
                         Token: idpt.token,
+                        Provider: MalarkeyIdentityProvider.Spotify,
                         Issued: idpt.iat.ParseJwtTime(),
                         Expires: idpt.exp.ParseJwtTime(),
                         RefreshToken: idpt.refresh,

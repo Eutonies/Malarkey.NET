@@ -3,13 +3,9 @@ using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
-namespace Malarkey.Integration.Authentication;
+namespace Malarkey.Abstractions.Authentication;
 public record MalarkeyAuthenticationSuccessHttpResult(
     MalarkeyAuthenticationSession Session,
     string ProfileToken,

@@ -1,4 +1,4 @@
-﻿using Malarkey.Persistence.Authentication;
+﻿using Malarkey.Persistence.Authentication.Model;
 using Malarkey.Persistence.Context.Configurations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;

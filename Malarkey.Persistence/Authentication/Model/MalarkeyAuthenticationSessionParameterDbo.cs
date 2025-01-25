@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Persistence.Authentication;
+namespace Malarkey.Persistence.Authentication.Model;
 internal class MalarkeyAuthenticationSessionParameterDbo
 {
     public long SessionId { get; set; }
@@ -18,7 +18,7 @@ internal class MalarkeyAuthenticationSessionParameterDbo
 
 
 
-    
+
 
 
     public MalarkeyAuthenticationSessionParameter ToDomain() => new MalarkeyAuthenticationSessionParameter(

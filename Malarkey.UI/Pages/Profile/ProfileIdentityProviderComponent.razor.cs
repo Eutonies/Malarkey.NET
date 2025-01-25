@@ -35,8 +35,8 @@ public partial class ProfileIdentityProviderComponent
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={Provider.ToString()}&" +
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName}={ProfileId.ToString().UrlEncoded()}&" +
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName}={true}&" +
-        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName}={IdentityConnectionState.ToString().UrlEncoded()}&" +
-        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={ProfileIdentityConnectionSucceededPage.SucceededPagePath.UrlEncoded()}";
+        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName}={IdentityConnectionState.ToString().UrlEncoded()}&" +
+        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={ProfileIdentityConnectionSucceededPage.SucceededPagePath.UrlEncoded()}";
 
 
     private record ShowIdentity(MalarkeyProfileIdentity Identity)

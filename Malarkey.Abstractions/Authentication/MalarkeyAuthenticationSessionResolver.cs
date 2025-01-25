@@ -1,18 +1,12 @@
-﻿using Azure.Core;
-using Malarkey.Abstractions;
+﻿using Malarkey.Abstractions;
 using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using ParDefs = Malarkey.Abstractions.MalarkeyConstants.AuthenticationRequestQueryParameters;
 
-namespace Malarkey.Integration.Authentication;
-public static class MalarkeyServerAuthenticationSessionResolver
+namespace Malarkey.Abstractions.Authentication;
+public static class MalarkeyAuthenticationSessionResolver
 {
 
     private static readonly string SendToLookup = ParDefs.SendToName.ToLower();

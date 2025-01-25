@@ -8,8 +8,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Malarkey.Abstractions.Util;
+using Malarkey.Persistence.Authentication;
+using Malarkey.Persistence.Authentication.Model;
 
-namespace Malarkey.Persistence.Authentication;
+namespace Malarkey.Persistence.Authentication.Model;
 internal class MalarkeyAuthenticationIdpSessionDbo
 {
     [Key]
@@ -27,11 +29,11 @@ internal class MalarkeyAuthenticationIdpSessionDbo
 
 
 
-    
+
 
 
     public MalarkeyAuthenticationIdpSession ToDomain() => new MalarkeyAuthenticationIdpSession(
-        IdpSessionId : IdpSessionId,
+        IdpSessionId: IdpSessionId,
         SessionId: SessionId,
         IdProvider: IdProvider.ToDomain(),
         Nonce: Nonce,

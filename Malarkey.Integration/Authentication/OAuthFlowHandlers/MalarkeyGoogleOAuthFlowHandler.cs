@@ -109,6 +109,7 @@ internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
             Email: email,
             AccessToken: new IdentityProviderToken(
                 Token: responseJson.access_token,
+                Provider: MalarkeyIdentityProvider.Google,
                 Issued: DateTime.Now,
                 Expires: DateTime.Now.AddSeconds(responseJson.expires_in),
                 RefreshToken: null,

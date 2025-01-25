@@ -27,7 +27,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly MalarkeyClientConfiguration _conf;
-    private readonly MalarkeyAuthenticationRequestContinuationCache _cache;
+    private readonly IMalarkeyCache<string, MalarkeyAuthenticationSession> _cache;
 
     public MalarkeyClientAuthenticationHandler(
         IOptionsMonitor<MalarkeyClientAuthenticationSchemeOptions> options, 
@@ -35,7 +35,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         UrlEncoder encoder, 
         IHttpClientFactory httpClientFactory,
         IOptions<MalarkeyClientConfiguration> conf,
-        MalarkeyAuthenticationRequestContinuationCache cache
+        IMalarkeyCache<string, MalarkeyAuthenticationSession> cache
         ) : base(options, logger, encoder)
     {
         _conf = conf.Value;
@@ -51,7 +51,9 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         var authAttribute = ExtractAttribute();
         if (authAttribute == null)
             return;
-        var state = await _cache.Cache(Request);
+        var authSession = Request.ResolveSession(_clientCertificateString);
+        var state = Guid.NewGuid().ToString();
+        await _cache.Cache(state, authSession);
         var idProvider = authAttribute.IdentityProvider;
         var scopes = authAttribute.Scopes?.Split(" ");
         var forwardUrl = BuildRequestString(state, idProvider, scopes);
@@ -61,8 +63,8 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     private string BuildRequestString(string state, MalarkeyIdentityProvider? provider, string[]? scopes)
     {
         var returnee = new StringBuilder($"{_conf.MalarkeyServerBaseAddress}{MalarkeyConstants.Authentication.ServerAuthenticationPath}");
-        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderName}={_conf.FullClientServerUrl.UrlEncoded()}");
-        returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.ForwarderStateName}={state.UrlEncoded()}");
+        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={_conf.FullClientServerUrl.UrlEncoded()}");
+        returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName}={state.UrlEncoded()}");
         if(provider != null)
         {
             returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
@@ -201,13 +203,13 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         var request = new HttpRequestMessage(
             HttpMethod.Post, 
             new Uri($"{_conf.MalarkeyServerBaseAddress}{MalarkeyConstants.API.Paths.Profile.RefreshTokenRelativePath}"));
-        var requestContent = new MalarkeyProfileRefreshProviderTokenRequest(token.Token);
+        var requestContent = new MalarkeyProfileRefreshProviderTokenRequest(token.Provider.ToDto(), token.Token);
         request.Content = JsonContent.Create(requestContent);
         request.Headers.Add(MalarkeyConstants.Authentication.AudienceHeaderName, _clientCertificateString.Base64UrlEncoded());
         var response = await client.SendAsync(request);
         response.EnsureSuccessStatusCode();
         var responseToken = (await response.Content.ReadFromJsonAsync<MalarkeyIdentityProviderTokenDto>())!;
-        return responseToken.ToDomain();
+        return responseToken.ToDomain(token.Provider.ToDto());
 
     }
 
@@ -224,45 +226,41 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
 
     public async Task<IResult> HandleCallback(HttpRequest request)
     {
-        var profileParam = request.Form
+        var profileTokenString = request.Form
             .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessParameters.ProfileTokenName)
             .Select(_ => _.Value.ToString())
             .FirstOrDefault();
-        if (profileParam == null)
+        if (profileTokenString == null)
             return TypedResults.BadRequest("No profile parameter found");
-        var profileVerifies = await VerifySignature(profileParam);
+        var profileVerifies = await VerifySignature(profileTokenString);
         if(!profileVerifies)
             return TypedResults.BadRequest("Profile parameter does not verify");
-        var profileToken = MalarkeyToken.ParseProfileToken(profileParam);
+        var profileToken = MalarkeyToken.ParseProfileToken(profileTokenString);
         if (profileToken == null) 
-            return TypedResults.BadRequest("Profile token could not be parsed: " + profileParam);
+            return TypedResults.BadRequest("Profile token could not be parsed: " + profileTokenString);
         if (profileToken.ValidUntil < DateTime.Now)
             return TypedResults.BadRequest("Profile token has expired");
-        request.HttpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName, profileParam);
 
-        var identityParam = request.Query
-            .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessParameters.IdentityTokenName)
+        var identityParams = request.Query
+            .Where(_ => _.Key.ToLower().StartsWith(MalarkeyConstants.AuthenticationSuccessParameters.IdentityTokenName.ToLower()))
+            .OrderBy(_ => _.Key.ToLower())
+            .Select(_ => _.Value.ToString())
+            .ToList();
+        var identityTokenStrings = await FilterVerifiableTokens(identityParams);
+
+        var state = request.Query
+            .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessParameters.StateName)
             .Select(_ => _.Value.ToString())
             .FirstOrDefault();
-        MalarkeyIdentityToken? identityToken = null;
-        if(identityParam != null)
+        if(state != null)
         {
-            var validIdentityParams = await FilterVerifiableTokens([identityParam]);
-            if(validIdentityParams.Any())
-                identityToken = MalarkeyToken.ParseIdentityToken(identityParam);
+            var authSession = await _cache.Pop(state);
+            if(authSession != null)
+            {
+                var returnee = new MalarkeyAuthenticationSuccessHttpResult(authSession, profileTokenString, identityTokenStrings, Logger);
+                return returnee;
+            }
         }
-        if(identityToken != null)
-            request.HttpContext.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName + ".0", identityParam!);
-
-        MalarkeyAuthenticationRequestContinuation? continuation = null;
-        var forwardedState = request.Query
-            .Where(_ => _.Key == MalarkeyConstants.AuthenticationSuccessParameters.ForwarderStateName)
-            .Select(_ => _.Value.ToString())
-            .FirstOrDefault();
-        if (forwardedState != null)
-            continuation = _cache.Pop(forwardedState);
-        if(continuation != null)
-           return new MalarkeyClientAuthenticationSuccessResult(continuation);
         return TypedResults.Redirect("/");
 
     }

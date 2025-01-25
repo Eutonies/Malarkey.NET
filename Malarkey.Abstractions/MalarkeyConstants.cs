@@ -89,7 +89,7 @@ public static class MalarkeyConstants
         /// <summary>
         /// The state provided when initiating authentication.
         /// </summary>
-        public const string ForwarderStateName = "state";
+        public const string StateName = "state";
     }
 
     

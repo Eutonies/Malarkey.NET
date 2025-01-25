@@ -1,5 +1,7 @@
-﻿using Malarkey.Abstractions.Token;
+﻿using Malarkey.Abstractions.Profile;
+using Malarkey.Abstractions.Token;
 using Malarkey.Abstractions.Util;
+using Malarkey.Application.Profile.Persistence;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -21,8 +23,9 @@ internal class IdentityProviderTokenDbo
     public string? RefreshToken { get; set; }
     public string Scopes { get; set; }
 
-    public IdentityProviderToken ToDomain() => new IdentityProviderToken(
+    public IdentityProviderToken ToDomain(MalarkeyIdentityProviderDbo provider) => new IdentityProviderToken(
         Token: TokenString,
+        Provider: provider.ToDomain(),
         Issued: Issued,
         Expires: Expires,
         RefreshToken: RefreshToken,

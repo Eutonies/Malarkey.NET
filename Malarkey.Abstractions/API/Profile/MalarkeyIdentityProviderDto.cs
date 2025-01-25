@@ -23,4 +23,13 @@ public static class MalarkeyIdentityProviderDtoExtensions
         MalarkeyIdentityProviderDto.Facebook => MalarkeyIdentityProvider.Facebook,
         _ => MalarkeyIdentityProvider.Spotify,
     };
+
+    public static MalarkeyIdentityProviderDto ToDto(this MalarkeyIdentityProvider identityProvider) => identityProvider switch
+    {
+        MalarkeyIdentityProvider.Microsoft => MalarkeyIdentityProviderDto.Microsoft,
+        MalarkeyIdentityProvider.Google => MalarkeyIdentityProviderDto.Google,
+        MalarkeyIdentityProvider.Facebook => MalarkeyIdentityProviderDto.Facebook,
+        _ => MalarkeyIdentityProviderDto.Spotify,
+    };
+
 }

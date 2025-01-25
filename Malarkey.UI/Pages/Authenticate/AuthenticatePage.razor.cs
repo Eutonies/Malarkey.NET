@@ -66,7 +66,7 @@ public partial class AuthenticatePage
                 .PublicKey.CleanCertificate();
             var context = ContextAccessor.HttpContext!;
             var sess = context.Request.ResolveSession(audience);
-            _authenticationSession = await AuthenticationSessionRepo.RequestInitiateSession(sess);
+            _authenticationSession = await AuthenticationSessionRepo.InitiateSession(sess);
             await InvokeAsync(StateHasChanged);
         }
 

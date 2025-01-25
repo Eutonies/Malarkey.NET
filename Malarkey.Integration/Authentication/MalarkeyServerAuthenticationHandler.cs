@@ -89,21 +89,21 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         {
             var audience = ExtractPublicKeyOfReceiver();
             authSession = Request.ResolveSession(audience);
-            authSession = await _sessionRepo.RequestInitiateSession(authSession);
+            authSession = await _sessionRepo.InitiateSession(authSession);
         }
         var idp = authSession!.RequestedIdProvider;
         if(idp == null)
         {
             idp = Request.ResolveSession("").RequestedIdProvider;
             if (idp != null)
-                await _sessionRepo.RequestUpdateSession(authSession.SessionId, idp.Value);
+                await _sessionRepo.UpdateSession(authSession.SessionId, idp.Value);
         }
         if (idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
             await CompleteInError("Failed to resolve desired identity provider");
         else
         {
             var idpSession = flowHandler.PopulateIdpSession(authSession);
-            authSession = await _sessionRepo.RequestInitiateIdpSession(authSession.SessionId, idpSession);
+            authSession = await _sessionRepo.InitiateIdpSession(authSession.SessionId, idpSession);
             var redirectUrl = flowHandler.ProduceAuthorizationUrl(authSession, idpSession);
             Context.Response.StatusCode = 302;
             Context.Response.Redirect(redirectUrl);
@@ -124,7 +124,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             _logger.LogError($"Unable to extract state from callback request");
             return await ReturnError("Could not extract state");
         }
-        var session = await _sessionRepo.RequestLoadByState(redirData.State);
+        var session = await _sessionRepo.LoadByState(redirData.State);
         if(session == null)
         {
             _logger.LogError($"Unable to load session from state: {redirData.State}");
@@ -215,7 +215,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             .FirstOrDefault();
         if (sessionState == null)
             return null;
-        var returnee = await _sessionRepo.RequestLoadByState(sessionState);
+        var returnee = await _sessionRepo.LoadByState(sessionState);
         return returnee;
     }
 
