@@ -12,6 +12,7 @@ using Malarkey.UI.Middleware;
 using Malarkey.Integration.Authentication;
 using Malarkey.UI.Components.Authentication;
 using Malarkey.UI.Pages.Profile;
+using Malarkey.Abstractions.Util;
 
 namespace Malarkey.UI;
 
@@ -62,14 +63,16 @@ public static class DependencyInjection
         var uiConf = app.Configuration.UiConf();
         if(!string.IsNullOrWhiteSpace(uiConf.HostingBasePath))
            app.UsePathBase("/" + uiConf.HostingBasePath);
+        app.UseMiddleware<MalarkeyRedirectHttpMethodCorrectionMiddleware>();
         app.UseMiddleware<MalarkeyRequestLoggingMiddleware>();   
         app.UseHttpLogging();
         app.UseRouting();
         app.UseStaticFiles();
+        app.UseIntegration();
         app.MapRazorComponents<App>()
             .DisableAntiforgery()
+            .AddEndpointFilter(new TessaFilter())
             .AddInteractiveServerRenderMode();
-        app.UseIntegration();
         app.UseApi();
         app.MapRazorPages();
 
@@ -83,5 +86,17 @@ public static class DependencyInjection
         conf.Bind(MalarkeyUIConfiguration.ConfigurationElementName, returnee);
         return returnee;
     }
+
+    private class TessaFilter : IEndpointFilter
+    {
+        public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+        {
+            Console.WriteLine($"******** IN FILTER *************");
+            Console.WriteLine($"{context.HttpContext.Request.Path}, Arguments: {context.Arguments.Select(_ => _ ?? "")?.MakeString(",")}");
+            var returnee = await next.Invoke(context);
+            return returnee;
+        }
+    }
+
 
 }

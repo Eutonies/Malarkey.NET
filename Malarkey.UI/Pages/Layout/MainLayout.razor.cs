@@ -1,4 +1,5 @@
-﻿using Malarkey.UI.Session;
+﻿using Malarkey.Abstractions.Authentication;
+using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components;
 
 namespace Malarkey.UI.Pages.Layout;
@@ -18,9 +19,6 @@ public partial class MainLayout
         _sessionState = new MalarkeySessionState(ScopeFactory, onUpdate: () => InvokeAsync(StateHasChanged));
         await _sessionState.UpdateUserFromContext(context: ContextAccessor.HttpContext!);
     }
-
-
-
 
 
 }

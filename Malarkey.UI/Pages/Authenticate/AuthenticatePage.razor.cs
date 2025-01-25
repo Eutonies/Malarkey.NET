@@ -64,27 +64,28 @@ public partial class AuthenticatePage
 
     protected override async Task OnParametersSetAsync()
     {
-        if (ContextAccessor.IsBlazorRequest())
+        await EnsureAuthenticationSession();
+    }
+
+
+    private async Task EnsureAuthenticationSession()
+    {
+        if (_authenticationSession != null)
             return;
-        if (_authenticationSession == null && ExistingSessionState != null)
-        {
+        if (ExistingSessionState != null)
             _authenticationSession = await AuthenticationSessionRepo.LoadByState(ExistingSessionState);
-            if(_authenticationSession != null)
-            {
-                await InvokeAsync(StateHasChanged);
-                return;
-            }
-        }
-        if (_authenticationSession == null)
+        if(_authenticationSession == null)
         {
             var audience = IntegrationConfiguration.Value
                 .PublicKey.CleanCertificate();
             var context = ContextAccessor.HttpContext!;
-            var sess = context.Request.ResolveSession(audience);
-            _authenticationSession = await AuthenticationSessionRepo.InitiateSession(sess);
-            await InvokeAsync(StateHasChanged);
+            _authenticationSession = context.Request.ResolveSession(audience);
+            if(!ContextAccessor.IsBlazorRequest())
+            {
+                _authenticationSession = await AuthenticationSessionRepo.InitiateSession(_authenticationSession);
+            }
         }
-
+        await InvokeAsync(StateHasChanged);
     }
 
 

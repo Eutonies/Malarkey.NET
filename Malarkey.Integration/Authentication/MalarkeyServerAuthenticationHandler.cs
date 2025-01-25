@@ -64,7 +64,9 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var profileAndIdentities = await _tokenHandler.ExtractProfileAndIdentities(Context, TokenReceiver);
-        if(profileAndIdentities == null)
+        if (IsBlazorRequest)
+            return AuthenticateResult.NoResult();
+        else if(profileAndIdentities == null)
             return AuthenticateResult.Fail("No profile found in cookies");
         if(!IsBlazorRequest)
         {
@@ -90,8 +92,6 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
-        if (IsBlazorRequest)
-            return;
         var authSession = await LoadSession();
         if(authSession == null)
         {

@@ -20,9 +20,6 @@ public partial class IdpSelectionComponent
     [Parameter]
     public MalarkeyAuthenticationSession Session { get; set; }
 
-    [Parameter]
-    public string? AlwaysChallenge { get; set; }
-
 
 
     private bool IsAuthenticated => SessionState.User != null;
@@ -62,17 +59,8 @@ public partial class IdpSelectionComponent
 
     private string BuildChallengeUrl(MalarkeyIdentityProvider provider)
     {
-        var returnee = new StringBuilder($"challenge?{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
-        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={Session.SendTo.UrlEncoded()}");
-        if (Session.RequestedScopes != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={Session.RequestedScopes.MakeString(" ").UrlEncoded()}");
-        if (Session.RequestState != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName}={Session.RequestState.UrlEncoded()}");
-        if (Session.ExistingProfileId != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName}={Session.ExistingProfileId.Value.ToString().UrlEncoded()}");
-        if (AlwaysChallenge != null)
-            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName}={AlwaysChallenge}");
-
+        var returnee = new StringBuilder($"challenge?{MalarkeyConstants.AuthenticationRequestQueryParameters.SessionStateName}={Session.State}");
+        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
         return returnee.ToString();
     }
 
