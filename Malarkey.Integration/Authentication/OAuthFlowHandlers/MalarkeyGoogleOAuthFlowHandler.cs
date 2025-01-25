@@ -132,36 +132,5 @@ internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
         string token_type,
         string id_token
         );
-
-
 }
 
-
-/*
- * ####################### Google ##########################
-https://developers.google.com/identity/protocols/oauth2/web-server#httprest_1
-
-https://accounts.google.com/o/oauth2/v2/auth?
-    client_id=00001111-aaaa-2222-bbbb-3333cccc4444
-    &response_type=code
-    &redirect_uri=http%3A%2F%2Flocalhost%2Fmyapp%2F
-    &response_mode=query
-    &state=12345
-    &nonce=0394852-3190485-2490358&
-    &code_challenge=YTFjNjI1OWYzMzA3MTI4ZDY2Njg5M2RkNmVjNDE5YmEyZGRhOGYyM2IzNjdmZWFhMTQ1ODg3NDcxY2Nl
-    &code_challenge_method=S256
-
-POST /token HTTP/1.1
-Host: oauth2.googleapis.com
-Content-Type: application/x-www-form-urlencoded
-
-code=4/P7q7W91a-oMsCeLvIaQm6bTrgtp7&
-client_id=your_client_id&
-client_secret=your_client_secret&
-redirect_uri=https%3A//oauth2.example.com/code&
-grant_type=authorization_code
- 
- * 
- * 
- * 
- */

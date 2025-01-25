@@ -9,10 +9,9 @@ using Microsoft.Extensions.Options;
 using SpyOff.Infrastructure.Tracks;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using Malarkey.Application.Security;
 using Malarkey.Abstractions.Token;
 using static Malarkey.Integration.Authentication.OAuthFlowHandlers.IMalarkeyOAuthFlowHandler;
-using Azure.Core;
+using Malarkey.Application.Authentication;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMalarkeyIdentityProviderTokenRefresher
@@ -156,6 +155,27 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMala
         return returnee;
     }
 
+    public override async Task<IdentityProviderToken?> Refresh(string refreshToken, string audiencePublicKey)
+    {
+        var url = _conf.TokenEndpointTemplate!;
+        var request = new HttpRequestMessage(HttpMethod.Post, url);
+        var formParameters = new List<(string, string)>
+        {
+            ("grant_type", "refresh_token"),
+            ("refresh_token", refreshToken),
+            ("client_id", _conf.ClientId)
+        };
+        request.Content = formParameters.ToFormContent();
+        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", $"{_conf.ClientId}:{_conf.ClientSecret}");
+        using var client = _httpClientFactory.CreateClient();
+        var response = await client.SendAsync(request);
+        var content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+            return null;
+        var returnee = await ParseAsToken(response);
+        return returnee;
+    }
+
     private record AccessTokenResponse(
         string Token,
         string[] Scopes,
@@ -172,45 +192,3 @@ internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMala
 
 
 }
-
-
-/*
- * ######################## Spotify ##############################
-https://developer.spotify.com/documentation/web-api/tutorials/code-pkce-flow
-
-const clientId = 'YOUR_CLIENT_ID';
-const redirectUri = 'http://localhost:8080';
-
-const scope = 'user-read-private user-read-email';
-const authUrl = new URL("https://accounts.spotify.com/authorize")
-
-// generated in the previous step
-window.localStorage.setItem('code_verifier', codeVerifier);
-
-const params =  {
-  response_type: 'code',
-  client_id: clientId,
-  scope,
-  code_challenge_method: 'S256',
-  code_challenge: codeChallenge,
-  redirect_uri: redirectUri,
-}
-
-authUrl.search = new URLSearchParams(params).toString();
-window.location.href = authUrl.toString();
-
-REDEEM ACCESS TOKEN:
-grant_type	Required	This field must contain the value authorization_code.
-code	Required	The authorization code returned from the previous request.
-redirect_uri	Required	This parameter is used for validation only (there is no actual redirection). The value of this parameter must exactly match the value of redirect_uri supplied when requesting the authorization code.
-client_id	Required	The client ID for your app, available from the developer dashboard.
-code_verifier	Required	The value of this parameter must match the value of the code_verifier that your app generated in the previous step.
-The request must include the following HTTP header:
-
-Header Parameter	Relevance	Value
-Content-Type	Required	Set to application/x-www-form-urlencoded. 
- 
- * 
- * 
- * 
- */

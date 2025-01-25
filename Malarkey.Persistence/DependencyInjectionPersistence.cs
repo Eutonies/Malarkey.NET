@@ -18,6 +18,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Malarkey.Application.Profile;
+using Malarkey.Application.Authentication;
 
 namespace Malarkey.Persistence;
 public static class DependencyInjectionPersistence

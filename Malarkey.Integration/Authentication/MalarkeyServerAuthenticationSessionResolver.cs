@@ -20,13 +20,16 @@ public static class MalarkeyServerAuthenticationSessionResolver
     private static readonly string SendToStateLookup = ParDefs.SendToStateName.ToLower();
     private static readonly string ScopesLookup = ParDefs.ScopesName.ToLower();
     private static readonly string ExistingProfileIdLookup = ParDefs.ExistingProfileIdName.ToLower();
+    private static readonly string AlwaysChallengeLookup = ParDefs.AlwaysChallengeName.ToLower();
+
     private static HashSet<string> NamedParameters = new List<string>
     {
         SendToLookup,
         IdProviderLookup, 
         SendToStateLookup,
         ScopesLookup,
-        ExistingProfileIdLookup
+        ExistingProfileIdLookup,
+        AlwaysChallengeLookup
     }.ToHashSet();
 
     public static MalarkeyAuthenticationSession ResolveSession(this HttpRequest req, string defaultAudience)
@@ -59,6 +62,11 @@ public static class MalarkeyServerAuthenticationSessionResolver
                ((Guid?) Guid.Parse(profId.Value)) : 
                null;
 
+        var alwaysChallenge = queryPars
+            .TryGetValue(AlwaysChallengeLookup, out var allwChal) ?
+            allwChal.Value.ToLower().Contains("true") :
+            false;
+
         var requestParameters = queryPars
             .Where(_ => !NamedParameters.Contains(_.Key))
             .Select(_ => _.Value)
@@ -78,6 +86,7 @@ public static class MalarkeyServerAuthenticationSessionResolver
               IdentityTokenId: null,
               Audience: audience,
               ExistingProfileId: existingProfileId,
+              AlwaysChallenge: alwaysChallenge,
               RequestParameters: requestParameters,
               IdpSession: null);
         return returnee;

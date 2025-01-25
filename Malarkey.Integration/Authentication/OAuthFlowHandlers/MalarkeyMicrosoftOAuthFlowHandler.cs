@@ -104,38 +104,3 @@ internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
 
 }
 
-
-/*
- * ###############    Microsoft ####################
-https://learn.microsoft.com/en-us/entra/identity-platform/v2-oauth2-auth-code-flow
-
-https://login.microsoftonline.com/{tenant}/oauth2/v2.0/authorize?
-    client_id=00001111-aaaa-2222-bbbb-3333cccc4444
-    &response_type=code
-    &redirect_uri=http%3A%2F%2Flocalhost%2Fmyapp%2F
-    &response_mode=query
-    &scope=https%3A%2F%2Fgraph.microsoft.com%2Fmail.read
-    &state=12345
-    &code_challenge=YTFjNjI1OWYzMzA3MTI4ZDY2Njg5M2RkNmVjNDE5YmEyZGRhOGYyM2IzNjdmZWFhMTQ1ODg3NDcxY2Nl
-    &code_challenge_method=S256
-
-RESPONSE:
-GET http://localhost?
-code=AwABAAAAvPM1KaPlrEqdFSBzjqfTGBCmLdgfSTLEMPGYuNHSUYBrq...
-&state=12345
- 
-
-REDEEM CODE
-POST /{tenant}/oauth2/v2.0/token HTTP/1.1
-Host: https://login.microsoftonline.com
-Content-Type: application/x-www-form-urlencoded
-
-client_id=11112222-bbbb-3333-cccc-4444dddd5555
-&scope=https%3A%2F%2Fgraph.microsoft.com%2Fmail.read
-&code=OAAABAAAAiL9Kn2Z27UubvWFPbm0gLWQJVzCTE9UkP3pSx1aXxUjq3n8b2JRLk4OxVXr...
-&redirect_uri=http%3A%2F%2Flocalhost%2Fmyapp%2F
-&grant_type=authorization_code
-&code_verifier=ThisIsntRandomButItNeedsToBe43CharactersLong 
-&client_secret=sampleCredentia1s    // NOTE: Only required for web apps. This secret needs to be URL-Encoded.
-
- */

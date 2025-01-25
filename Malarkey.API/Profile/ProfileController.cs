@@ -5,12 +5,7 @@ using Malarkey.API.Common;
 using Malarkey.Application.Authentication;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Server.HttpSys;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Malarkey.API.Profile;
 public class ProfileController : MalarkeyController
@@ -19,15 +14,19 @@ public class ProfileController : MalarkeyController
 
     [HttpPost(MalarkeyConstants.API.Paths.Profile.RefreshTokenRelativePath)]
     public Task<Results<BadRequest<string>, Ok<MalarkeyIdentityProviderTokenDto>>> RefreshIdentityProviderToken(
-           [FromServices] IMalarkeyAuthenticationSessionRepository sessionHandler,
+           [FromServices] IMalarkeyAuthenticationSessionRepository sessionRepo,
+           [FromServices] IServiceProvider serviceProvider,
            [FromBody] MalarkeyProfileRefreshProviderTokenRequest request) =>
         RequireClientCertificate(async clientCertificate => 
         {
-            var refreshed = await sessionHandler.Refresh(request.AccessToken, clientCertificate);
+            var identityProvider = request.IdentityProvider.ToDomain();
+            var refreshToken = await sessionRepo.LoadRefreshTokenForAccessToken(request.AccessToken, clientCertificate);
+            var refresher = serviceProvider.GetRequiredKeyedService<IMalarkeyIdentityProviderTokenRefresher>(identityProvider);
+            var refreshed = await refresher.Refresh(request.AccessToken, clientCertificate);
             if (refreshed == null)
                 throw new Exception("Twas not possible to refresh token");
+            refreshed = await sessionRepo.UpdateIdentityProviderToken(refreshed);
             return refreshed.ToDto();
-
         });
 
 

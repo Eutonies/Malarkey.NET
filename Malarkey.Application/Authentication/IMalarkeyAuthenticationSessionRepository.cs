@@ -24,7 +24,9 @@ public interface IMalarkeyAuthenticationSessionRepository
         MalarkeyProfileToken profileToken,
         MalarkeyIdentityToken identityToken);
 
-    Task<IdentityProviderToken?> Refresh(string accessToken, string audiencePublicKey);
+    Task<MalarkeyRefreshTokenData?> LoadRefreshTokenForAccessToken(string accessToken, string clientCertificate);
 
+
+    Task<IdentityProviderToken> UpdateIdentityProviderToken(IdentityProviderToken token);
 
 }

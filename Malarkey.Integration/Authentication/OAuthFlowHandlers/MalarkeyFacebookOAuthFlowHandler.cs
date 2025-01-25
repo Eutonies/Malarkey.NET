@@ -101,21 +101,3 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
 
 
 }
-
-
-/*
-######################### Facebook ##############################
-https://www.facebook.com/v19.0/dialog/oauth?
-  client_id={app-id}
-  &redirect_uri={redirect-uri}
-  &state={state-param}
-
-GET
-https://graph.facebook.com/v19.0/oauth/access_token
-
-
- 
- * 
- * 
- * 
- */

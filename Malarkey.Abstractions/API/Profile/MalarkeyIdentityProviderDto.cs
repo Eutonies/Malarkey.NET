@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Malarkey.Abstractions.Profile;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,4 +12,15 @@ public enum MalarkeyIdentityProviderDto
     Google = 10,
     Facebook = 20,
     Spotify = 30
+}
+
+
+public static class MalarkeyIdentityProviderDtoExtensions
+{
+    public static MalarkeyIdentityProvider ToDomain(this MalarkeyIdentityProviderDto identityProviderDto) => identityProviderDto switch {
+        MalarkeyIdentityProviderDto.Microsoft => MalarkeyIdentityProvider.Microsoft,
+        MalarkeyIdentityProviderDto.Google => MalarkeyIdentityProvider.Google,
+        MalarkeyIdentityProviderDto.Facebook => MalarkeyIdentityProvider.Facebook,
+        _ => MalarkeyIdentityProvider.Spotify,
+    };
 }

@@ -1,5 +1,7 @@
 ﻿using Malarkey.Abstractions;
 using Malarkey.Abstractions.Authentication;
+using Malarkey.Abstractions.Profile;
+using Malarkey.Application.Authentication;
 using Malarkey.Application.Profile;
 using Malarkey.Integration.Authentication;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
@@ -44,10 +46,13 @@ public static class DependencyInjectionIntegration
                    opts.PublicKey = conf.PublicKey;
                });
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyMicrosoftOAuthFlowHandler>();
+        builder.Services.AddKeyedScoped<IMalarkeyIdentityProviderTokenRefresher, MalarkeyMicrosoftOAuthFlowHandler>(MalarkeyIdentityProvider.Microsoft);
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyGoogleOAuthFlowHandler>();
+        builder.Services.AddKeyedScoped<IMalarkeyIdentityProviderTokenRefresher, MalarkeyGoogleOAuthFlowHandler>(MalarkeyIdentityProvider.Google);
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyFacebookOAuthFlowHandler>();
+        builder.Services.AddKeyedScoped<IMalarkeyIdentityProviderTokenRefresher, MalarkeyFacebookOAuthFlowHandler>(MalarkeyIdentityProvider.Facebook);
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeySpotifyOAuthFlowHandler>();
-        builder.Services.AddSingleton<MalarkeyAuthenticationRequestContinuationCache>();
+        builder.Services.AddKeyedScoped<IMalarkeyIdentityProviderTokenRefresher, MalarkeySpotifyOAuthFlowHandler>(MalarkeyIdentityProvider.Spotify);
         builder.Services.AddSingleton<IVerificationEmailSender, VerificationEmailSender>();
         builder.Services.AddHttpClients();
         return builder;

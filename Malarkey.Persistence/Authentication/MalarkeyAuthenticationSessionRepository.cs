@@ -27,40 +27,6 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthentication
     }
 
 
-    public async Task<MalarkeyAuthenticationSession?> UpdateWithAuthenticationInfo(string state, DateTime authenticatedTime, Guid profileTokenId, Guid identityTokenId)
-    {
-    }
-
-    public async Task<IMalarkeyAuthenticationSessionRepository.RefreshTokenLoadData?> LoadRefreshTokenForAccessToken(string accessToken, string clientCertificate)
-    {
-        await using var cont = await _contectFactory.CreateDbContextAsync();
-        var relevantTokenQuery = from tok in cont.IdentityProviderTokens.Where(_ => _.TokenString == accessToken)
-                                 join ident in cont.Identities
-                                 on tok.IdentityId equals ident.IdentityId
-                                 join identTok in cont.Tokens
-                                 on ident.IdentityId equals identTok.IdentityId
-                                 join sess in cont.AuthenticationSessions.Where(_ => _.Audience == clientCertificate)
-                                 on identTok.TokenId equals sess.IdentityTokenId
-                                 select new { Token = tok, Provider = ident.Provider };
-        var relevantToken = await relevantTokenQuery.FirstOrDefaultAsync();
-        if (relevantToken == null)
-            return null;
-        var scopesSet = relevantToken.Token.ToDomain().Scopes.ToHashSet();
-        var issuedTokens = await cont.IdentityProviderTokens
-            .Where(_ => _.IdentityId == relevantToken.Token.IdentityId && _.RefreshToken != null)
-            .OrderByDescending(_ => _.Expires)
-            .ToListAsync();
-        var bestToken = issuedTokens
-            .FirstOrDefault(_ => _.ToDomain().Scopes.ToHashSet().IsSupersetOf(scopesSet));
-        if (bestToken?.RefreshToken == null)
-            return null;
-        var returnee = new IMalarkeyAuthenticationSessionRepository.RefreshTokenLoadData(
-            bestToken.RefreshToken!,
-            IdentityId: relevantToken.Token.IdentityId,
-            relevantToken.Provider.ToDomain()
-            );
-        return returnee;
-    }
 
     public async Task SaveRefreshedToken(IdentityProviderToken token, Guid identityId)
     {
@@ -152,5 +118,39 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthentication
         return returnee;
     }
 
+    public async Task<MalarkeyRefreshTokenData?> LoadRefreshTokenForAccessToken(string accessToken, string clientCertificate)
+    {
+        await using var cont = await _contectFactory.CreateDbContextAsync();
+        var relevantTokenQuery = from tok in cont.IdentityProviderTokens.Where(_ => _.TokenString == accessToken)
+                                 join ident in cont.Identities
+                                 on tok.IdentityId equals ident.IdentityId
+                                 join identTok in cont.Tokens
+                                 on ident.IdentityId equals identTok.IdentityId
+                                 join sess in cont.AuthenticationSessions.Where(_ => _.Audience == clientCertificate)
+                                 on identTok.TokenId equals sess.IdentityTokenId
+                                 select new { Token = tok, Provider = ident.Provider };
+        var relevantToken = await relevantTokenQuery.FirstOrDefaultAsync();
+        if (relevantToken == null)
+            return null;
+        var scopesSet = relevantToken.Token.ToDomain().Scopes.ToHashSet();
+        var issuedTokens = await cont.IdentityProviderTokens
+            .Where(_ => _.IdentityId == relevantToken.Token.IdentityId && _.RefreshToken != null)
+            .OrderByDescending(_ => _.Expires)
+            .ToListAsync();
+        var bestToken = issuedTokens
+            .FirstOrDefault(_ => _.ToDomain().Scopes.ToHashSet().IsSupersetOf(scopesSet));
+        if (bestToken?.RefreshToken == null)
+            return null;
+        var returnee = new MalarkeyRefreshTokenData(
+            RefreshToken: bestToken.RefreshToken!,
+            IdentityId: relevantToken.Token.IdentityId,
+            IdentityProvider: relevantToken.Provider.ToDomain()
+            );
+        return returnee;
+    }
 
+    public Task<IdentityProviderToken> UpdateIdentityProviderToken(IdentityProviderToken token)
+    {
+        throw new NotImplementedException();
+    }
 }

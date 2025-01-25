@@ -6,5 +6,6 @@ using System.Threading.Tasks;
 
 namespace Malarkey.Abstractions.API.Profile.Requests;
 public record MalarkeyProfileRefreshProviderTokenRequest(
+    MalarkeyIdentityProviderDto IdentityProvider,
     string AccessToken
     );
