@@ -30,30 +30,6 @@ public partial class AuthenticatePage
     [Inject]
     public IOptions<MalarkeyIntegrationConfiguration> IntegrationConfiguration { get; set; }
 
-    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName)]
-    [Parameter]
-    public string? SendTo { get; set; }
-
-    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName)]
-    [Parameter]
-    public string? IdProvider { get; set; }
-
-    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName)]
-    [Parameter]
-    public string? Scopes { get; set; }
-
-    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName)]
-    [Parameter]
-    public string? SendToState { get; set; }
-
-    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName)]
-    [Parameter]
-    public string? ProfileId { get; set; }
-
-    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName)]
-    [Parameter]
-    public string? AlwaysChallenge { get; set; }
-
 
     [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SessionStateName)]
     [Parameter]
@@ -65,6 +41,11 @@ public partial class AuthenticatePage
     protected override async Task OnParametersSetAsync()
     {
         await EnsureAuthenticationSession();
+        if (_authenticationSession != null && _authenticationSession.RequestedIdProvider != null)
+            NavManager.NavigateTo(
+                uri: ChallengePage.BuildChallengeUrl(_authenticationSession),
+                forceLoad: true);
+
     }
 
 

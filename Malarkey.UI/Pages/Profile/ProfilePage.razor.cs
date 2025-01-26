@@ -34,13 +34,11 @@ public partial class ProfilePage : IDisposable
     private string? _infoMessage;
 
     private MalarkeyProfile? _profile;
-    private IReadOnlyCollection<MalarkeyProfileIdentity> _identities = [];
 
     private IReadOnlyCollection<ProfileIdentityProviderEntry> _identityEntries = MalarkeyIdentityProviders.AllProviders
         .Select(prov => new ProfileIdentityProviderEntry(prov, []))
         .ToList();
 
-    private readonly Guid _connectionState = Guid.NewGuid();
 
 
 
@@ -126,23 +124,7 @@ public partial class ProfilePage : IDisposable
     {
         if (_profile == null && SessionState.User != null)
         {
-            var loaded = await ProfileRepo.LoadProfileAndIdentities(SessionState.User!.Profile.ProfileId);
-            if(loaded != null)
-            {
-                _profile = loaded.Profile;
-                _identities = loaded.Identities;
-                var identityMap = _identities
-                    .GroupBy(_ => _.IdentityProvider)
-                    .ToDictionary(
-                      _ => _.Key, 
-                      _ => _.OrderBy(_ => _.EmailToUse ?? _.ProviderId)
-                            .ToReadOnlyCollection()
-                     );
-                _identityEntries = MalarkeyIdentityProviders.AllProviders
-                    .Select(prov => new ProfileIdentityProviderEntry(prov, identityMap.GetValueOrDefault(prov, [])))
-                    .ToList();
-            }
-            await InvokeAsync(StateHasChanged);
+            await RefreshProfileAndIdentities();
         }
         if(!_hasRegisteredForEmailUpdates)
         {
@@ -175,16 +157,7 @@ public partial class ProfilePage : IDisposable
     {
         if(ProfileId != null && email.ProfileId == ProfileId && email.EmailAddress.ToLower().Trim() == _profile?.PrimaryEmail?.ToLower()?.Trim())
         {
-            Task.Run(async () =>
-            {
-                var reloaded = await ProfileRepo.LoadProfileAndIdentities(ProfileId.Value);
-                if (reloaded != null)
-                {
-                    _profile = reloaded.Profile;
-                    _identities = reloaded.Identities;
-                    await InvokeAsync(StateHasChanged);
-                }
-            });
+            _ = RefreshProfileAndIdentities();
         }
     }
 
@@ -192,11 +165,7 @@ public partial class ProfilePage : IDisposable
     {
         if(ProfileId != null && _profile?.PrimaryEmail != null)
         {
-            Task.Run(async () =>
-            {
-                await EmailHandler.SendVerificationMail(_profile.PrimaryEmail, ProfileId.Value);
-            });
-
+            _ = EmailHandler.SendVerificationMail(_profile.PrimaryEmail, ProfileId.Value);
         }
     }
 
@@ -204,17 +173,30 @@ public partial class ProfilePage : IDisposable
     {
         if(ProfileId != null && identity.ProfileId == ProfileId)
         {
-            _ = Task.Run(async () =>
-            {
-                var reloaded = await ProfileRepo.LoadProfileAndIdentities(ProfileId.Value);
-                if (reloaded != null)
-                {
-                    _profile = reloaded.Profile;
-                    _identities = reloaded.Identities;
-                    await InvokeAsync(StateHasChanged);
-                }
-            });
+            _ = RefreshProfileAndIdentities();
         }
+    }
+
+    private async Task RefreshProfileAndIdentities()
+    {
+        var loaded = await ProfileRepo.LoadProfileAndIdentities(SessionState.User!.Profile.ProfileId);
+        if (loaded != null)
+        {
+            _profile = loaded.Profile;
+            var identities = loaded.Identities;
+            var identityMap = identities
+                .GroupBy(_ => _.IdentityProvider)
+                .ToDictionary(
+                  _ => _.Key,
+                  _ => _.OrderBy(_ => _.EmailToUse ?? _.ProviderId)
+                        .ToReadOnlyCollection()
+                 );
+            _identityEntries = MalarkeyIdentityProviders.AllProviders
+                .Select(prov => new ProfileIdentityProviderEntry(prov, identityMap.GetValueOrDefault(prov, [])))
+                .ToList();
+        }
+        await InvokeAsync(StateHasChanged);
+
     }
 
 

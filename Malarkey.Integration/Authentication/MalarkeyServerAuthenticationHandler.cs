@@ -26,7 +26,6 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly IMalarkeyProfileRepository _profileRepo;
     private readonly MalarkeyIntegrationConfiguration _intConf;
     private readonly ILogger<MalarkeyServerAuthenticationHandler> _logger;
-    private readonly IAuthenticationUrlResolver _urlResolver;
     private readonly string _malarkeyTokenReceiver;
     private readonly IMalarkeyServerAuthenticationEventHandler _events;
 
@@ -41,11 +40,9 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         IMalarkeyProfileRepository profileRepo,
         IOptions<MalarkeyIntegrationConfiguration> intConf,
         ILogger<MalarkeyServerAuthenticationHandler> logger,
-        IAuthenticationUrlResolver urlResolver,
         IMalarkeyServerAuthenticationEventHandler events) : base(options, loggerFactory, encoder)
     {
         _events = events;
-        _urlResolver = urlResolver;
         _logger = logger;
         _intConf = intConf.Value;
         _tokenHandler = tokenHandler;
@@ -68,18 +65,13 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             return AuthenticateResult.NoResult();
         else if(profileAndIdentities == null)
             return AuthenticateResult.Fail("No profile found in cookies");
-        if(!IsBlazorRequest)
+        var authSession = await LoadSession();
+        if (authSession != null && !IsBlazorRequest)
         {
-            var authSession = await LoadSession();
-            if (authSession == null)
-                authSession = Request.ResolveSession(ExtractPublicKeyOfReceiver());
-            if (authSession != null && !IsBlazorRequest)
-            {
-                if (authSession.AlwaysChallenge)
-                    return AuthenticateResult.Fail("Asked to always challenge");
-                if (authSession.RequestedIdProvider != null && !profileAndIdentities.Identities.Any(_ => _.IdentityProvider == authSession.RequestedIdProvider))
-                    return AuthenticateResult.Fail($"No identity token for: {authSession.RequestedIdProvider} found");
-            }
+            if (authSession.AlwaysChallenge)
+                return AuthenticateResult.Fail("Asked to always challenge");
+            if (authSession.RequestedIdProvider != null && !profileAndIdentities.Identities.Any(_ => _.IdentityProvider == authSession.RequestedIdProvider))
+                return AuthenticateResult.Fail($"No identity token for: {authSession.RequestedIdProvider} found");
         }
         var (prof, idents, _) = profileAndIdentities;
         var returnee = AuthenticateResult.Success(new AuthenticationTicket(
@@ -93,32 +85,18 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     protected override async Task HandleChallengeAsync(AuthenticationProperties properties)
     {
         var authSession = await LoadSession();
-        if(authSession == null)
+        if(
+            authSession == null || 
+            authSession.RequestedIdProvider == null || 
+            !_flowHandlers.TryGetValue(authSession.RequestedIdProvider.Value, out var flowHandler))
         {
-            var audience = ExtractPublicKeyOfReceiver();
-            authSession = Request.ResolveSession(audience);
-            authSession = await _sessionRepo.InitiateSession(authSession);
+            RedirectTo(MalarkeyConstants.Authentication.ServerAuthenticationPath);
+            return;
         }
-        var idp = authSession!.RequestedIdProvider;
-        if(idp == null)
-        {
-            idp = Request.ResolveSession("").RequestedIdProvider;
-            if (idp != null)
-                await _sessionRepo.UpdateSession(authSession.SessionId, idp.Value);
-        }
-        if (idp == null || !_flowHandlers.TryGetValue(idp.Value, out var flowHandler))
-        {
-            var redirUrl = new StringBuilder($"{MalarkeyConstants.Authentication.ServerAuthenticationPath}");
-            redirUrl.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.SessionStateName}={authSession.State.UrlEncoded()}");
-            RedirectTo(redirUrl.ToString());
-        }
-        else
-        {
-            var idpSession = flowHandler.PopulateIdpSession(authSession);
-            authSession = await _sessionRepo.InitiateIdpSession(authSession.SessionId, idpSession);
-            var redirectUrl = flowHandler.ProduceAuthorizationUrl(authSession, idpSession);
-            RedirectTo(redirectUrl);
-        }
+        var idpSession = flowHandler.PopulateIdpSession(authSession);
+        authSession = await _sessionRepo.InitiateIdpSession(authSession.SessionId, idpSession);
+        var redirectUrl = flowHandler.ProduceAuthorizationUrl(authSession, idpSession);
+        RedirectTo(redirectUrl);
     }
 
     public async Task<IResult> HandleCallback(HttpRequest request)
@@ -215,13 +193,6 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     {
         Context.Response.StatusCode = 302;
         Context.Response.Redirect(url, permanent: false);
-    }
-
-    private string ExtractPublicKeyOfReceiver()
-    {
-        if (!Request.Headers.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var pubKey))
-            return _intConf.PublicKey.CleanCertificate();
-        return pubKey.ToString();
     }
 
     private async Task<MalarkeyAuthenticationSession?> LoadSession()

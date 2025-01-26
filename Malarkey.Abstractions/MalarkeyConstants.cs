@@ -18,6 +18,7 @@ public static class MalarkeyConstants
         public const string TokenType = "JWT";
         public const string AudienceHeaderName = API.ClientCertificateHeaderName;
         public const string ServerAuthenticationPath = "authenticate";
+        public const string ServerChallengePath = "challenge";
 
         public static string IdentityCookieName(int no) => $"{IdentityCookieBaseName}.{no}";
     }

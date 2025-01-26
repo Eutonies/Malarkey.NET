@@ -6,6 +6,8 @@ using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
 using System.Text;
 using Malarkey.Abstractions.Authentication;
+using Malarkey.Application.Authentication;
+using Malarkey.UI.Pages.Authenticate;
 
 namespace Malarkey.UI.Components.Authentication;
 
@@ -20,7 +22,8 @@ public partial class IdpSelectionComponent
     [Parameter]
     public MalarkeyAuthenticationSession Session { get; set; }
 
-
+    [Inject]
+    public IMalarkeyAuthenticationSessionRepository AuthenticationRepo { get; set; }
 
     private bool IsAuthenticated => SessionState.User != null;
 
@@ -45,24 +48,24 @@ public partial class IdpSelectionComponent
     }
 
 
-    public void OnMicrosoftClick(MouseEventArgs e) => GoTo(MalarkeyIdentityProvider.Microsoft);
+    public void OnMicrosoftClick(MouseEventArgs e) => OnClick(MalarkeyIdentityProvider.Microsoft);
 
-    public void OnGoogleClick(MouseEventArgs e) => GoTo(MalarkeyIdentityProvider.Google);
+    public void OnGoogleClick(MouseEventArgs e) => OnClick(MalarkeyIdentityProvider.Google);
 
-    public void OnFacebookClick(MouseEventArgs e) => GoTo(MalarkeyIdentityProvider.Facebook);
+    public void OnFacebookClick(MouseEventArgs e) => OnClick(MalarkeyIdentityProvider.Facebook);
 
-    public void OnSpotifyClick(MouseEventArgs e) => GoTo(MalarkeyIdentityProvider.Spotify);
+    public void OnSpotifyClick(MouseEventArgs e) => OnClick(MalarkeyIdentityProvider.Spotify);
+
+    private void OnClick(MalarkeyIdentityProvider provider) =>
+        _ = Task.Run(async () =>
+        {
+            await AuthenticationRepo.UpdateSession(Session.SessionId, provider);
+            GoTo(provider);
+        });
 
     private void GoTo(MalarkeyIdentityProvider provider) =>
-        NavManager.NavigateTo(BuildChallengeUrl(provider), forceLoad: true);
+        NavManager.NavigateTo(ChallengePage.BuildChallengeUrl(Session), forceLoad: true);
 
-
-    private string BuildChallengeUrl(MalarkeyIdentityProvider provider)
-    {
-        var returnee = new StringBuilder($"challenge?{MalarkeyConstants.AuthenticationRequestQueryParameters.SessionStateName}={Session.State}");
-        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
-        return returnee.ToString();
-    }
 
 
 }

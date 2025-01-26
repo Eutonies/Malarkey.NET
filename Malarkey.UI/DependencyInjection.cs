@@ -54,7 +54,6 @@ public static class DependencyInjection
         builder.Services.AddHttpLogging();
         builder.AddSecurity();
         builder.AddApi();
-        builder.Services.AddSingleton<IAuthenticationUrlResolver, AuthenticateUrlResolver>();
         return builder;
     }
 
@@ -71,7 +70,6 @@ public static class DependencyInjection
         app.UseIntegration();
         app.MapRazorComponents<App>()
             .DisableAntiforgery()
-            .AddEndpointFilter(new TessaFilter())
             .AddInteractiveServerRenderMode();
         app.UseApi();
         app.MapRazorPages();
@@ -85,17 +83,6 @@ public static class DependencyInjection
         var returnee = new MalarkeyUIConfiguration();
         conf.Bind(MalarkeyUIConfiguration.ConfigurationElementName, returnee);
         return returnee;
-    }
-
-    private class TessaFilter : IEndpointFilter
-    {
-        public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
-        {
-            Console.WriteLine($"******** IN FILTER *************");
-            Console.WriteLine($"{context.HttpContext.Request.Path}, Arguments: {context.Arguments.Select(_ => _ ?? "")?.MakeString(",")}");
-            var returnee = await next.Invoke(context);
-            return returnee;
-        }
     }
 
 

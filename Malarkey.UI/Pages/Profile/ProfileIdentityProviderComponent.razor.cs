@@ -14,29 +14,31 @@ public partial class ProfileIdentityProviderComponent
     [Parameter]
     public Guid ProfileId { get; set; }
 
-    [Parameter]
-    public Guid IdentityConnectionState { get; set; }
-
     private MalarkeyIdentityProvider Provider => ProviderEntry.Provider;
 
-    private IReadOnlyCollection<ShowIdentity> _identities = [];
-
-    private string ImageFile => $"images/profile/{Provider.ToString().ToLower()}.webp";
-
-    protected override void OnParametersSet()
-    {
-        _identities = ProviderEntry.Identities
+    private IReadOnlyCollection<ShowIdentity> Identities => ProviderEntry.Identities
             .Select(_ => new ShowIdentity(_))
             .OrderBy(_ => _.NameToUse)
             .ToList();
-    }
+
+    private string ImageFile => $"images/profile/{Provider.ToString().ToLower()}.webp";
+
 
     private string IdentityConnectUrl => $"{MalarkeyConstants.Authentication.ServerAuthenticationPath}?" + 
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={Provider.ToString()}&" +
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName}={ProfileId.ToString().UrlEncoded()}&" +
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName}={true}&" +
-        $"{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName}={IdentityConnectionState.ToString().UrlEncoded()}&" +
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={ProfileIdentityConnectionSucceededPage.SucceededPagePath.UrlEncoded()}";
+
+    protected override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(Provider == MalarkeyIdentityProvider.Google)
+        {
+            var tessa = Identities;
+            var tess2 = "jdkds";
+        }
+        return base.OnAfterRenderAsync(firstRender);
+    }
 
 
     private record ShowIdentity(MalarkeyProfileIdentity Identity)
