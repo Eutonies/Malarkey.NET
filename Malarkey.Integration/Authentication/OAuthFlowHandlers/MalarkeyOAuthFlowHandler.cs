@@ -113,7 +113,7 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler, IM
         return returnee;
     }
 
-    protected virtual string[] ScopesFor(MalarkeyAuthenticationSession session) => session.RequestedScopes ?? DefaultScopes;
+    protected virtual string[] ScopesFor(MalarkeyAuthenticationSession session) => session.RequestedScopes ?? _conf.Scopes ?? DefaultScopes;
 
     protected virtual (string Verifier, string Challenge) GenerateChallengeAndVerifier()
     {
