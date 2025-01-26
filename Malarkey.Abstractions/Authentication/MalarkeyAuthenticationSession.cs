@@ -24,5 +24,18 @@ public record MalarkeyAuthenticationSession(
     bool AlwaysChallenge,
     IReadOnlyCollection<MalarkeyAuthenticationSessionParameter> RequestParameters,
     MalarkeyAuthenticationIdpSession? IdpSession
-    );
+    )
+{
+    public MalarkeyAuthenticationParameters ToParameters() => new MalarkeyAuthenticationParameters(
+        IsInternal: IsInternal,
+        RequestedSendTo: RequestedSendTo,
+        RequestedIdProvider: RequestedIdProvider,
+        RequestState: RequestState,
+        RequestedScopes: RequestedScopes,
+        ExistingProfileId: ExistingProfileId,
+        AlwaysChallenge: AlwaysChallenge
+        );
+
+
+}
 

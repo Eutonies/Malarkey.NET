@@ -37,10 +37,7 @@ public static class DependencyInjection
     {
         IdentityModelEventSource.ShowPII = true;
         builder.Services.AddRazorComponents()
-            .AddInteractiveServerComponents()
-            .AddMicrosoftIdentityConsentHandler();
-        builder.Services.AddRazorPages()
-            .AddMvcOptions(_ => { });
+            .AddInteractiveServerComponents();
         builder.AddIntegrationServices();
         builder.AddApplication();
         builder.AddPersistence();
@@ -52,6 +49,7 @@ public static class DependencyInjection
         builder.Services.AddAntiforgery();
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddHttpLogging();
+        builder.Services.AddSingleton<MalarkeySynchronizer>();
         builder.AddSecurity();
         builder.AddApi();
         return builder;
@@ -65,14 +63,14 @@ public static class DependencyInjection
         app.UseMiddleware<MalarkeyRedirectHttpMethodCorrectionMiddleware>();
         app.UseMiddleware<MalarkeyRequestLoggingMiddleware>();   
         app.UseHttpLogging();
+        app.MapStaticAssets();
         app.UseRouting();
-        app.UseStaticFiles();
-        app.UseIntegration();
         app.MapRazorComponents<App>()
             .DisableAntiforgery()
             .AddInteractiveServerRenderMode();
+        app.UseIntegration();
         app.UseApi();
-        app.MapRazorPages();
+        //app.MapRazorPages();
 
         return app;
     }

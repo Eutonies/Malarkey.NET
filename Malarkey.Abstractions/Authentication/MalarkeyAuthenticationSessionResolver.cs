@@ -26,7 +26,16 @@ public static class MalarkeyAuthenticationSessionResolver
         AlwaysChallengeLookup
     }.ToHashSet();
 
-    public static MalarkeyAuthenticationSession ResolveSession(this HttpRequest req, string defaultAudience)
+    public static MalarkeyAuthenticationSession ResolveSession(
+        this HttpRequest req, 
+        string defaultAudience,
+        string? sendToOverride = null,
+        string? sendToStateOverride = null,
+        string? idProviderOverride = null,
+        string? scopesOverride = null,
+        string? profileIdOverride = null,
+        string? alwaysChallengeOverride = null
+        )
     {
         var queryPars = req.Query
             .Select(pair => new MalarkeyAuthenticationSessionParameter(
@@ -36,32 +45,32 @@ public static class MalarkeyAuthenticationSessionResolver
             ))
             .GroupBy(_ => _.NameKey)
             .ToDictionarySafe(_ => _.Key, grp => grp.First() with { Value = grp.Select(_ => _.Value).Order().MakeString(" ")});
-        var requestedSendTo = queryPars
+        var requestedSendTo = sendToOverride ?? queryPars
             .GetValueOrDefault(SendToLookup)?.Value;
         if (requestedSendTo == null)
             requestedSendTo = req.Path;
         var sendTo = requestedSendTo ?? $"/{MalarkeyConstants.Authentication.ServerAuthenticationPath}";
         var isInternal = !sendTo.ToLower().StartsWith("http");
-        var requestedIdProviderString = queryPars
+        var requestedIdProviderString = idProviderOverride ?? queryPars
             .GetValueOrDefault(IdProviderLookup)?.Value;
         var requestedIdProvider = requestedIdProviderString?
             .Pipe(_ => Enum.Parse<MalarkeyIdentityProvider>(_));
-        var requestState = queryPars
+        var requestState = sendToStateOverride ?? queryPars
             .GetValueOrDefault(SendToStateLookup)?.Value;
-        var requestedScopes = queryPars
-            .GetValueOrDefault(ScopesLookup)?.Value?.Split(" ");
+        var requestedScopes = (scopesOverride ?? queryPars
+            .GetValueOrDefault(ScopesLookup)?.Value)?.Split(" ");
         var audience = req.Headers.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var pubKey) ?
               pubKey.ToString() :
               defaultAudience;
-        var existingProfileId = queryPars
+        var existingProfileId = profileIdOverride?.Pipe(Guid.Parse) ?? (queryPars
             .TryGetValue(ExistingProfileIdLookup, out var profId) ? 
                ((Guid?) Guid.Parse(profId.Value)) : 
-               null;
+               null);
 
-        var alwaysChallenge = queryPars
+        var alwaysChallenge = alwaysChallengeOverride?.Pipe(_ => _.ToLower().Contains("true")) ?? ( queryPars
             .TryGetValue(AlwaysChallengeLookup, out var allwChal) ?
             allwChal.Value.ToLower().Contains("true") :
-            false;
+            false);
 
         var requestParameters = queryPars
             .Where(_ => !NamedParameters.Contains(_.Key))
@@ -86,7 +95,11 @@ public static class MalarkeyAuthenticationSessionResolver
               RequestParameters: requestParameters,
               IdpSession: null);
         return returnee;
-
     }
+
+    public static MalarkeyAuthenticationParameters ResolveParameters(this HttpRequest request) => request
+        .ResolveSession("dummy")
+        .ToParameters();
+
 
 }

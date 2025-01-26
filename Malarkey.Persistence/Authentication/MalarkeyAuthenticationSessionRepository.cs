@@ -98,11 +98,6 @@ internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthentication
         return returnee;
     }
 
-    public async Task<IdentityProviderToken?> Refresh(string accessToken, string audiencePublicKey)
-    {
-        throw new NotImplementedException();
-    }
-
     private async Task<MalarkeyAuthenticationSession> Load(long sessionId, MalarkeyDbContext cont)
     {
         var session = await cont.AuthenticationSessions

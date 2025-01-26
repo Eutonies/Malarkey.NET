@@ -25,10 +25,38 @@ public partial class AuthenticatePage
     public IHttpContextAccessor ContextAccessor { get; set; }
 
     [Inject]
+    public ILogger<AuthenticatePage> Logger { get; set; }
+
+    [Inject]
     public IMalarkeyAuthenticationSessionRepository AuthenticationSessionRepo { get; set; }
 
     [Inject]
     public IOptions<MalarkeyIntegrationConfiguration> IntegrationConfiguration { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName)]
+    [Parameter]
+    public string? SendTo { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName)]
+    [Parameter]
+    public string? IdProvider { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName)]
+    [Parameter]
+    public string? Scopes { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName)]
+    [Parameter]
+    public string? SendToState { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ExistingProfileIdName)]
+    [Parameter]
+    public string? ProfileId { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName)]
+    [Parameter]
+    public string? AlwaysChallenge { get; set; }
+
 
 
     [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SessionStateName)]
@@ -38,16 +66,14 @@ public partial class AuthenticatePage
     private MalarkeyAuthenticationSession? _authenticationSession;
 
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
         await EnsureAuthenticationSession();
         if (_authenticationSession != null && _authenticationSession.RequestedIdProvider != null)
             NavManager.NavigateTo(
                 uri: ChallengePage.BuildChallengeUrl(_authenticationSession),
                 forceLoad: true);
-
     }
-
 
     private async Task EnsureAuthenticationSession()
     {
@@ -60,11 +86,17 @@ public partial class AuthenticatePage
             var audience = IntegrationConfiguration.Value
                 .PublicKey.CleanCertificate();
             var context = ContextAccessor.HttpContext!;
-            _authenticationSession = context.Request.ResolveSession(audience);
-            if(!ContextAccessor.IsBlazorRequest())
-            {
-                _authenticationSession = await AuthenticationSessionRepo.InitiateSession(_authenticationSession);
-            }
+            _authenticationSession = context.Request
+                .ResolveSession(
+                   defaultAudience: audience,
+                   sendToOverride: SendTo,
+                   sendToStateOverride: SendToState,
+                   idProviderOverride: IdProvider,
+                   scopesOverride: Scopes,
+                   profileIdOverride: ProfileId,
+                   alwaysChallengeOverride: AlwaysChallenge
+                   );
+            _authenticationSession = await AuthenticationSessionRepo.InitiateSession(_authenticationSession);
         }
         await InvokeAsync(StateHasChanged);
     }

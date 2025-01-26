@@ -24,16 +24,17 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly IMalarkeyAuthenticationSessionRepository _sessionRepo;
     private readonly IReadOnlyDictionary<MalarkeyIdentityProvider, IMalarkeyOAuthFlowHandler> _flowHandlers;
     private readonly IMalarkeyProfileRepository _profileRepo;
-    private readonly MalarkeyIntegrationConfiguration _intConf;
     private readonly ILogger<MalarkeyServerAuthenticationHandler> _logger;
     private readonly string _malarkeyTokenReceiver;
     private readonly IMalarkeyServerAuthenticationEventHandler _events;
+    private readonly MalarkeySynchronizer _synchronizer;
 
 
     public MalarkeyServerAuthenticationHandler(
         IOptionsMonitor<MalarkeyServerAuthenticationHandlerOptions> options,
         ILoggerFactory loggerFactory,
         UrlEncoder encoder,
+        MalarkeySynchronizer synchronizer,
         IMalarkeyTokenHandler tokenHandler,
         IMalarkeyAuthenticationSessionRepository sessionRepo,
         IEnumerable<IMalarkeyOAuthFlowHandler> flowHandlers,
@@ -42,9 +43,9 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         ILogger<MalarkeyServerAuthenticationHandler> logger,
         IMalarkeyServerAuthenticationEventHandler events) : base(options, loggerFactory, encoder)
     {
+        _synchronizer = synchronizer;
         _events = events;
         _logger = logger;
-        _intConf = intConf.Value;
         _tokenHandler = tokenHandler;
         _sessionRepo = sessionRepo;
         _flowHandlers = flowHandlers
@@ -90,12 +91,24 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             authSession.RequestedIdProvider == null || 
             !_flowHandlers.TryGetValue(authSession.RequestedIdProvider.Value, out var flowHandler))
         {
-            RedirectTo(MalarkeyConstants.Authentication.ServerAuthenticationPath);
+            var pars = Request.ResolveParameters();
+            var url = pars.ProduceAuthenticationString();
+            RedirectTo(url);
             return;
         }
-        var idpSession = flowHandler.PopulateIdpSession(authSession);
-        authSession = await _sessionRepo.InitiateIdpSession(authSession.SessionId, idpSession);
-        var redirectUrl = flowHandler.ProduceAuthorizationUrl(authSession, idpSession);
+        if(authSession.IdpSession == null)
+        {
+            await _synchronizer.PerformLockedActionAsync<MalarkeyServerAuthenticationHandler>(async () =>
+            {
+                authSession = await LoadSession();
+                if (authSession?.IdpSession == null)
+                {
+                    var idpSession = flowHandler.PopulateIdpSession(authSession!);
+                    authSession = await _sessionRepo.InitiateIdpSession(authSession!.SessionId, idpSession);
+                }
+            });
+        }
+        var redirectUrl = flowHandler.ProduceAuthorizationUrl(authSession, authSession.IdpSession!);
         RedirectTo(redirectUrl);
     }
 
@@ -188,6 +201,8 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private Task<BadRequest<string>> ReturnError(string errorMessage) => Task.FromResult(
         TypedResults.BadRequest(errorMessage)
         );
+
+
 
     private void RedirectTo(string url)
     {

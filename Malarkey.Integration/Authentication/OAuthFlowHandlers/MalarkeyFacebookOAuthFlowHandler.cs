@@ -31,7 +31,7 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
     protected override MalarkeyOAuthNamingScheme ProduceNamingScheme() => MalarkeyFacebookOAuthNamingScheme.Init(_conf.NamingSchemeOverwrites);
     protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Facebook;
 
-    protected override bool StripCodeChallengePadding => false;
+    protected override bool StripCodeChallengePadding => true;
 
     public override IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session, MalarkeyAuthenticationIdpSession idpSession) => new List<(string, string?)>
     {
