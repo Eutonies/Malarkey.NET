@@ -4,6 +4,7 @@ using Malarkey.Abstractions.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
@@ -12,12 +13,17 @@ using System.Text.Json;
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
+    private readonly ILogger<MalarkeyFacebookOAuthFlowHandler> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
 
     public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Facebook;
 
-    public MalarkeyFacebookOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf, IHttpClientFactory httpClientFactory) : base(intConf)
+    public MalarkeyFacebookOAuthFlowHandler(
+        IOptions<MalarkeyIntegrationConfiguration> intConf, 
+        IHttpClientFactory httpClientFactory,
+        ILogger<MalarkeyFacebookOAuthFlowHandler> logger) : base(intConf)
     {
+        _logger = logger;
         _httpClientFactory = httpClientFactory;
     }
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate;
@@ -25,12 +31,14 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
     protected override MalarkeyOAuthNamingScheme ProduceNamingScheme() => MalarkeyFacebookOAuthNamingScheme.Init(_conf.NamingSchemeOverwrites);
     protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Facebook;
 
+    protected override bool StripCodeChallengePadding => false;
+
     public override IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session, MalarkeyAuthenticationIdpSession idpSession) => new List<(string, string?)>
     {
         (_namingScheme.ClientId, _conf.ClientId),
-        (_namingScheme.Scope, _conf.Scopes?.MakeString(",") ?? ""),
+        (_namingScheme.Scope, _conf.Scopes?.MakeString(" ")?.UrlEncoded() ?? ""),
         (_namingScheme.ResponseType, _conf.ResponseType),
-        (_namingScheme.RedirectUri, _intConf.RedirectUrl),
+        (_namingScheme.RedirectUri, _intConf.RedirectUrl.UrlEncoded()),
         (_namingScheme.State, session.State
             .Replace('+','-')
             .Replace('/','_')
@@ -41,6 +49,13 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
     }
     .Where(_ => _.Item2 != null)
     .ToDictionarySafe(_ => _.Item1, _ => _.Item2!);
+
+    public override string ProduceAuthorizationUrl(MalarkeyAuthenticationSession session, MalarkeyAuthenticationIdpSession idpSession)
+    {
+        var returnee =  base.ProduceAuthorizationUrl(session, idpSession);
+        _logger.LogInformation($"Using facebook authorization URL: {returnee}");
+        return returnee;
+    }
 
     public override async Task<IMalarkeyOAuthFlowHandler.RedirectData?> ExtractRedirectData(HttpRequest request)
     {
@@ -62,17 +77,23 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
         var urlBuilder = new StringBuilder(_conf.TokenEndpointTemplate!);
         urlBuilder.Append($"?{_namingScheme.ClientId}={_conf.ClientId.UrlEncoded()}");
         urlBuilder.Append($"&{_namingScheme.RedirectUri}={_intConf.RedirectUrl.UrlEncoded()}");
-        urlBuilder.Append($"&{_namingScheme.RedemptionCodeVerifier}={codeVerifier}");
+        urlBuilder.Append($"&{_namingScheme.RedemptionCodeVerifier}={codeVerifier.UrlEncoded()}");
         urlBuilder.Append($"&{_namingScheme.RedemptionCode}={redirectData.Code!.UrlEncoded()}");
         var url = urlBuilder.ToString();
+        _logger.LogInformation($"Firing off access token request against facebook through URL: {url}");
+
 
         using var client = _httpClientFactory.CreateClient();
         var accessTokenRequest = new HttpRequestMessage(HttpMethod.Get, url);
         var response = await client.SendAsync(accessTokenRequest);
         var content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
+        {
+            _logger.LogError($"Received error code: {response.StatusCode} on access token request. Message: {content}");
             return null;
+        }
         var tokenResponse = JsonSerializer.Deserialize<AccessTokenResponse>(content);
+        _logger.LogInformation($"Got back token response from facebook: {tokenResponse}");
         var jwtHandler = new JwtSecurityTokenHandler();
         var parsedToken = jwtHandler.ReadJwtToken(tokenResponse!.id_token);
         var tokenClaims = parsedToken.Claims

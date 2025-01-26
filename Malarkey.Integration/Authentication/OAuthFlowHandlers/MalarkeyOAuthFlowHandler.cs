@@ -33,6 +33,8 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler, IM
     protected virtual string DefaultCodeChallengeMethod => "S256";
     protected virtual int NumberOfCharsInCodeVerifier => 43;
 
+    protected virtual bool StripCodeChallengePadding => true;
+
     public MalarkeyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf)
     {
         _intConf = intConf.Value;
@@ -126,7 +128,9 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler, IM
             .MakeString("");
         var verifierBytes = UTF8Encoding.UTF8.GetBytes(verifier);
         var challengeBytes = SHA256.HashData(verifierBytes);
-        var challenge = Convert.ToBase64String(challengeBytes).Substring(0, NumberOfCharsInCodeVerifier);
+        var challenge = Convert.ToBase64String(challengeBytes);
+        if(StripCodeChallengePadding)
+            challenge = challenge.Substring(0, NumberOfCharsInCodeVerifier);
         return (verifier, challenge);
     }
 

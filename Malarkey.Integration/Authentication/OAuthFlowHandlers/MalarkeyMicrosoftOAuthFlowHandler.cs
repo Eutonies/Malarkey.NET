@@ -20,14 +20,12 @@ using System.Threading.Tasks;
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
-    private readonly IMalarkeyProfileRepository _profileRepo;
     
     public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Microsoft;
 
 
-    public MalarkeyMicrosoftOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf, IMalarkeyProfileRepository profileRepo) : base(intConf)
+    public MalarkeyMicrosoftOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf) : base(intConf)
     {
-        _profileRepo = profileRepo;
     }
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate.Replace("{tenant}", _conf.Tenant);
 

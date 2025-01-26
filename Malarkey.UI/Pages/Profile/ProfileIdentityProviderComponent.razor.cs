@@ -30,16 +30,6 @@ public partial class ProfileIdentityProviderComponent
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.AlwaysChallengeName}={true}&" +
         $"{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={ProfileIdentityConnectionSucceededPage.SucceededPagePath.UrlEncoded()}";
 
-    protected override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if(Provider == MalarkeyIdentityProvider.Google)
-        {
-            var tessa = Identities;
-            var tess2 = "jdkds";
-        }
-        return base.OnAfterRenderAsync(firstRender);
-    }
-
 
     private record ShowIdentity(MalarkeyProfileIdentity Identity)
     {
