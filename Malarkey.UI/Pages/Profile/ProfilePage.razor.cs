@@ -8,8 +8,11 @@ using Malarkey.Application.Profile;
 using Malarkey.Application.Profile.Persistence;
 using Malarkey.Integration.Authentication;
 using Malarkey.UI.Session;
+using Malarkey.UI.Util;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using System.Net.Mail;
+using static Malarkey.UI.Util.FileUploadHandler;
 namespace Malarkey.UI.Pages.Profile;
 public partial class ProfilePage : IDisposable
 {
@@ -39,8 +42,12 @@ public partial class ProfilePage : IDisposable
         .Select(prov => new ProfileIdentityProviderEntry(prov, []))
         .ToList();
 
+    private MarkupString ProfileImage => _profile?.ProfileImage?.Pipe(
+           imgBytz => new MarkupString($"url(data:{_profile.ProfileImageType};base64,{imgBytz.ToBase64String()})")
+        ) ??new MarkupString("url('images/profile/upload-image.webp')");
 
 
+    private string? _profileImageError;
 
     private string? _intermediateName;
     private bool _useIntermediateName = false;
@@ -152,6 +159,33 @@ public partial class ProfilePage : IDisposable
 
         }
     });
+
+    private void OnImageFileChanged(InputFileChangeEventArgs ev)
+    {
+        _ = Task.Run(async () => 
+        {
+            var parseResult = await FileUploadHandler.ParseFileChange(ev);
+            if(parseResult is FileUploadSuccess succ)
+            {
+                if(_profile != null)
+                {
+                    _profileImageError = null;
+                    var reloaded = await ProfileRepo.UpdateProfileImage(_profile.ProfileId, succ.Bytes, succ.MimeType);
+                    if(reloaded is  SuccessActionResult<MalarkeyProfile> succRes)
+                    {
+                        _profile = succRes.Result;
+                        _ = InvokeAsync(StateHasChanged);
+                    }
+                }
+            }
+            else if (parseResult is FileUploadFailure fail)
+            {
+                _profileImageError = fail.FileError;
+                _ = InvokeAsync(StateHasChanged);
+            }
+
+        });
+    }
 
     private void OnEmailVerification(object? sender, VerifiableEmail email)
     {

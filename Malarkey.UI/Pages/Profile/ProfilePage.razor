@@ -11,10 +11,16 @@
         <div class="malarkey-profile-image-container">
             <div class="malarkey-profile-image-frame"></div>
             <div class="malarkey-profile-image-container-inner">
-                <div id="malarkey-profile-image" title="Profile image" style="background-image: url('images/profile/image-sample.png');" />
+                <div id="malarkey-profile-image" title="Profile image" style="background-image: @ProfileImage;" />
             </div>
         </div>
-        <input type="file" id="malarkey-profile-image-input" title="Select profile image" />
+        <div id="malarkey-profile-image-input-container">
+            <InputFile OnChange="OnImageFileChanged" id="malarkey-profile-image-input" title="Select profile image"></InputFile>
+            @if (_profileImageError != null)
+            {
+                <div class="malarkey-profile-input-error">@_profileImageError</div>
+            }
+        </div>
 
         <div class="malarkey-profile-input-form">
             <div class="malarkey-profile-input-container">
