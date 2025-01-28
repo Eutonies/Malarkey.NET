@@ -53,6 +53,10 @@
                         @if(CanSendVerifyEmail) {
                             <button id="malarkey-profile-send-verification-button" @onclick="OnSendVerificationEmailClicked" type="button">Send verification mail</button>
                         }
+                        @if(EmailIsVerified) {
+                            <i class="bi bi-check-lg malarkey-profile-email-verified-icon" title="Email is verified"></i>
+
+                        }
 
                     </div>
                     @if (_primaryEmailError != null)

@@ -141,6 +141,13 @@
     border-radius: 5px;
 }
 
+.malarkey-profile-email-verified-icon {
+    margin-left: 10px;
+    margin-top: -8px;
+    font-size: 20pt;
+    color: green;
+}
+
 .malarkey-profile-input-error {
     font-family: 'Ink Free';
     font-size: 10pt;

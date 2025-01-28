@@ -1,0 +1,14 @@
+﻿@page "/verify-email"
+@using Malarkey.UI.Pages.Layout
+@layout EmptyLayout
+
+<div class="malarkey-verify-email-page">
+    @if(_errorMessage != null) {
+        <div class="malarkey-verify-email-error">@_errorMessage</div>
+    }
+    @if (_successMessage != null)
+    {
+        <div class="malarkey-verify-email-success">@_successMessage</div>
+    }
+</div>
+

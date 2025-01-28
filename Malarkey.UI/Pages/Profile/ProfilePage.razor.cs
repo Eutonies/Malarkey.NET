@@ -119,9 +119,11 @@ public partial class ProfilePage : IDisposable
     private string? _primaryEmailError;
     private bool IsValidEmail(string email) => MailAddress.TryCreate(email, out _);
 
-    private bool CanSendVerifyEmail => !(_profile?.PrimaryEmailIsVerified ?? false) &&
+    private bool CanSendVerifyEmail => !EmailIsVerified &&
         (_profile?.PrimaryEmail?.Pipe(IsValidEmail) ?? false) &&
         (_profile?.NextVerificationSendTime?.Pipe(tim => tim < DateTime.Now) ?? true);
+
+    private bool EmailIsVerified => _profile?.PrimaryEmailIsVerified ?? false;
 
     private string ProfileNameExtraClass => _profileNameError == null ? "" : "input-error";
     private string EmailClasses =>  "malarkey-profile-input" + " " + 

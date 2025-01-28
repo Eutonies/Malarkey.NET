@@ -1,7 +1,8 @@
-﻿using Malarkey.Application.Profile;
+﻿
+using Malarkey.Application.Profile;
 using Microsoft.AspNetCore.Components;
 
-namespace Malarkey.UI.Pages.Profile;
+namespace Malarkey.UI.Pages.Email;
 
 public partial class VerifyEmailPage
 {
@@ -21,7 +22,7 @@ public partial class VerifyEmailPage
 
     protected override async Task OnParametersSetAsync()
     {
-        if (_errorMessage == null && _successMessage == null)
+        if(_errorMessage == null && _successMessage == null)
         {
             try
             {
