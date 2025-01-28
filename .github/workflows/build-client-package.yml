@@ -1,0 +1,56 @@
+name: .NET build
+
+on:
+  workflow_dispatch:
+  push:  
+
+jobs:
+  define-version-number:
+    name: Calculate SemVer
+    runs-on: ubuntu-24.04
+    outputs:
+      package-version: ${{ steps.version_step.outputs.fullSemVer }}
+    steps:  
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  
+    - name: Install GitVersion
+      uses: gittools/actions/gitversion/setup@v3.1.3
+      with:
+        versionSpec: '6.0.x'
+        preferLatestVersion: true
+    - name: Determine SemVer
+      id: version_step
+      uses: gittools/actions/gitversion/execute@v3.1.3
+    
+  build-and-publish:
+    name: Build & Deploy yo!
+    runs-on: windows-2025
+    needs: [ define-version-number ]
+    env:
+      packageversion: ${{ needs.define-version-number.outputs.package-version }}
+      packageid: SpyOff.UI
+      mainprojectfolder: SpyOff.UI
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 9.0.x
+    - name: .NET publish
+      shell: pwsh
+      run: |
+        dotnet publish Malarkey.Client/Malarkey.Client.csproj -c Release 
+#    - name: Setup NuGet
+#      uses: nuget/setup-nuget@v2.0.1
+#      with:
+#        nuget-api-key: ${{secrets.NEXUS_APIKEY}}
+#        nuget-version: '5.3.1'
+    - name: Upload packages
+      uses: actions/upload-artifact@v4
+      with:
+        name: packaged-artifacts
+        path: packages
+            
