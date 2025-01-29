@@ -4,6 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Malarkey.Persistence</PackageId>
+    <Company>Eutonies.com</Company>
+    <Authors>Sune</Authors>
+    <IsPackable>true</IsPackable>
+    <Description>Clean architecture persistence layer for Malarkey.NET</Description>
+    <PackageIconUrl>../resources/logos/logo-64x64.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -25,13 +25,12 @@ jobs:
       uses: gittools/actions/gitversion/execute@v3.1.3
     
   build-and-publish:
-    name: Build & Deploy yo!
+    name: Build & Deploy
     runs-on: windows-2025
     needs: [ define-version-number ]
     env:
       packageversion: ${{ needs.define-version-number.outputs.package-version }}
-      packageid: SpyOff.UI
-      mainprojectfolder: SpyOff.UI
+      packageid: Malarkey.Client
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -39,18 +38,29 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 9.0.x
-    - name: .NET publish
+    - name: .NET Build & Pack
       shell: pwsh
       run: |
-        dotnet publish Malarkey.Client/Malarkey.Client.csproj -c Release 
-#    - name: Setup NuGet
-#      uses: nuget/setup-nuget@v2.0.1
-#      with:
-#        nuget-api-key: ${{secrets.NEXUS_APIKEY}}
-#        nuget-version: '5.3.1'
-    - name: Upload packages
-      uses: actions/upload-artifact@v4
-      with:
-        name: packaged-artifacts
-        path: packages
-            
+        dotnet build Malarkey.Abstractions/Malarkey.Abstractions.csproj -c Release
+        dotnet build Malarkey.API/Malarkey.API.csproj -c Release
+        dotnet build Malarkey.Application/Malarkey.Application.csproj -c Release
+        dotnet build Malarkey.Client/Malarkey.Client.csproj -c Release
+        dotnet build Malarkey.Integration/Malarkey.Integration.csproj -c Release
+        dotnet build Malarkey.Persistence/Malarkey.Persistence.csproj -c Release
+        dotnet build Malarkey.Security/Malarkey.Security.csproj -c Release
+        dotnet build Malarkey.UI/Malarkey.UI.csproj -c Release
+
+        dotnet pack Malarkey.Abstractions/Malarkey.Abstractions.csproj -c Release --artifacts-path ./dist
+        dotnet pack Malarkey.API/Malarkey.API.csproj -c Release --artifacts-path ./dist
+        dotnet pack Malarkey.Application/Malarkey.Application.csproj -c Release --artifacts-path ./dist
+        dotnet pack Malarkey.Client/Malarkey.Client.csproj -c Release --artifacts-path ./dist
+        dotnet pack Malarkey.Integration/Malarkey.Integration.csproj -c Release --artifacts-path ./dist
+        dotnet pack Malarkey.Persistence/Malarkey.Persistence.csproj -c Release --artifacts-path ./dist
+        dotnet pack Malarkey.Security/Malarkey.Security.csproj -c Release --artifacts-path ./dist
+        dotnet pack Malarkey.UI/Malarkey.UI.csproj -c Release --artifacts-path ./dist
+    - name: Publish to Nuget package repository
+      shell: pwsh
+      run: |
+        dotnet nuget add source --username Eutonies.com --password $GITHUB_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Eutonies.com/index.json"
+        $packagePattern = "./dist/package/release/*.nupkg"
+        dotnet nuget push $packagePattern --source "github"

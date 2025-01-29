@@ -4,6 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Malarkey.Security</PackageId>
+    <Company>Eutonies.com</Company>
+    <Authors>Sune</Authors>
+    <IsPackable>true</IsPackable>
+    <Description>Malarkey.NET cryptography utilizations</Description>
+    <PackageIconUrl>../resources/logos/logo-64x64.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>

@@ -4,6 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Malarkey.Abstractions</PackageId>
+    <Authors>Sune</Authors>
+    <Company>Eutonies.com</Company>
+    <IsPackable>true</IsPackable>
+    <Description>Universal types and features used throughtout in Malarkey.NET, both server and client side</Description>
+    <PackageIconUrl>../resources/logos/logo-64x64.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>

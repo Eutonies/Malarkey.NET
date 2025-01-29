@@ -4,6 +4,12 @@
     <TargetFramework>net9.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <PackageId>Malarkey.Client</PackageId>
+    <Company>Eutonies.com</Company>
+    <Authors>Sune</Authors>
+    <IsPackable>true</IsPackable>
+    <Description>Single point of dependency for client API's using Malarkey.NET server for authentication</Description>
+    <PackageIconUrl>../resources/logos/logo-64x64.png</PackageIconUrl>
   </PropertyGroup>
 
   <ItemGroup>
