@@ -9,7 +9,7 @@ jobs:
     name: Calculate SemVer
     runs-on: ubuntu-24.04
     outputs:
-      package-version: ${{ steps.version_step.outputs.fullSemVer }}
+      package-version: ${{ steps.version_step.outputs.majorMinorPatch }}
     steps:  
     - name: Checkout
       uses: actions/checkout@v4
@@ -62,5 +62,6 @@ jobs:
       shell: pwsh
       run: |
         dotnet nuget add source --username Eutonies.com --password $GITHUB_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Eutonies.com/index.json"
-        $packagePattern = "./dist/package/release/*.nupkg"
-        dotnet nuget push $packagePattern --source "github"
+        $packageFolder = "./dist/package/release"
+        dotnet nuget push "${packageFolder}/Malarkey.Abstractions.nupkg" --source "github"
+        dotnet nuget push "${packageFolder}/Malarkey.Client.nupkg" --source "github"
