@@ -25,6 +25,9 @@ jobs:
       uses: gittools/actions/gitversion/execute@v3.1.3
     
   build-and-publish:
+    permissions:
+      packages: write # for pushing GitHub Nuget packages
+
     name: Build & Deploy
     runs-on: windows-2025
     needs: [ define-version-number ]
