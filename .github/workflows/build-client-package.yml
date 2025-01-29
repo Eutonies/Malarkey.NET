@@ -60,8 +60,10 @@ jobs:
         dotnet pack Malarkey.UI/Malarkey.UI.csproj -c Release --artifacts-path ./dist
     - name: Publish to Nuget package repository
       shell: pwsh
+      env:
+        actionsapikey: ${{ secrets.EUTONIES_GITHUB_ACTIONS_APIKEY }}
       run: |
-        dotnet nuget add source --username Eutonies.com --password $GITHUB_TOKEN --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Eutonies.com/index.json"
+        dotnet nuget add source --username Eutonies.com --password $Env:actionsapikey --store-password-in-clear-text --name github "https://nuget.pkg.github.com/Eutonies.com/index.json"
         $packageFolder = "./dist/package/release"
         $vers = $Env:packageversion
         dotnet nuget push "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" --source "github"
