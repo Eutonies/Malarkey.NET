@@ -91,8 +91,8 @@ jobs:
         asset_path: ./dist/package/release/Malarkey.Abstractions.${{ needs.define-version-number.outputs.package-version }}.nupkg
         asset_name: Malarkey.Abstractions.nupkg
         asset_content_type: application/zip
-    - name: Upload Client 
-      id: upload-release-asset_client 
+    - name: Upload Client
+      id: upload-release-asset_client
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
