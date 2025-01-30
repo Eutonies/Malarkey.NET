@@ -71,33 +71,3 @@ jobs:
         $vers = $Env:packageversion
         dotnet nuget push "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" --source "github"
         dotnet nuget push "${packageFolder}/Malarkey.Client.${vers}.nupkg" --source "github"
-    - name: Create Release
-      id: create_release
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: false
-    - name: Upload Abstractions
-      id: upload-release-asset_abstractions 
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./dist/package/release/Malarkey.Abstractions.${{ needs.define-version-number.outputs.package-version }}.nupkg
-        asset_name: Malarkey.Abstractions.nupkg
-        asset_content_type: application/zip
-    - name: Upload Client
-      id: upload-release-asset_client
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }} 
-        asset_path: ./dist/package/release/Malarkey.Client.${{ needs.define-version-number.outputs.package-version }}.nupkg
-        asset_name: Malarkey.Client.nupkg
-        asset_content_type: application/zip
