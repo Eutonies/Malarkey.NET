@@ -64,9 +64,7 @@ jobs:
     - name: Publish to Nuget package repository
       shell: pwsh
       env:
-        actionsapikey: ${{ secrets.EUTONIES_GITHUB_ACTIONS_APIKEY }}
         actionsuser: ${{ secrets.EUTONIES_GITHUB_ACTIONS_USER }}
-
       run: |
         dotnet nuget add source --username $Env:actionsuser --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name "github" "https://nuget.pkg.github.com/Eutonies/index.json"
         $packageFolder = "./dist/package/release"
