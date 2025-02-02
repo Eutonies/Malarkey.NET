@@ -62,24 +62,42 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
         var profileAndIdentities = await _tokenHandler.ExtractProfileAndIdentities(Context, TokenReceiver);
-        if (IsBlazorRequest)
+        if (IsBlazorRequest){
+            DetailLog("Identified as BlazorRequest");
             return AuthenticateResult.NoResult();
-        else if(profileAndIdentities == null)
+        }
+        else if(profileAndIdentities == null) {
+            DetailLog($"No profile found in cookies");
             return AuthenticateResult.Fail("No profile found in cookies");
+        }
         var authSession = await LoadSession();
         if (authSession != null && !IsBlazorRequest)
         {
-            if (authSession.AlwaysChallenge)
+            if (authSession.AlwaysChallenge) {
+                DetailLog("Asked to always challange");
                 return AuthenticateResult.Fail("Asked to always challenge");
-            if (authSession.RequestedIdProvider != null && !profileAndIdentities.Identities.Any(_ => _.IdentityProvider == authSession.RequestedIdProvider))
+            }
+            if (authSession.RequestedIdProvider != null && !profileAndIdentities.Identities.Any(_ => _.IdentityProvider == authSession.RequestedIdProvider)) {
+                DetailLog($"No identity token for: {authSession.RequestedIdProvider} found");
                 return AuthenticateResult.Fail($"No identity token for: {authSession.RequestedIdProvider} found");
+
+            }
         }
         var (prof, idents, _) = profileAndIdentities;
         var returnee = AuthenticateResult.Success(new AuthenticationTicket(
                 principal: prof.ToClaimsPrincipal(idents),
                 MalarkeyConstants.MalarkeyAuthenticationScheme
                 ));
+        DetailLog($"Returning profile with ID: {prof.ProfileId} and identities for: {idents.Select(_ => _.IdentityProvider.ToString()).MakeString(",")}");        
         return returnee;
+
+    }
+
+    private void DetailLog(string mess) {
+        DebugLog(mess);
+        DebugLog($"  Request: {Request.GetDisplayUrl}");
+        DebugLog($"  Headers present: {Request.Headers.Select(_ => _.Key).Order().MakeString(",")}");
+        DebugLog($"  Cookies present: {Request.Cookies.Select(_ => _.Key).Order().MakeString(",")}");
 
     }
 
