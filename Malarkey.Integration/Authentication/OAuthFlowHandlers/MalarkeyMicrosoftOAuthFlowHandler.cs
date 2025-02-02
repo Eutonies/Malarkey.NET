@@ -16,6 +16,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
@@ -24,7 +25,9 @@ internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
     public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Microsoft;
 
 
-    public MalarkeyMicrosoftOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf) : base(intConf)
+    public MalarkeyMicrosoftOAuthFlowHandler(
+        IOptions<MalarkeyIntegrationConfiguration> intConf,
+        ILogger<MalarkeyMicrosoftOAuthFlowHandler> logger) : base(intConf, logger)
     {
     }
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate.Replace("{tenant}", _conf.Tenant);

@@ -17,6 +17,7 @@ using Malarkey.Application.Util;
 using System.Net.Http;
 using System.Text.Json;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.Extensions.Logging;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
@@ -25,7 +26,10 @@ internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
     public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Google;
 
 
-    public MalarkeyGoogleOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf, IHttpClientFactory httpClientFactory) : base(intConf)
+    public MalarkeyGoogleOAuthFlowHandler(
+        IOptions<MalarkeyIntegrationConfiguration> intConf,
+        IHttpClientFactory httpClientFactory,
+        ILogger<MalarkeyGoogleOAuthFlowHandler> logger) : base(intConf, logger)
     {
         _httpClientFactory = httpClientFactory;
     }
@@ -85,14 +89,18 @@ internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
             ("client_secret", _conf.ClientSecret),
             ("code_verifier", codeVerifier)
         };
+        LogDebug($"Requesting access token with parameters: {formParameters.Select(_ => $"{_.Item1}={_.Item2}").MakeString(", ")}");
         request.Content = formParameters.ToFormContent();
         using var client = _httpClientFactory.CreateClient();
         var response = await client.SendAsync(request);
         var responseContent = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
         {
+            _logger.LogError($"Received status code: {response.StatusCode} on request for access token");
+            _logger.LogError($"  Message: {responseContent}");
             return null;
         }
+        LogDebug($"Received back access token data: {responseContent}");
         var responseJson = JsonSerializer.Deserialize<AccessCodeResponseJsonLayout>(responseContent)!;
         var jwtHandler = new JwtSecurityTokenHandler();
         var parsedToken = jwtHandler.ReadJwtToken(responseJson.id_token);
@@ -118,8 +126,7 @@ internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
 
 
         );
-
-
+        LogDebug($"Resolved Google Identity: \n {returnee.ToPropertiesString()}");
         return returnee;
     }
 
@@ -133,5 +140,12 @@ internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
         string token_type,
         string id_token
         );
+
+
+    protected override void LogDebug(string str) {
+        _logger.LogInformation(str);
+    }
+
+
 }
 

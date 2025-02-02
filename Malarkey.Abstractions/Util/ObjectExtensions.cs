@@ -31,7 +31,7 @@ public static class ObjectExtensions
             if(stringVal != null || showNullValues)
               returnee.Append($"\n  {prop.Name}={stringVal}");
         }
-        return returnee.ToString();
+        return returnee.ToString(); 
     }
 
 }

@@ -9,6 +9,7 @@ using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -35,11 +36,14 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler, IM
 
     protected virtual bool StripCodeChallengePadding => true;
 
-    public MalarkeyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf)
+    protected ILogger _logger;
+
+    public MalarkeyOAuthFlowHandler(IOptions<MalarkeyIntegrationConfiguration> intConf, ILogger logger)
     {
         _intConf = intConf.Value;
         _conf = ProduceConfiguration();
         _namingScheme = ProduceNamingScheme();
+        _logger = logger;
     }
     public abstract string AuthorizationEndpoint { get; }
 
@@ -145,6 +149,12 @@ internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler, IM
 
     public virtual async Task<IdentityProviderToken?> Refresh(string accessToken, string audiencePublicKey) =>
         null;
+
+    protected virtual void LogDebug(string str) {
+        _logger.LogDebug(str);
+    }
+
+
 }
 
 

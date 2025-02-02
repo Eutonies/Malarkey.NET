@@ -13,7 +13,6 @@ using System.Text.Json;
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
 internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
-    private readonly ILogger<MalarkeyFacebookOAuthFlowHandler> _logger;
     private readonly IHttpClientFactory _httpClientFactory;
 
     public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Facebook;
@@ -21,9 +20,8 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
     public MalarkeyFacebookOAuthFlowHandler(
         IOptions<MalarkeyIntegrationConfiguration> intConf, 
         IHttpClientFactory httpClientFactory,
-        ILogger<MalarkeyFacebookOAuthFlowHandler> logger) : base(intConf)
+        ILogger<MalarkeyFacebookOAuthFlowHandler> logger) : base(intConf, logger)
     {
-        _logger = logger;
         _httpClientFactory = httpClientFactory;
     }
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate;

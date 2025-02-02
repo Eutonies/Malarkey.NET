@@ -20,7 +20,7 @@ spec:
             secretName: malarkey-cert          
       containers:
       - name: malarkey
-        image: docker.io/library/malarkey:1.0.22
+        image: docker.io/library/malarkey:1.0.25
         imagePullPolicy: Never
         ports:
         - containerPort: 8080
@@ -55,22 +55,22 @@ spec:
           value: Path
         - name: Integration__Microsoft__AzureAd__ClientCertificates__0__CertificateDiskPath
           value: malarkey.pfx
-        - name: Integration__Microsoft__AzureAd__ClientSecret
+        - name: Integration__Microsoft__ClientSecret
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
               key: clientsecretmicrosoft
-        - name: Integration__Facebook__Identity__ClientSecret
+        - name: Integration__Facebook__ClientSecret
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
               key: clientsecretfacebook
-        - name: Integration__Google__Identity__ClientSecret
+        - name: Integration__Google__ClientSecret
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
               key: clientsecretgoogle
-        - name: Integration__Spotify__Identity__ClientSecret
+        - name: Integration__Spotify__ClientSecret
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
