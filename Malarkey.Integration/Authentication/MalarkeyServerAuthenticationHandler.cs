@@ -114,12 +114,15 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     public async Task<IResult> HandleCallback(HttpRequest request)
     {
+        DebugLog($"Authentication callback called: {request.Method} {request.GetDisplayUrl()}");
         IMalarkeyOAuthFlowHandler.RedirectData? redirData = null;
         foreach(var handler in _flowHandlers.Values)
         {
             redirData = await handler.ExtractRedirectData(request);
-            if (!string.IsNullOrWhiteSpace(redirData?.State))
+            if (!string.IsNullOrWhiteSpace(redirData?.State)) {
+                DebugLog($"Handler for: {handler.HandlerFor} parsed redirect data to:\n {redirData.ToPropertiesString()}");
                 break;
+            }
         }
         if (string.IsNullOrWhiteSpace(redirData?.State))
         {
@@ -132,9 +135,10 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             _logger.LogError($"Unable to load session from state: {redirData.State}");
             return await ReturnError($"Could not find session for state={redirData.State}");
         }
+        DebugLog($"Loaded session: {session.ToPropertiesString()}");
         if(session.RequestedIdProvider == null || !_flowHandlers.TryGetValue(session.RequestedIdProvider.Value, out var flowHandler))
         {
-            _logger.LogError($"Unable to determine flow handler on callback from state: {redirData.State}");
+            _logger.LogError($"Unable to determine flow handler on callback from state: {redirData.State}, requested ID provider: {session.RequestedIdProvider}");
             return await ReturnError($"Could not find flow handler on callback for state={redirData.State}");
         }
         var identity = await flowHandler.ResolveIdentity(session, redirData);
@@ -143,14 +147,17 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             _logger.LogError($"Unable to load identity from state: {redirData.State} and redirect data: {redirData.ToString()}");
             return await ReturnError($"Could not resolve identity by {session.RequestedIdProvider} for callback request with URL={request.GetDisplayUrl()}");
         }
+        DebugLog($"Resolved identity: {identity.ToPropertiesString()}");
         MalarkeyProfileAndIdentities? profileAndIdentities = null;
         if(session.ExistingProfileId != null)
         {
             profileAndIdentities = await _profileRepo.AttachIdentityToProfile(identity, session.ExistingProfileId.Value);
+            DebugLog($"Attached identity to existing profile: {profileAndIdentities.Profile.ProfileId}");
         }
         else
         {
             profileAndIdentities = await _profileRepo.LoadOrCreateByIdentity(identity);
+            DebugLog($"Created new profile with ID: {profileAndIdentities?.Profile?.ProfileId}");
         }
         if (profileAndIdentities == null)
         {
@@ -223,6 +230,10 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     }
 
     private bool IsBlazorRequest => Request.Path.ToString().ToLower().StartsWith("/_blazor");
+
+
+    private void DebugLog(string str) => 
+       _logger.LogInformation(str);
 
 
 }

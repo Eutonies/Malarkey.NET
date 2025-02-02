@@ -20,7 +20,7 @@ spec:
             secretName: malarkey-cert          
       containers:
       - name: malarkey
-        image: docker.io/library/malarkey:1.0.20
+        image: docker.io/library/malarkey:1.0.22
         imagePullPolicy: Never
         ports:
         - containerPort: 8080
