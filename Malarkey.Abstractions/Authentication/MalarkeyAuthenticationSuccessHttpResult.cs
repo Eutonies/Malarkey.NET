@@ -39,6 +39,8 @@ public record MalarkeyAuthenticationSuccessHttpResult(
            DebugLog($"    {cookieName}={idTok}");
         }
         httpContext.Response.Redirect(url, permanent: false, preserveMethod: false);
+        //httpContext.Response.Redirect("/home", permanent: false, preserveMethod: false);
+
     }
 
 
