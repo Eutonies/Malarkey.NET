@@ -1,5 +1,6 @@
 ﻿using Malarkey.Abstractions;
 using Malarkey.Abstractions.Util;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,10 @@ public class MalarkeyClientConfiguration
     public string ClientAuthenticatedPathToUse => ClientAuthenticatedPath ?? MalarkeyConstants.Client.Paths.DefaultAuthenticationForwarderPath;
     public string ClientServerBasePath { get; set; }
     public string FullClientServerUrl => $"{ClientServerBasePath}{ClientAuthenticatedPathToUse}";
+
+    public string LogLevel { get; set; } = "Debug";
+
+    public LogLevel LogLevelToUse => Enum.TryParse<LogLevel>(LogLevel, out var lev) ? lev : Microsoft.Extensions.Logging.LogLevel.Debug;
 
     private X509Certificate2? _clientCertificate;
     public X509Certificate2 ClientCertificate => _clientCertificate ??= X509CertificateLoader.LoadPkcs12FromFile(ClientCertificateFile, password: ClientCertificatePassword);

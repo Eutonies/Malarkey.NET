@@ -40,6 +40,7 @@ public static class DependencyInjectionClient
         var conf = app.Configuration.ClientConfig();
         app.UseMiddleware<MalarkeyClientAuthenticationAttributeMiddleware>();
         app.UseAuthentication();
+        app.UseAuthorization();
         app.MapPost(conf.ClientAuthenticatedPathToUse, (
             [FromServices] IMalarkeyClientAuthenticatedCallback callback,
             HttpRequest request
