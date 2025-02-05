@@ -1,9 +1,8 @@
-assembly-versioning-scheme: MajorMinorPatchTag
-mode: ContinuousDeployment
+assembly-versioning-scheme: MajorMinorPatch
+assembly-file-versioning-scheme: MajorMinorPatch
 branches:
-  master:
-    regex: main
-    mode: ContinuousDeployment
+  main:
+    regex: ^master$|^main$
   feature: {}
 ignore:
   sha: []
