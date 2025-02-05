@@ -57,5 +57,7 @@ jobs:
         dotnet nuget add source --username $Env:actionsuser --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name "github" "https://nuget.pkg.github.com/Eutonies/index.json"
         $packageFolder = "./dist/package/release"
         $vers = $Env:packageversion
+        $versionName = "v$Env:packageversion"
+        gh release create $versionName "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" "${packageFolder}/Malarkey.Client.${vers}.nupkg"
         dotnet nuget push "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" --source "github"
         dotnet nuget push "${packageFolder}/Malarkey.Client.${vers}.nupkg" --source "github"
