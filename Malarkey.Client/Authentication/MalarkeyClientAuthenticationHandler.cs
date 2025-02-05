@@ -72,15 +72,15 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     private string BuildRequestString(string state, MalarkeyIdentityProvider? provider, string[]? scopes)
     {
         var returnee = new StringBuilder($"{_conf.MalarkeyServerBaseAddress}{MalarkeyConstants.Authentication.ServerAuthenticationPath}");
-        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={_conf.FullClientServerUrl.UrlEncoded()}");
-        returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName}={state.UrlEncoded()}");
+        returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={_conf.FullClientServerUrl.UrlEncoded()}");
+        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName}={state.UrlEncoded()}");
         if(provider != null)
         {
-            returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
         }
         if (scopes != null)
         {
-            returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={scopes.MakeString(" ").UrlEncoded()}");
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={scopes.MakeString(" ").UrlEncoded()}");
         }
         return returnee.ToString();
     }
