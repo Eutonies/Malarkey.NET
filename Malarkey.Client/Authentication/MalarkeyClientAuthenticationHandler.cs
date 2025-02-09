@@ -28,17 +28,22 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly MalarkeyClientConfiguration _conf;
     private readonly IMalarkeyCache<string, MalarkeyAuthenticationSession> _cache;
+    private readonly ILogger<MalarkeyClientAuthenticationHandler> _logger;
+    private readonly LogLevel _logLevel;
 
     public MalarkeyClientAuthenticationHandler(
         IOptionsMonitor<MalarkeyClientAuthenticationSchemeOptions> options, 
-        ILoggerFactory logger, 
+        ILoggerFactory loggerFactory, 
         UrlEncoder encoder, 
         IHttpClientFactory httpClientFactory,
         IOptions<MalarkeyClientConfiguration> conf,
-        IMalarkeyCache<string, MalarkeyAuthenticationSession> cache
-        ) : base(options, logger, encoder)
+        IMalarkeyCache<string, MalarkeyAuthenticationSession> cache,
+        ILogger<MalarkeyClientAuthenticationHandler> logger
+        ) : base(options, loggerFactory, encoder)
     {
+        _logger = logger;
         _conf = conf.Value;
+        _logLevel = _conf.LogLevelToUse;
         _clientCertificateString = _conf.ClientCertificateString;
         _httpClientFactory = httpClientFactory;
         _cache = cache;
@@ -50,28 +55,32 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     {
         var authAttribute = ExtractAttribute();
         if (authAttribute == null)
+        {
+            Log($"No challange to do, since no authorization attribute");
             return;
+        }
         var authSession = Request.ResolveSession(_clientCertificateString);
         var state = Guid.NewGuid().ToString();
         await _cache.Cache(state, authSession);
         var idProvider = authAttribute.IdentityProvider;
         var scopes = authAttribute.Scopes?.Split(" ");
         var forwardUrl = BuildRequestString(state, idProvider, scopes);
+        Log($"On challenge, forwarding to: {forwardUrl}");
         Response.Redirect(forwardUrl);
     }
 
     private string BuildRequestString(string state, MalarkeyIdentityProvider? provider, string[]? scopes)
     {
         var returnee = new StringBuilder($"{_conf.MalarkeyServerBaseAddress}{MalarkeyConstants.Authentication.ServerAuthenticationPath}");
-        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={_conf.FullClientServerUrl.UrlEncoded()}");
-        returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName}={state.UrlEncoded()}");
+        returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName}={_conf.FullClientServerUrl.UrlEncoded()}");
+        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.SendToStateName}={state.UrlEncoded()}");
         if(provider != null)
         {
-            returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.IdProviderName}={provider.ToString()}");
         }
         if (scopes != null)
         {
-            returnee.Append($"?{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={scopes.MakeString(" ").UrlEncoded()}");
+            returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={scopes.MakeString(" ").UrlEncoded()}");
         }
         return returnee.ToString();
     }
@@ -81,21 +90,38 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     {
         var authAttribute = ExtractAttribute();
         if (authAttribute == null)
+        {
+            Log($"No authorization attribute found, so will not invalidate request");
             return AuthenticateResult.NoResult();
+        }
         var profileCookie = Request.Cookies
             .Where(_ => _.Key == MalarkeyConstants.Authentication.ProfileCookieName)
             .Select(_ => _.Value.ToString())
             .FirstOrDefault();
         if (profileCookie == null)
+        {
+            Log($"No profile cookie found");
             return AuthenticateResult.Fail("No profile cookie found");
+        }
         var profileToken = MalarkeyToken.ParseProfileToken(profileCookie);
         if (profileToken == null)
+        {
+            Log($"Profile cookie could not be parsed as profile token");
+            Log($"  profile cookie: {profileCookie}");
             return AuthenticateResult.Fail("Profile cookie could not be parsed as profile token");
+
+        }
         if (profileToken.ValidUntil < DateTime.Now)
+        {
+            Log($"Profile token expired. Only valid until: {profileToken.ValidUntil}");
             return AuthenticateResult.Fail("Profile cookie has expired");
+        }
         var profileTokenVerifies = await VerifySignature(profileCookie);
         if(!profileTokenVerifies)
+        {
+            Log($"Profile cookie signature does not verify");
             return AuthenticateResult.Fail("Profile cookie signature does not verify");
+        }
         var identityCookies = Request.Cookies
             .Select(cook => (Matcher: _idTokenIndexRegex.Match(cook.Key), Value: cook.Value.ToString()))
             .Where(_ => _.Matcher.Success && _.Matcher.Groups.Count > 1)
@@ -115,8 +141,11 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         if (authAttribute.IdentityProvider != null)
         {
             if(!identities.Any(_ => _.IdentityProvider == authAttribute.IdentityProvider))
-               return AuthenticateResult.Fail($"No valid identity token found for ID Provider: {authAttribute.IdentityProvider}");
-            if(authAttribute.Scopes != null)
+            {
+                Log($"No valid identity token found for ID Provider: {authAttribute.IdentityProvider}");
+                return AuthenticateResult.Fail($"No valid identity token found for ID Provider: {authAttribute.IdentityProvider}");
+            }
+            if (authAttribute.Scopes != null)
             {
                 var requestedScopes = authAttribute.Scopes
                     .Split(" ")
@@ -127,12 +156,18 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
                     var relIdent = identities.First(_ => _.IdentityProvider == authAttribute.IdentityProvider);
                     var idpToken = relIdent.IdentityProviderTokenToUse;
                     if(idpToken == null)
+                    {
+                        Log($"No valid access token found for ID Provider: {authAttribute.IdentityProvider}");
                         return AuthenticateResult.Fail($"No valid access token found for ID Provider: {authAttribute.IdentityProvider}");
-                    if(idpToken.Expires < DateTime.Now)
+                    }
+                    if (idpToken.Expires < DateTime.Now)
                     {
                         var refreshed = await RefreshToken(idpToken);
                         if(refreshed == null)
+                        {
+                            Log($"Twas not possible to refresh IDP access token for provider: {authAttribute.IdentityProvider}");
                             return AuthenticateResult.Fail($"Twas not possible to refresh IDP access token for provider: {authAttribute.IdentityProvider}");
+                        }
                         relIdent = relIdent.WithToken(refreshed);
                         identities = identities
                             .Select(_ => _.IdentityId == relIdent.IdentityId ? relIdent : _)
@@ -146,6 +181,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
                         .ToList();
                     if (missingScopes.Any())
                     {
+                        Log($"IDP access token for provider: {authAttribute.IdentityProvider} did not contain scopes: {missingScopes.Order().MakeString(" ")}");
                         return AuthenticateResult.Fail($"IDP access token for provider: {authAttribute.IdentityProvider} did not contain scopes: {missingScopes.Order().MakeString(" ")}");
                     }
                 }
@@ -185,7 +221,10 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     private async Task<bool> VerifySignature(string token)
     {
         if (_malarkeySigningCertificatePublicKey == null)
+        {
+            Log($"Malarkey signing certificate public key is null");
             await LoadMalarkeyCertificate();
+        }
         var jwtHandler = new JsonWebTokenHandler();
         var validationResult = await jwtHandler.ValidateTokenAsync(token, new TokenValidationParameters
         {
@@ -193,6 +232,11 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
             ValidAudience = _clientCertificateString,
             IssuerSigningKey = _malarkeySigningCertificatePublicKey!
         });
+        if(!validationResult.IsValid)
+        {
+            Log("Token validation failed");
+            Log(validationResult.Exception.ToString());
+        }
         return validationResult.IsValid;
     }
 
@@ -217,8 +261,10 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     {
         using var client = _httpClientFactory.CreateClient();
         var reqUrl = $"{_conf.MalarkeyServerBaseAddress}{MalarkeyConstants.API.Paths.Certificates.SigningCertificateAbsolutePath}";
+        Log($"Loading Malarkey certificate from: {reqUrl}");
         var response = (await client.GetAsync(reqUrl)).EnsureSuccessStatusCode();
         var certificateString = await response.Content.ReadAsStringAsync();
+        Log($"Loaded Malarkey certificate: {certificateString}");
         var certBytes = Encoding.UTF8.GetBytes(certificateString);
         var signingCert = X509CertificateLoader.LoadCertificate(certBytes);
         _malarkeySigningCertificatePublicKey = new RsaSecurityKey(signingCert.GetRSAPublicKey());
@@ -265,5 +311,10 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
 
     }
 
+
+    private void Log(string message)
+    {
+        _logger.Log(_logLevel, message);
+    }
 
 }

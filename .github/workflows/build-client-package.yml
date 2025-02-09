@@ -45,22 +45,10 @@ jobs:
       shell: pwsh
       run: |
         dotnet build Malarkey.Abstractions/Malarkey.Abstractions.csproj -c Release
-        dotnet build Malarkey.API/Malarkey.API.csproj -c Release
-        dotnet build Malarkey.Application/Malarkey.Application.csproj -c Release
         dotnet build Malarkey.Client/Malarkey.Client.csproj -c Release
-        dotnet build Malarkey.Integration/Malarkey.Integration.csproj -c Release
-        dotnet build Malarkey.Persistence/Malarkey.Persistence.csproj -c Release
-        dotnet build Malarkey.Security/Malarkey.Security.csproj -c Release
-        dotnet build Malarkey.UI/Malarkey.UI.csproj -c Release
 
         dotnet pack Malarkey.Abstractions/Malarkey.Abstractions.csproj -c Release --artifacts-path ./dist
-        dotnet pack Malarkey.API/Malarkey.API.csproj -c Release --artifacts-path ./dist
-        dotnet pack Malarkey.Application/Malarkey.Application.csproj -c Release --artifacts-path ./dist
         dotnet pack Malarkey.Client/Malarkey.Client.csproj -c Release --artifacts-path ./dist
-        dotnet pack Malarkey.Integration/Malarkey.Integration.csproj -c Release --artifacts-path ./dist
-        dotnet pack Malarkey.Persistence/Malarkey.Persistence.csproj -c Release --artifacts-path ./dist
-        dotnet pack Malarkey.Security/Malarkey.Security.csproj -c Release --artifacts-path ./dist
-        dotnet pack Malarkey.UI/Malarkey.UI.csproj -c Release --artifacts-path ./dist
     - name: Publish to Nuget package repository
       shell: pwsh
       env:
@@ -69,5 +57,7 @@ jobs:
         dotnet nuget add source --username $Env:actionsuser --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name "github" "https://nuget.pkg.github.com/Eutonies/index.json"
         $packageFolder = "./dist/package/release"
         $vers = $Env:packageversion
+        $versionName = "v$Env:packageversion"
+        gh release create $versionName "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" "${packageFolder}/Malarkey.Client.${vers}.nupkg"
         dotnet nuget push "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" --source "github"
         dotnet nuget push "${packageFolder}/Malarkey.Client.${vers}.nupkg" --source "github"
