@@ -19,6 +19,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Malarkey.Application.Profile;
 using Malarkey.Application.Authentication;
+using Malarkey.Application.Cleanup;
+using Malarkey.Persistence.Cleanup;
 
 namespace Malarkey.Persistence;
 public static class DependencyInjectionPersistence
@@ -37,6 +39,7 @@ public static class DependencyInjectionPersistence
         builder.Services.AddSingleton<IMalarkeyProfileRepository, MalarkeyProfileRepository>();
         builder.Services.AddSingleton<IMalarkeyTokenRepository, MalarkeyTokenRepository>();
         builder.Services.AddSingleton<IVerificationEmailHandler, VerificationEmailHandler>();
+        builder.Services.AddSingleton<IPersistenceCleaner, PersistenceCleaner>();
         return builder;
     }
 

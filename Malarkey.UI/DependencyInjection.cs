@@ -13,6 +13,7 @@ using Malarkey.Integration.Authentication;
 using Malarkey.UI.Components.Authentication;
 using Malarkey.UI.Pages.Profile;
 using Malarkey.Abstractions.Util;
+using Malarkey.UI.BackgroundServices;
 
 namespace Malarkey.UI;
 
@@ -52,6 +53,8 @@ public static class DependencyInjection
         builder.Services.AddSingleton<MalarkeySynchronizer>();
         builder.AddSecurity();
         builder.AddApi();
+        builder.Services.AddHostedService<CleanupBackgroundService>();
+
         return builder;
     }
 
