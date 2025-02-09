@@ -28,6 +28,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
     private readonly string _malarkeyTokenReceiver;
     private readonly IMalarkeyServerAuthenticationEventHandler _events;
     private readonly MalarkeySynchronizer _synchronizer;
+    private readonly IMalarkeyServerAuthenticationForwarder _forwarder;
 
 
     public MalarkeyServerAuthenticationHandler(
@@ -41,7 +42,8 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         IMalarkeyProfileRepository profileRepo,
         IOptions<MalarkeyIntegrationConfiguration> intConf,
         ILogger<MalarkeyServerAuthenticationHandler> logger,
-        IMalarkeyServerAuthenticationEventHandler events) : base(options, loggerFactory, encoder)
+        IMalarkeyServerAuthenticationEventHandler events,
+        IMalarkeyServerAuthenticationForwarder forwarder) : base(options, loggerFactory, encoder)
     {
         _synchronizer = synchronizer;
         _events = events;
@@ -52,6 +54,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
             .ToDictionarySafe(_ => _.HandlerFor);
         _profileRepo = profileRepo;
         _malarkeyTokenReceiver = intConf.Value.PublicKey.CleanCertificate();
+        _forwarder = forwarder;
     }
 
     private string TokenReceiver => (Context?.Request?.Headers?.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var audience) ?? false) ?
@@ -130,7 +133,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         RedirectTo(redirectUrl);
     }
 
-    public async Task<IResult> HandleCallback(HttpRequest request)
+    public async Task HandleCallback(HttpRequest request)
     {
         DebugLog($"Authentication callback called: {request.Method} {request.GetDisplayUrl()}");
         IMalarkeyOAuthFlowHandler.RedirectData? redirData = null;
@@ -145,25 +148,25 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         if (string.IsNullOrWhiteSpace(redirData?.State))
         {
             _logger.LogError($"Unable to extract state from callback request");
-            return await ReturnError("Could not extract state");
+            return;
         }
         var session = await _sessionRepo.LoadByState(redirData.State);
         if(session == null)
         {
             _logger.LogError($"Unable to load session from state: {redirData.State}");
-            return await ReturnError($"Could not find session for state={redirData.State}");
+            return;
         }
         DebugLog($"Loaded session: {session.ToPropertiesString()}");
         if(session.RequestedIdProvider == null || !_flowHandlers.TryGetValue(session.RequestedIdProvider.Value, out var flowHandler))
         {
             _logger.LogError($"Unable to determine flow handler on callback from state: {redirData.State}, requested ID provider: {session.RequestedIdProvider}");
-            return await ReturnError($"Could not find flow handler on callback for state={redirData.State}");
+            return;
         }
         var identity = await flowHandler.ResolveIdentity(session, redirData);
         if (identity == null)
         {
             _logger.LogError($"Unable to load identity from state: {redirData.State} and redirect data: {redirData.ToString()}");
-            return await ReturnError($"Could not resolve identity by {session.RequestedIdProvider} for callback request with URL={request.GetDisplayUrl()}");
+            return;
         }
         DebugLog($"Resolved identity: {identity.ToPropertiesString()}");
         MalarkeyProfileAndIdentities? profileAndIdentities = null;
@@ -180,45 +183,13 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         if (profileAndIdentities == null)
         {
             _logger.LogError($"Unable to load/create profile and/or identities for identity {identity.ProvidersIdForIdentity} from provider: {identity.IdentityProvider}");
-            return await ReturnError($"Could not resolve profile from identity provider ID: {identity.ProvidersIdForIdentity} by {session.RequestedIdProvider}");
+            return;
         }
         _logger.LogInformation($"Resolved profile: {profileAndIdentities.Profile.ProfileId} and {profileAndIdentities.Identities.Count} identities");
-        identity = profileAndIdentities.Identities
-            .First(_ => _.IdentityProvider == identity.IdentityProvider && _.ProviderId == identity.ProviderId);
-        var (profileToken, profileTokenString) = await _tokenHandler.IssueToken(profileAndIdentities.Profile, session.Audience);
-        var existingIdentityTokens = (await _tokenHandler.ValidateIdentityTokens(request.HttpContext, session.Audience)).Results
-            .Select(_ => _ as MalarkeyTokenValidationSuccessResult)
-            .Where(_ => _ != null)
-            .Select(_ => (Identity: (_!.ValidToken as MalarkeyIdentityToken)!.Identity, TokenString: _.TokenString))
-            .ToList();
-        var existingIdentityTokensToCarry = existingIdentityTokens
-            .Where(_ => _.Identity.IdentityId != identity.IdentityId)
-            .ToList();
-        var existingIdentityTokenIdentityIds = existingIdentityTokensToCarry
-            .Select(_ => _.Identity.IdentityId)
-            .ToHashSet();
-        var identitiesForTokenIssue = profileAndIdentities.Identities
-            .Where(_ => !existingIdentityTokenIdentityIds.Contains(_.IdentityId))
-            .ToList();
-        var newlyIssuedIdentityTokens = await _tokenHandler.IssueTokens(identitiesForTokenIssue, session.Audience);
-        var tokenForRelevantIdentity = newlyIssuedIdentityTokens
-            .First(_ => _.Token.Identity.IdentityId == identity.IdentityId);
-        await _sessionRepo.UpdateSessionWithTokenInfo(session, profileToken, tokenForRelevantIdentity.Token);
-        var allIdentityTokens = existingIdentityTokensToCarry
-            .Select(_ => _.TokenString)
-            .Union(
-               newlyIssuedIdentityTokens
-                 .Select(_ => _.TokenString)
-            ).ToList();
         _events.RegisterIdentificationCompleted(identity);
 
-        var returnee = new MalarkeyAuthenticationSuccessHttpResult(
-            Session: session,
-            ProfileToken: profileTokenString,
-            IdentityTokens: allIdentityTokens,
-            Logger: _logger
-            );
-        return returnee;
+        await _forwarder.Forward(session, profileAndIdentities.Profile.ProfileId, Context);
+
     }
 
 

@@ -1,0 +1,16 @@
+﻿@page "/backward"
+
+<form id="malarkey-authentication-form" target="@_targetUrl">
+	<input type="hidden" id="malarkey-backward-profile-token" name="profile-token" value="@_profileToken" />
+	@foreach(var ident in _identityTokens.Select((tok, indx) => (Token: tok, Index: indx))) 
+	{
+		<input type="hidden" id="malarkey-backward-identity-token-@(ident.Index)" name="identity-token-@(ident.Index)" value="@(ident.Token)" />
+	}
+	
+</form>
+
+<script>
+	window.submitData = () => {
+		document.getElementById("malarkey-authentication-form").submit();
+	}
+</script>

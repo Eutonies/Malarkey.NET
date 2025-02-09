@@ -3,6 +3,6 @@
 namespace Malarkey.Integration.Authentication;
 public interface IMalarkeyServerAuthenticationCallbackHandler
 {
-    Task<IResult> HandleCallback(HttpRequest request);
+    Task HandleCallback(HttpRequest request);
 
 }
