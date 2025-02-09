@@ -20,7 +20,7 @@ spec:
             secretName: malarkey-cert          
       containers:
       - name: malarkey
-        image: docker.io/library/malarkey:1.0.29
+        image: docker.io/library/malarkey:1.0.49
         imagePullPolicy: Never
         ports:
         - containerPort: 8080
@@ -75,3 +75,10 @@ spec:
             secretKeyRef:
               name: malarkey-secrets
               key: clientsecretspotify
+        - name: Integration__Email__ApiToken
+          valueFrom:
+            secretKeyRef:
+              name: malarkey-secrets
+              key: emailapitoken
+        - name: Integration__Email__VerifyEmailUrl
+          value: https://eutonies.com/malarkey/verify-email
