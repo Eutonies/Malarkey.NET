@@ -6,7 +6,6 @@ using Malarkey.Application.Security;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Util;
-using Malarkey.C;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -68,7 +67,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         var authAttribute = ExtractAttribute();
         if (authAttribute == null)
         {
-            Log($"No authorization attribute found, so will not invalidate request");
+            DetailLog($"No authorization attribute found, so will not invalidate request");
             return AuthenticateResult.NoResult();
         }
 
