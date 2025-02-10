@@ -69,6 +69,7 @@ create table authentication_session (
     audience varchar(2000) not null,
     existing_profile_id uuid,
     always_challenge boolean not null,
+    encrypt_state boolean not null,
     unique(state)
 );
 

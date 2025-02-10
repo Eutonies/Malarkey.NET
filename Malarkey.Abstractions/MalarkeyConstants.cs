@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ namespace Malarkey.Abstractions;
 public static class MalarkeyConstants
 {
     public const string MalarkeyAuthenticationScheme = "Malarkey.Session";
+    public static readonly RSAEncryptionPadding RSAPadding = RSAEncryptionPadding.Pkcs1;
 
     public static class Authentication
     {
@@ -68,6 +70,8 @@ public static class MalarkeyConstants
         public const string ExistingProfileIdName = "profileid";
         public const string AlwaysChallengeName = "alwayschallenge";
         public const string SessionStateName = "sessionstate";
+        public const string EncryptedStateName = "encsessionstate";
+        public const string ClientCertificateName = "clientcert";
     }
 
 
@@ -78,9 +82,11 @@ public static class MalarkeyConstants
         /// </summary>
         public const string ProfileTokenName = "malarkeyprofiletoken";
         /// <summary>
-        /// If Malarkey authentication succeeds, identity token for employed provider will returned as <see cref="IdentityTokenName"/> query parameter on forward
+        /// If Malarkey authentication succeeds, identity tokens returned as <see cref="IdentityTokenBaseName"/>.indx form parameter on forward
         /// </summary>
-        public const string IdentityTokenName = "malarkeyidentitytoken";
+        public static string IdentityTokenName(int indx) => $"{IdentityTokenBaseName}.{indx}";
+
+        public const string IdentityTokenBaseName = "malarkeyidentitytoken";
 
         /// <summary>
         /// If the access-token obtained from identity provider is transferable for use by client API it will be returned as <see cref="IdentityProviderAccessTokenName"/> query parameter on forward

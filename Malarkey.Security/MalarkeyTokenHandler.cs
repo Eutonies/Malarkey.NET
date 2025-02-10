@@ -28,17 +28,6 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     private readonly SigningCredentials _credentials;
 
     internal static readonly HashAlgorithm ReceiverHasher = SHA256.Create();
-    internal static string HashReceiver(string receiver) 
-    {
-        receiver = receiver
-           .Replace(" ", "")
-           .Replace("\r", "")
-           .Replace("\n", "");
-        var bytes = UTF8Encoding.UTF8.GetBytes(receiver);
-        var hashedBytes = ReceiverHasher.ComputeHash(bytes);
-        var returnee = Convert.ToBase64String(hashedBytes);
-        return returnee;
-    }
 
     public IServiceScopeFactory ServiceScopeFactory => _scopeFactory;
 
@@ -60,7 +49,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         await Task.CompletedTask;
         var token = new MalarkeyProfileToken(
             TokenId: Guid.NewGuid(),
-            IssuedTo: HashReceiver(receiverPublicKey),
+            IssuedTo: receiverPublicKey.HashPem(),
             IssuedAt: MalarkeySecurityConstants.Now.ToUniversalTime(),
             ValidUntil: MalarkeySecurityConstants.Now.ToUniversalTime() + MalarkeySecurityConstants.TokenLifeTime,
             Profile: profile
@@ -78,7 +67,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         await Task.CompletedTask;
         var token = new MalarkeyIdentityToken(
             TokenId: Guid.NewGuid(),
-            IssuedTo: HashReceiver(receiverPublicKey),
+            IssuedTo: receiverPublicKey.HashPem(),
             IssuedAt: MalarkeySecurityConstants.Now.ToUniversalTime(),
             ValidUntil: MalarkeySecurityConstants.Now.ToUniversalTime() + MalarkeySecurityConstants.TokenLifeTime,
             Identity: identity
@@ -93,7 +82,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     public string CreateTokenString(MalarkeyProfileToken profileToken, string receiverPublicKey)
     {
         receiverPublicKey = receiverPublicKey.CleanCertificate();
-        var payload = profileToken.ToPayloadTso(HashReceiver(receiverPublicKey));
+        var payload = profileToken.ToPayloadTso(receiverPublicKey.HashPem());
         var header = profileToken.ToHeaderTso();
         var tokenString = _jwtHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
 
@@ -103,7 +92,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     public string CreateTokenString(MalarkeyIdentityToken identityToken, string receiverPublicKey)
     {
         receiverPublicKey = receiverPublicKey.CleanCertificate();
-        var payload = identityToken.ToPayloadTso(HashReceiver(receiverPublicKey));
+        var payload = identityToken.ToPayloadTso(receiverPublicKey.HashPem());
         var header = identityToken.ToHeaderTso();
         var tokenString = _jwtHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
         return tokenString;
@@ -129,7 +118,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
     {
         try
         {
-            receiver= HashReceiver(receiver.CleanCertificate());
+            receiver= receiver.CleanCertificate().HashPem();
             var result = await _jwtHandler.ValidateTokenAsync(token, new TokenValidationParameters
             {
                 ValidIssuer = MalarkeyConstants.Authentication.TokenIssuer,

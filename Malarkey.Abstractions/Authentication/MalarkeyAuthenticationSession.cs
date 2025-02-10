@@ -23,7 +23,8 @@ public record MalarkeyAuthenticationSession(
     Guid? ExistingProfileId,
     bool AlwaysChallenge,
     IReadOnlyCollection<MalarkeyAuthenticationSessionParameter> RequestParameters,
-    MalarkeyAuthenticationIdpSession? IdpSession
+    MalarkeyAuthenticationIdpSession? IdpSession,
+    bool EncryptState
     )
 {
     public MalarkeyAuthenticationParameters ToParameters() => new MalarkeyAuthenticationParameters(

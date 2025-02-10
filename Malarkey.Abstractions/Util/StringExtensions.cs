@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.RegularExpressions;
@@ -47,5 +48,18 @@ public static class StringExtensions
         return returnee;
     }
 
+    private static readonly HashAlgorithm ReceiverHasher = SHA256.Create();
+
+    public static string HashPem(this string pem)
+    {
+        pem = pem
+           .Replace(" ", "")
+           .Replace("\r", "")
+           .Replace("\n", "");
+        var bytes = UTF8Encoding.UTF8.GetBytes(pem);
+        var hashedBytes = ReceiverHasher.ComputeHash(bytes);
+        var returnee = Convert.ToBase64String(hashedBytes);
+        return returnee;
+    }
 
 }

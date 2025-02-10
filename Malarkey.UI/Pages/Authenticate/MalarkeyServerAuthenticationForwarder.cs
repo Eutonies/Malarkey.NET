@@ -1,7 +1,9 @@
-﻿using Malarkey.Abstractions.Authentication;
+﻿using Malarkey.Abstractions;
+using Malarkey.Abstractions.Authentication;
 using Malarkey.Integration.Authentication;
 using Microsoft.AspNetCore.Http;
 using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace Malarkey.UI.Pages.Authenticate;

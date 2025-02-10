@@ -10,7 +10,9 @@ using Malarkey.Integration.Authentication;
 using Microsoft.AspNetCore.Components;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.JSInterop;
+using System.Security.Cryptography.X509Certificates;
 using System.Security.Principal;
+using System.Text;
 
 namespace Malarkey.UI.Pages.Authenticate;
 
@@ -53,7 +55,7 @@ public partial class ForwarderPage
     private string _targetUrl = "";
     private string _profileToken = "";
     private IReadOnlyCollection<string> _identityTokens = [];
-
+    private string _returnState = "";
 
 
 
@@ -66,7 +68,7 @@ public partial class ForwarderPage
             if(session != null)
             {
                 _targetUrl = session.SendTo;
-                await ResolveTokens(session);
+                await ResolveParameters(session);
                 await JS.InvokeVoidAsync("submitData");
             }
         }
@@ -74,7 +76,7 @@ public partial class ForwarderPage
 
 
 
-    private async Task ResolveTokens(MalarkeyAuthenticationSession session)
+    private async Task ResolveParameters(MalarkeyAuthenticationSession session)
     {
         var profileAndIdentities = await ProfileRepo.LoadProfileAndIdentities(ProfileGuid);
         if (profileAndIdentities == null)
@@ -111,7 +113,15 @@ public partial class ForwarderPage
         for(var i = 0; i < allIdentityTokens.Count; i++)
             context.Response.Cookies.Append(MalarkeyConstants.Authentication.IdentityCookieName(i), allIdentityTokens[i]);
         _identityTokens = allIdentityTokens.ToList();
-
+        if (session.EncryptState)
+        {
+            var recieverCertificate = X509Certificate2.CreateFromPem(session.Audience);
+            var encryptedStateBytes = recieverCertificate.PublicKey.GetRSAPublicKey()!.Encrypt(UTF8Encoding.UTF8.GetBytes(State), MalarkeyConstants.RSAPadding);
+            var encryptedState = UTF8Encoding.UTF8.GetString(encryptedStateBytes);
+            _returnState = encryptedState;
+        }
+        else
+            _returnState = State;
 
     }
 

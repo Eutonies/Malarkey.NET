@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Malarkey.Integration.Configuration;
 using Azure.Core;
 using Malarkey.UI.Util;
+using System.Security.Cryptography;
 
 namespace Malarkey.UI.Pages.Authenticate;
 
@@ -57,11 +58,18 @@ public partial class AuthenticatePage
     [Parameter]
     public string? AlwaysChallenge { get; set; }
 
-
-
     [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SessionStateName)]
     [Parameter]
     public string? ExistingSessionState { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.EncryptedStateName)]
+    [Parameter]
+    public string? EncryptedState { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ClientCertificateName)]
+    [Parameter]
+    public string? ClientCertificate { get; set; }
+
 
     private MalarkeyAuthenticationSession? _authenticationSession;
 
@@ -86,6 +94,8 @@ public partial class AuthenticatePage
             var audience = IntegrationConfiguration.Value
                 .PublicKey.CleanCertificate();
             var context = ContextAccessor.HttpContext!;
+            var privateKey = RSA.Create();
+            privateKey.ImportFromPem(IntegrationConfiguration.Value.PrivateKey!);
             _authenticationSession = context.Request
                 .ResolveSession(
                    defaultAudience: audience,
@@ -94,7 +104,9 @@ public partial class AuthenticatePage
                    idProviderOverride: IdProvider,
                    scopesOverride: Scopes,
                    profileIdOverride: ProfileId,
-                   alwaysChallengeOverride: AlwaysChallenge
+                   alwaysChallengeOverride: AlwaysChallenge,
+                   encryptedStateOverride: EncryptedState,
+                   malarkeyPrivateKey: privateKey
                    );
             _authenticationSession = await AuthenticationSessionRepo.InitiateSession(_authenticationSession);
         }

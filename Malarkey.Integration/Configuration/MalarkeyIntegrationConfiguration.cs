@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Malarkey.Abstractions.Util;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,12 @@ public class MalarkeyIntegrationConfiguration
             _publicKey ??= File.ReadAllText(PublicKeyFile);
             return _publicKey;
         } }
+
+
+    public string? PrivateKeyFile { get; set; }
+
+    private string? _privateKey;
+    public string? PrivateKey => _privateKey ??= PrivateKeyFile?.Pipe(File.ReadAllText);
 
 
     public MalarkeyIdentityProviderConfiguration Microsoft { get; set; }
