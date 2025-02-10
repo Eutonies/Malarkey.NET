@@ -6,6 +6,7 @@ using Malarkey.Application.Security;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Util;
+using Malarkey.C;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Extensions;
@@ -64,6 +65,13 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
 
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
+        var authAttribute = ExtractAttribute();
+        if (authAttribute == null)
+        {
+            Log($"No authorization attribute found, so will not invalidate request");
+            return AuthenticateResult.NoResult();
+        }
+
         var profileAndIdentities = await _tokenHandler.ExtractProfileAndIdentities(Context, TokenReceiver);
         if (IsBlazorRequest){
             DetailLog("Identified as BlazorRequest");
@@ -93,6 +101,20 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
                 ));
         DetailLog($"Returning profile with ID: {prof.ProfileId} and identities for: {idents.Select(_ => _.IdentityProvider.ToString()).MakeString(",")}");        
         return returnee;
+
+    }
+
+
+
+    private MalarkeyAuthenticationAttribute? ExtractAttribute()
+    {
+        var endpoint = Context.GetEndpoint();
+        if (endpoint == null)
+            return null;
+        var authAttribute = endpoint.Metadata
+            .OfType<MalarkeyAuthenticationAttribute>()
+            .FirstOrDefault();
+        return authAttribute;
 
     }
 

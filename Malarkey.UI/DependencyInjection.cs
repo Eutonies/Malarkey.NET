@@ -70,11 +70,11 @@ public static class DependencyInjection
         app.UseHttpLogging();
         app.MapStaticAssets();
         app.UseRouting();
+        app.UseApi();
         app.MapRazorComponents<App>()
             .DisableAntiforgery()
             .AddInteractiveServerRenderMode();
         app.UseIntegration();
-        app.UseApi();
         //app.MapRazorPages();
 
         return app;

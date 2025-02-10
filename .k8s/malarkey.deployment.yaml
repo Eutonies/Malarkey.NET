@@ -20,7 +20,7 @@ spec:
             secretName: malarkey-cert          
       containers:
       - name: malarkey
-        image: docker.io/library/malarkey:1.0.49
+        image: docker.io/library/malarkey:1.0.51
         imagePullPolicy: Never
         ports:
         - containerPort: 8080
@@ -36,6 +36,12 @@ spec:
           value: https://eutonies.com/malarkey
         - name: Integration__PublicKeyFile
           value: /crts/malarkey.crt
+        - name: Integration__PrivateKey
+          valueFrom:
+            secretKeyRef:
+              name: malarkey-cert
+              key: malarkey.key
+
         - name: Persistence__Db__ConnectionString
           valueFrom:
             secretKeyRef:

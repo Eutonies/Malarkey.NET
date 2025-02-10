@@ -31,10 +31,7 @@ public class MalarkeyIntegrationConfiguration
         } }
 
 
-    public string? PrivateKeyFile { get; set; }
-
-    private string? _privateKey;
-    public string? PrivateKey => _privateKey ??= PrivateKeyFile?.Pipe(File.ReadAllText);
+    public string? PrivateKey {get; set; }
 
 
     public MalarkeyIdentityProviderConfiguration Microsoft { get; set; }
