@@ -43,8 +43,6 @@ public static class MalarkeyConstants
             public static class Certificates
             {
                 public const string CertificatesPath = "certificates";
-                public const string HostingCertificateRelativePath = "hosting-certificate";
-                public const string HostingCertificateAbsolutePath = $"{ApiPath}/{CertificatesPath}/{HostingCertificateRelativePath}";
                 public const string SigningCertificateRelativePath = "signing-certificate";
                 public const string SigningCertificateAbsolutePath = $"{ApiPath}/{CertificatesPath}/{SigningCertificateRelativePath}";
 

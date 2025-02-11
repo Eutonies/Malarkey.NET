@@ -38,7 +38,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
         _scopeFactory = scopeFactory;
         using var scope = scopeFactory.CreateScope();
         _securityConfiguration = scope.ServiceProvider.GetRequiredService<IOptions<MalarkeyApplicationConfiguration>>().Value;
-        _certificate = _securityConfiguration.SigningCertificate.AsCertificate;
+        _certificate = _securityConfiguration.Certificate.AsCertificate;
         _rsaPublicKey = new RsaSecurityKey(_certificate.GetRSAPublicKey());
         _rsaPrivateKey = new RsaSecurityKey(_certificate.GetRSAPrivateKey());
         _jwtHandler = new JsonWebTokenHandler();

@@ -16,6 +16,7 @@ using Malarkey.Abstractions;
 using Malarkey.Application.Authentication;
 using Malarkey.Abstractions.Token;
 using System.Text;
+using Malarkey.Application.Configuration;
 
 namespace Malarkey.Integration.Authentication;
 public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<MalarkeyServerAuthenticationHandlerOptions>, IMalarkeyServerAuthenticationCallbackHandler
@@ -41,6 +42,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         IEnumerable<IMalarkeyOAuthFlowHandler> flowHandlers,
         IMalarkeyProfileRepository profileRepo,
         IOptions<MalarkeyIntegrationConfiguration> intConf,
+        IOptions<MalarkeyApplicationConfiguration> appConf,
         ILogger<MalarkeyServerAuthenticationHandler> logger,
         IMalarkeyServerAuthenticationEventHandler events,
         IMalarkeyServerAuthenticationForwarder forwarder) : base(options, loggerFactory, encoder)
@@ -53,7 +55,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         _flowHandlers = flowHandlers
             .ToDictionarySafe(_ => _.HandlerFor);
         _profileRepo = profileRepo;
-        _malarkeyTokenReceiver = intConf.Value.PublicKey.CleanCertificate();
+        _malarkeyTokenReceiver = appConf.Value.Certificate.PublicKeyPem.CleanCertificate();
         _forwarder = forwarder;
     }
 

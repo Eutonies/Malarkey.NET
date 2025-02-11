@@ -14,6 +14,7 @@ using Malarkey.Integration.Configuration;
 using Azure.Core;
 using Malarkey.UI.Util;
 using System.Security.Cryptography;
+using Malarkey.Application.Configuration;
 
 namespace Malarkey.UI.Pages.Authenticate;
 
@@ -32,7 +33,7 @@ public partial class AuthenticatePage
     public IMalarkeyAuthenticationSessionRepository AuthenticationSessionRepo { get; set; }
 
     [Inject]
-    public IOptions<MalarkeyIntegrationConfiguration> IntegrationConfiguration { get; set; }
+    public IOptions<MalarkeyApplicationConfiguration> ApplicationConfiguration { get; set; }
 
     [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName)]
     [Parameter]
@@ -91,11 +92,10 @@ public partial class AuthenticatePage
             _authenticationSession = await AuthenticationSessionRepo.LoadByState(ExistingSessionState);
         if(_authenticationSession == null)
         {
-            var audience = IntegrationConfiguration.Value
-                .PublicKey.CleanCertificate();
+            var audience = ApplicationConfiguration.Value
+                .Certificate.PublicKeyPem.CleanCertificate();
             var context = ContextAccessor.HttpContext!;
-            var privateKey = RSA.Create();
-            privateKey.ImportFromPem(IntegrationConfiguration.Value.PrivateKey!);
+            var privateKey = ApplicationConfiguration.Value.Certificate.PrivateKey;
             _authenticationSession = context.Request
                 .ResolveSession(
                    defaultAudience: audience,

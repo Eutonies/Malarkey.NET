@@ -1,4 +1,5 @@
 ﻿using Malarkey.Abstractions.Util;
+using Malarkey.Application.Configuration;
 using Malarkey.Application.Security;
 using Malarkey.Integration.Configuration;
 using Microsoft.Extensions.Options;
@@ -24,8 +25,8 @@ public class MalarkeySessionState
         if (User != null)
             return;
         using var scope = _scopeFactory.CreateScope();
-        var intConf = scope.ServiceProvider.GetRequiredService<IOptions<MalarkeyIntegrationConfiguration>>().Value;
-        var tokenReceiver = intConf.PublicKey.CleanCertificate();
+        var appConf = scope.ServiceProvider.GetRequiredService<IOptions<MalarkeyApplicationConfiguration>>().Value;
+        var tokenReceiver = appConf.Certificate.PublicKeyPem.CleanCertificate();
         var tokenHandler = scope.ServiceProvider.GetRequiredService<IMalarkeyTokenHandler>();
         var profileAndIdentities = await tokenHandler.ExtractProfileAndIdentities(context,tokenReceiver);
         if(profileAndIdentities != null)

@@ -2,6 +2,7 @@
 using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Application.Authentication;
+using Malarkey.Application.Configuration;
 using Malarkey.Application.Profile;
 using Malarkey.Integration.Authentication;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
@@ -36,6 +37,7 @@ public static class DependencyInjectionIntegration
     public static WebApplicationBuilder AddIntegrationServices(this WebApplicationBuilder builder)
     {
         var conf = builder.Configuration.IntegrationConfig();
+        var appConf = builder.Configuration.ApplicationConfig();
         builder.Services.AddSingleton<IMalarkeyServerAuthenticationEventHandler, MalarkeyServerAuthenticationEvents>();
         builder.Services.AddAuthentication(MalarkeyConstants.MalarkeyAuthenticationScheme)
             .AddScheme<MalarkeyServerAuthenticationHandlerOptions, MalarkeyServerAuthenticationHandler>(
@@ -43,7 +45,7 @@ public static class DependencyInjectionIntegration
                configureOptions: opts =>
                {
                    opts.AccessDeniedUrl = conf.AccessDeniedPath;
-                   opts.PublicKey = conf.PublicKey;
+                   opts.PublicKey = appConf.Certificate.PublicKeyPem;
                });
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeyMicrosoftOAuthFlowHandler>();
         builder.Services.AddKeyedScoped<IMalarkeyIdentityProviderTokenRefresher, MalarkeyMicrosoftOAuthFlowHandler>(MalarkeyIdentityProvider.Microsoft);
@@ -85,6 +87,13 @@ public static class DependencyInjectionIntegration
         conf.Bind(MalarkeyIntegrationConfiguration.ConfigurationElementName, returnee);
         return returnee;
     }
+    private static MalarkeyApplicationConfiguration ApplicationConfig(this IConfiguration conf)
+    {
+        var returnee = new MalarkeyApplicationConfiguration();
+        conf.Bind(MalarkeyApplicationConfiguration.ConfigurationElementName, returnee);
+        return returnee;
+    }
+
 
     private static IServiceCollection AddHttpClients(this IServiceCollection services)
     {

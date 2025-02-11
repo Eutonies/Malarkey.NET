@@ -20,16 +20,6 @@ public class MalarkeyIntegrationConfiguration
 
     public string AccessDeniedPath { get; set; }
 
-    public string PublicKeyFile {  get; set; }
-    private string? _publicKey;
-    public string PublicKey => _publicKey ??= File.ReadAllText(PublicKeyFile);
-
-    public string PrivateKeyFile { get; set; }
-
-    private string? _privateKey;
-    public string? PrivateKey => _privateKey ??= File.ReadAllText(PrivateKeyFile);
-
-
     public MalarkeyIdentityProviderConfiguration Microsoft { get; set; }
     public MalarkeyIdentityProviderConfiguration Google { get; set; }
     public MalarkeyIdentityProviderConfiguration Facebook{ get; set; }

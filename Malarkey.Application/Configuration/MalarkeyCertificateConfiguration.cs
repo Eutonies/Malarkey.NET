@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,9 +21,21 @@ public class MalarkeyCertificateConfiguration
     private X509Certificate2 Create()
     {
         var fileToUse = CertificateFileToUse();
-        var returnee = X509CertificateLoader.LoadPkcs12FromFile(fileToUse, password: CertificatePasswordToUse());
+        var fileContent = File.ReadAllText(fileToUse);
+        var certBytes = Convert.FromBase64String(fileContent);
+        var returnee = X509CertificateLoader.LoadPkcs12(certBytes, password: CertificatePasswordToUse());
         return returnee;
     }
     private string? _exportableCertificate;
-    public string ExportableCertificate => _exportableCertificate ??= AsCertificate.ExportCertificatePem();
+    public string PublicKeyPem => _exportableCertificate ??= AsCertificate.ExportCertificatePem();
+
+    private RSA? _publicKey;
+    public RSA PublicKey => _publicKey ??= AsCertificate.GetRSAPublicKey()!;
+
+    private RSA? _privateKey;
+    public RSA PrivateKey => _privateKey ??= AsCertificate.GetRSAPrivateKey()!;
+
+
+
+
 }

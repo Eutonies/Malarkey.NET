@@ -22,18 +22,7 @@ public class CertficatesController : MalarkeyController
         )
     {
         await Task.CompletedTask;
-        var certificate = appConf.Value.SigningCertificate.ExportableCertificate;
+        var certificate = appConf.Value.Certificate.PublicKeyPem;
         return TypedResults.Ok(certificate);
     }
-
-    [HttpGet(MalarkeyConstants.API.Paths.Certificates.HostingCertificateRelativePath)]
-    public async Task<Results<BadRequest<string>, Ok<string>>> GetHostingCertificate(
-        [FromServices] IOptions<MalarkeyApplicationConfiguration> appConf
-        )
-    {
-        await Task.CompletedTask;
-        var certificate = appConf.Value.HostingCertificate.ExportableCertificate;
-        return TypedResults.Ok(certificate);
-    }
-
 }
