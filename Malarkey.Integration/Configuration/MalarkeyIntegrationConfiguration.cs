@@ -21,17 +21,13 @@ public class MalarkeyIntegrationConfiguration
     public string AccessDeniedPath { get; set; }
 
     public string PublicKeyFile {  get; set; }
-
     private string? _publicKey;
+    public string PublicKey => _publicKey ??= File.ReadAllText(PublicKeyFile);
 
-    public string PublicKey { get
-        {
-            _publicKey ??= File.ReadAllText(PublicKeyFile);
-            return _publicKey;
-        } }
+    public string PrivateKeyFile { get; set; }
 
-
-    public string? PrivateKey {get; set; }
+    private string? _privateKey;
+    public string? PrivateKey => _privateKey ??= File.ReadAllText(PrivateKeyFile);
 
 
     public MalarkeyIdentityProviderConfiguration Microsoft { get; set; }

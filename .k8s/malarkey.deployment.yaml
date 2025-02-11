@@ -36,11 +36,8 @@ spec:
           value: https://eutonies.com/malarkey
         - name: Integration__PublicKeyFile
           value: /crts/malarkey.crt
-        - name: Integration__PrivateKey
-          valueFrom:
-            secretKeyRef:
-              name: malarkey-cert
-              key: malarkey.key
+        - name: Integration__PrivateKeyFile
+          value: /crts/malarkey.key
 
         - name: Persistence__Db__ConnectionString
           valueFrom:

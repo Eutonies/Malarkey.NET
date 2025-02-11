@@ -13,7 +13,7 @@
     "https": {
       "commandName": "Project",
       "launchBrowser": true,
-      "launchUrl": "profile",
+      "launchUrl": "api/swagger.json",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },

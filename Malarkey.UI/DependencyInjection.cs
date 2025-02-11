@@ -69,8 +69,8 @@ public static class DependencyInjection
         app.UseMiddleware<MalarkeyRequestLoggingMiddleware>();   
         app.UseHttpLogging();
         app.MapStaticAssets();
+        app.UseApi(uiConf.HostingBasePath);
         app.UseRouting();
-        app.UseApi();
         app.MapRazorComponents<App>()
             .DisableAntiforgery()
             .AddInteractiveServerRenderMode();

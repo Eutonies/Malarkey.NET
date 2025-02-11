@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Malarkey.API.Certificates;
+[Route(MalarkeyConstants.API.ApiPath + "/certificates")]
 public class CertficatesController : MalarkeyController
 {
 

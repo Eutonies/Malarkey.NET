@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Malarkey.API.Common;
 
-[Route("api/[controller]")]
+[Route(MalarkeyConstants.API.ApiPath +  "/[controller]")]
 public class MalarkeyController : ControllerBase
 {
 
