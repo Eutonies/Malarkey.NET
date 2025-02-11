@@ -277,9 +277,12 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         var response = (await client.GetAsync(reqUrl)).EnsureSuccessStatusCode();
         var certificateString = await response.Content.ReadAsStringAsync();
         Log($"Loaded Malarkey certificate: {certificateString}");
-        var certBytes = Encoding.UTF8.GetBytes(certificateString);
-        var signingCert = X509CertificateLoader.LoadCertificate(certBytes);
-        _malarkeySigningCertificatePublicKey = new RsaSecurityKey(signingCert.GetRSAPublicKey());
+        certificateString = certificateString
+            .Replace("\n", "")
+            .Replace("\r", "");
+        var rsaPublicKey = RSA.Create();
+        rsaPublicKey.ImportFromPem(certificateString);
+        _malarkeySigningCertificatePublicKey = new RsaSecurityKey(rsaPublicKey);
     }
 
     public async Task<IResult> HandleCallback(HttpRequest request)
