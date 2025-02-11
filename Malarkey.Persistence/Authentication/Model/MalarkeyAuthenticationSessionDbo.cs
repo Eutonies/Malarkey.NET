@@ -81,7 +81,8 @@ internal static class MalarkeyAuthenticationSessionDboExtensions
                IdentityTokenId = sess.IdentityTokenId,
                Audience = sess.Audience,
                ExistingProfileId = sess.ExistingProfileId,
-               AlwaysChallenge = sess.AlwaysChallenge
+               AlwaysChallenge = sess.AlwaysChallenge,
+               EncryptState = sess.EncryptState
            },
            Parameters: sess.RequestParameters.Select(par => par.ToDbo()).ToList(),
            IdpSession: sess.IdpSession?.ToDbo()

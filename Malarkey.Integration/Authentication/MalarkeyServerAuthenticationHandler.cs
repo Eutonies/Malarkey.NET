@@ -211,7 +211,7 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         _logger.LogInformation($"Resolved profile: {profileAndIdentities.Profile.ProfileId} and {profileAndIdentities.Identities.Count} identities");
         _events.RegisterIdentificationCompleted(identity);
 
-        await _forwarder.Forward(session, profileAndIdentities.Profile.ProfileId, Context);
+        await _forwarder.Forward(session, profileAndIdentities.Profile.ProfileId, request.HttpContext);
 
     }
 

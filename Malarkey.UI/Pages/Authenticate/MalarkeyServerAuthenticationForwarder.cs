@@ -11,13 +11,23 @@ namespace Malarkey.UI.Pages.Authenticate;
 public class MalarkeyServerAuthenticationForwarder : IMalarkeyServerAuthenticationForwarder
 {
 
+    private readonly ILogger<MalarkeyServerAuthenticationForwarder> _logger;
+
+    public MalarkeyServerAuthenticationForwarder(ILogger<MalarkeyServerAuthenticationForwarder> logger)
+    {
+        _logger = logger;
+    }
+
     private readonly Aes _stateVerifier = Aes.Create();
 
     public async Task Forward(MalarkeyAuthenticationSession session, Guid profileId, HttpContext context)
     {
         await Task.CompletedTask;
+        _logger.LogInformation($"Will generate state verifier for state: {session.State}");
         var verifier = StateVerifierFor(session.State);
+        _logger.LogInformation($"  Generated verifier: {verifier}");
         var targetUrl = ForwarderPage.UrlFor(session.State, verifier, profileId);
+        _logger.LogInformation($"  Re-directing to forward URL: {targetUrl}");
         // Status code 303: redirect to Headers.Location with Http Method GET
         context.Response.StatusCode = 303;
         context.Response.Headers.Location = targetUrl;

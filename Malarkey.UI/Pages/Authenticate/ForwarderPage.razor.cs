@@ -19,18 +19,18 @@ namespace Malarkey.UI.Pages.Authenticate;
 public partial class ForwarderPage
 {
     public static string UrlFor(string state, string verifier, Guid profileId) =>
-        $"backward?state={state.UrlEncoded()}&stateVerifier={verifier.UrlEncoded()}&profileId={profileId.ToString().UrlEncoded()}";
+        $"backward?{nameof(State)}={state.UrlEncoded()}&{nameof(StateVerifier)}={verifier.UrlEncoded()}&{nameof(ProfileId)}={profileId.ToString().UrlEncoded()}";
 
 
-    [SupplyParameterFromQuery]
-    public string State { get; set; }
+    [SupplyParameterFromQuery(Name = nameof(State))]
+    public string? State { get; set; }
 
-    [SupplyParameterFromQuery]
-    public string StateVerifier { get; set; }
+    [SupplyParameterFromQuery(Name = nameof(StateVerifier))]
+    public string? StateVerifier { get; set; }
 
-    [SupplyParameterFromQuery]
-    public string ProfileId { get; set; }
-    private Guid ProfileGuid => Guid.Parse(ProfileId);
+    [SupplyParameterFromQuery(Name= nameof(ProfileId))]
+    public string? ProfileId { get; set; }
+    private Guid ProfileGuid => Guid.Parse(ProfileId!);
 
 
     [Inject]
@@ -51,6 +51,9 @@ public partial class ForwarderPage
     [Inject]
     public IJSRuntime JS { get; set; }
 
+    [Inject]
+    public ILogger<ForwarderPage> Logger { get; set; }
+
 
     private string _targetUrl = "";
     private string _profileToken = "";
@@ -61,15 +64,30 @@ public partial class ForwarderPage
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        var stateForVerifier = Forwarder.StateFor(StateVerifier);
-        if(stateForVerifier == State)
-        {
-            var session = await Repo.LoadByState(State);
-            if(session != null)
+        if(StateVerifier != null) {
+            var stateForVerifier = Forwarder.StateFor(StateVerifier);
+            if(stateForVerifier != State) 
             {
-                _targetUrl = session.SendTo;
-                await ResolveParameters(session);
-                await JS.InvokeVoidAsync("submitData");
+                Logger.LogInformation($"State and state verifier don't be matching boss");
+                Logger.LogInformation($"  State: {State}");
+                Logger.LogInformation($"  Verifier: {stateForVerifier}");
+            }
+            else
+            {
+                Logger.LogInformation($"State and verifier matched boss!");
+                var session = await Repo.LoadByState(State);
+                if(session== null) 
+                {
+                    Logger.LogInformation($"Unable to load session for state: {State} boss");
+                }
+                else
+                {
+                    Logger.LogInformation($"Dun loaded the session for state: {State} boss!");
+                    _targetUrl = session.SendTo;
+                    Logger.LogInformation($"Be sendin' dem to: {_targetUrl} boss!");
+                    await ResolveParameters(session);
+                    await JS.InvokeVoidAsync("submitData");
+                }
             }
         }
     }
@@ -109,16 +127,18 @@ public partial class ForwarderPage
                newlyIssuedIdentityTokens
                  .Select(_ => _.TokenString)
             ).ToList();
-        context.Response.Cookies.Append(MalarkeyConstants.Authentication.ProfileCookieName, profileTokenString);
-        for(var i = 0; i < allIdentityTokens.Count; i++)
-            context.Response.Cookies.Append(MalarkeyConstants.Authentication.IdentityCookieName(i), allIdentityTokens[i]);
         _identityTokens = allIdentityTokens.ToList();
         if (session.EncryptState)
         {
-            var recieverCertificate = X509Certificate2.CreateFromPem(session.Audience);
+            Logger.LogInformation($"Will encrypt state using audience certificate: {session.Audience}");
+            var receiverCertBytes = Convert.FromBase64String(session.Audience);
+            Logger.LogInformation($"  That's {receiverCertBytes.Length} bytes worth of certificate");
+            var recieverCertificate = X509CertificateLoader.LoadCertificate(receiverCertBytes);
+            Logger.LogInformation($"  Loaded certificate with friendly name: {recieverCertificate.FriendlyName}");
             var encryptedStateBytes = recieverCertificate.PublicKey.GetRSAPublicKey()!.Encrypt(UTF8Encoding.UTF8.GetBytes(State), MalarkeyConstants.RSAPadding);
             var encryptedState = UTF8Encoding.UTF8.GetString(encryptedStateBytes);
             _returnState = encryptedState;
+            Logger.LogInformation($"  Return state will be: {_returnState}");
         }
         else
             _returnState = State;
