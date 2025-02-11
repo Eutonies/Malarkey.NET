@@ -404,3 +404,4 @@ FodyWeavers.xsd
 /Malarkey.UI/malarkey.crt
 **/*.secrets.yaml
 /Malarkey.UI/malarkey.key
+/Malarkey.Client.UI/appsettings.local.json

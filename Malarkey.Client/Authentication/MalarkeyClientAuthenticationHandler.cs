@@ -98,7 +98,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         {
             returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={scopes.MakeString(" ").UrlEncoded()}");
         }
-        returnee.Append($"${MalarkeyConstants.AuthenticationRequestQueryParameters.ClientCertificateName}={_clientCertificatePem.UrlEncoded()}");
+        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ClientCertificateName}={_clientCertificatePem.UrlEncoded()}");
         return returnee.ToString();
     }
 
@@ -277,11 +277,10 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         var response = (await client.GetAsync(reqUrl)).EnsureSuccessStatusCode();
         var certificateString = await response.Content.ReadAsStringAsync();
         Log($"Loaded Malarkey certificate: {certificateString}");
-        certificateString = certificateString
-            .Replace("\n", "")
-            .Replace("\r", "");
-        var rsaPublicKey = RSA.Create();
-        rsaPublicKey.ImportFromPem(certificateString);
+        certificateString = certificateString.CleanCertificate();
+        var bytes = Convert.FromBase64String(certificateString);
+        var cert = X509CertificateLoader.LoadCertificate(bytes);
+        var rsaPublicKey = cert.GetRSAPublicKey()!;
         _malarkeySigningCertificatePublicKey = new RsaSecurityKey(rsaPublicKey);
     }
 

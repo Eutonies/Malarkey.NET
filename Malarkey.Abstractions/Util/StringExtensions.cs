@@ -12,12 +12,23 @@ namespace Malarkey.Abstractions.Util;
 public static class StringExtensions
 {
 
-    private static readonly Regex MetaRegex = new Regex(@"^-{5}((BEGIN)|(END)).*");
+    private static readonly Regex MetaRegex = new Regex(@"-{5}((BEGIN)|(END)).*-{5}");
 
-    public static string CleanCertificate(this string cert) => string.Join("", cert
-        .Split("\n")
-        .Select(_ => _.Trim())
-        .Where(_ => !MetaRegex.IsMatch(_)));
+    public static string CleanCertificate(this string cert) 
+    {
+        var newLineReplaced = cert
+          .Replace("\\n", "\n");
+        var newLineSplitted = newLineReplaced
+          .Split("\n");
+        var trimmed = newLineSplitted
+            .Select(_ => _.Trim())
+            .ToList();
+        var cleaned = trimmed
+            .Where(_ => !MetaRegex.IsMatch(_))
+            .ToList();
+        var returnee = cleaned.MakeString("");
+        return returnee;
+    }
 
     public static string UrlEncoded(this string input) => UrlEncoder.Default.Encode(input);
 
