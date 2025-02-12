@@ -52,7 +52,6 @@ public static class DependencyInjection
         builder.Services.AddCascadingAuthenticationState();
         builder.Services.AddHttpLogging();
         builder.Services.AddSingleton<MalarkeySynchronizer>();
-        builder.Services.AddSingleton<IMalarkeyServerAuthenticationForwarder, MalarkeyServerAuthenticationForwarder>();
         builder.AddSecurity();
         builder.AddApi();
         builder.Services.AddHostedService<CleanupBackgroundService>();
