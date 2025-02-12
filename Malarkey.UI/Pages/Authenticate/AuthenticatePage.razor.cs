@@ -67,9 +67,9 @@ public partial class AuthenticatePage
     [Parameter]
     public string? EncryptedState { get; set; }
 
-    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ClientCertificateName)]
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ClientPublicKey)]
     [Parameter]
-    public string? ClientCertificate { get; set; }
+    public string? ClientPublicKey { get; set; }
 
 
     private MalarkeyAuthenticationSession? _authenticationSession;

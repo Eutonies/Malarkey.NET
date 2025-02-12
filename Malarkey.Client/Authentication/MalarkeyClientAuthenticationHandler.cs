@@ -33,9 +33,8 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     }
         
     private readonly X509Certificate2 _clientCertificate;
-    private readonly string _clientCertificatePem;
-    private readonly string _clientCertificateForValidation;
-    private readonly string _clientCertificateHashForValidation;
+    private readonly string _clientPublicKey;
+    private readonly string _clienPublicKeyHashForValidation;
 
 
     private readonly IHttpClientFactory _httpClientFactory;
@@ -58,12 +57,8 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         _conf = conf.Value;
         _logLevel = _conf.LogLevelToUse;
         _clientCertificate = conf.Value.ClientCertificate;
-        var clientCertPem = _clientCertificate.ExportCertificatePem();
-        _clientCertificatePem = _clientCertificate.GetRSAPublicKey()!.ExportRSAPublicKeyPem()
-            .Replace("\n", "")
-            .Replace("\r", "");
-        _clientCertificateForValidation = _clientCertificate.GetRSAPublicKey()!.ExportRSAPublicKeyPem().CleanCertificate();
-        _clientCertificateHashForValidation = _clientCertificateForValidation.HashPem();
+        _clientPublicKey = _clientCertificate.GetRSAPublicKey()!.ExportRSAPublicKeyPem().CleanCertificate();
+        _clienPublicKeyHashForValidation = _clientPublicKey.HashPem();
         _httpClientFactory = httpClientFactory;
         _cache = cache;
     }
@@ -104,7 +99,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         {
             returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ScopesName}={scopes.MakeString(" ").UrlEncoded()}");
         }
-        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ClientCertificateName}={_clientCertificatePem.UrlEncoded()}");
+        returnee.Append($"&{MalarkeyConstants.AuthenticationRequestQueryParameters.ClientPublicKey}={_clientPublicKey.UrlEncoded()}");
         return returnee.ToString();
     }
 
@@ -245,12 +240,12 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     {
         var malarkeyKey = await MalarkeySigningCertificatePublicKey();
         var jwtHandler = new JsonWebTokenHandler();
-        Log($"Using client certificate for validation: {_clientCertificateForValidation}");
-        Log($"  With certificate hash: {_clientCertificateHashForValidation}");
+        Log($"Using client public key for validation: {_clientPublicKey}");
+        Log($"  With certificate hash: {_clienPublicKeyHashForValidation}");
         var validationResult = await jwtHandler.ValidateTokenAsync(token, new TokenValidationParameters
         {
             ValidIssuer = MalarkeyConstants.Authentication.TokenIssuer,
-            ValidAudience = _clientCertificateHashForValidation,
+            ValidAudience = _clienPublicKeyHashForValidation,
             IssuerSigningKey = malarkeyKey
         });
         if(!validationResult.IsValid)
@@ -271,7 +266,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         var requestContent = new MalarkeyProfileRefreshProviderTokenRequest(
             IdentityProvider: token.Provider.ToDto(), 
             AccessToken: token.Token,
-            ClientCertificate: _clientCertificatePem);
+            ClientCertificate: _clientPublicKey);
         request.Content = JsonContent.Create(requestContent);
         var response = await client.SendAsync(request);
         response.EnsureSuccessStatusCode();

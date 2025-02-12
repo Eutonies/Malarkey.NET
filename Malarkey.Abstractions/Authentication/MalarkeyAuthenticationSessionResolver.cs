@@ -19,7 +19,7 @@ public static class MalarkeyAuthenticationSessionResolver
     private static readonly string ExistingProfileIdLookup = ParDefs.ExistingProfileIdName.ToLower();
     private static readonly string AlwaysChallengeLookup = ParDefs.AlwaysChallengeName.ToLower();
     private static readonly string EncryptedStateLookup = ParDefs.EncryptedStateName.ToLower();
-    private static readonly string ClientCertificateLookup = ParDefs.ClientCertificateName.ToLower();
+    private static readonly string ClientPublicKeyLookup = ParDefs.ClientPublicKey.ToLower();
 
     private static HashSet<string> NamedParameters = new List<string>
     {
@@ -41,7 +41,7 @@ public static class MalarkeyAuthenticationSessionResolver
         string? profileIdOverride = null,
         string? alwaysChallengeOverride = null,
         string? encryptedStateOverride = null,
-        string? clientCertificateOverride = null,
+        string? clientPublicKeyOverride = null,
         RSA? malarkeyPrivateKey = null
         )
     {
@@ -77,8 +77,8 @@ public static class MalarkeyAuthenticationSessionResolver
         }
         var requestedScopes = (scopesOverride ?? queryPars
             .GetValueOrDefault(ScopesLookup)?.Value)?.Split(" ");
-        var audience = clientCertificateOverride?.CleanCertificate() ?? defaultAudience;
-        if (queryPars.TryGetValue(ClientCertificateLookup, out var clientCertPar))
+        var audience = clientPublicKeyOverride?.CleanCertificate() ?? defaultAudience;
+        if (queryPars.TryGetValue(ClientPublicKeyLookup, out var clientCertPar))
             audience = clientCertPar.Value.CleanCertificate();
         var existingProfileId = profileIdOverride?.Pipe(Guid.Parse) ?? (queryPars
             .TryGetValue(ExistingProfileIdLookup, out var profId) ? 

@@ -68,7 +68,7 @@ public static class MalarkeyConstants
         public const string AlwaysChallengeName = "alwayschallenge";
         public const string SessionStateName = "sessionstate";
         public const string EncryptedStateName = "encsessionstate";
-        public const string ClientCertificateName = "clientcert";
+        public const string ClientPublicKey = "clientpubkey";
     }
 
 
