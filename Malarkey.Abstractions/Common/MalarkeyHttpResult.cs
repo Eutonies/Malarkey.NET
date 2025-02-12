@@ -16,7 +16,7 @@ public abstract class MalarkeyHttpResult : IResult
     {
         httpContext.Response.StatusCode = StatusCode;
         var htmlContent = GenerateHtmlPage();
-        httpContext.Response.ContentType = "text/html";
+        httpContext.Response.ContentType = "text/html;charset=utf-8";
         var bytes = Encoding.UTF8.GetBytes(htmlContent);
         await httpContext.Response.Body.WriteAsync(bytes, 0, bytes.Length);
     }

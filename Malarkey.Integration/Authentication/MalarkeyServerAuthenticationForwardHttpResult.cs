@@ -32,7 +32,7 @@ internal class MalarkeyServerAuthenticationForwardHttpResult : MalarkeyHttpForwa
                   data: UTF8Encoding.UTF8.GetBytes(session.State), 
                   padding: MalarkeyConstants.RSAPadding
             );
-            var encryptedState = UTF8Encoding.UTF8.GetString(encryptedStateBytes);
+            var encryptedState = Convert.ToBase64String(encryptedStateBytes);
             _returnState = encryptedState;
             logger.LogInformation($"  Return state will be: {_returnState}");
         }
