@@ -34,6 +34,9 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         
     private readonly X509Certificate2 _clientCertificate;
     private readonly string _clientCertificatePem;
+    private readonly string _clientCertificateForValidation;
+    private readonly string _clientCertificateHashForValidation;
+
 
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly MalarkeyClientConfiguration _conf;
@@ -55,9 +58,12 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         _conf = conf.Value;
         _logLevel = _conf.LogLevelToUse;
         _clientCertificate = conf.Value.ClientCertificate;
-        _clientCertificatePem = _clientCertificate.ExportCertificatePem()
+        var clientCertPem = _clientCertificate.ExportCertificatePem();
+        _clientCertificatePem = clientCertPem
             .Replace("\n", "")
             .Replace("\r", "");
+        _clientCertificateForValidation = _clientCertificate.GetRSAPublicKey()!.ExportRSAPublicKeyPem().CleanCertificate();
+        _clientCertificateHashForValidation = _clientCertificateForValidation.HashPem();
         _httpClientFactory = httpClientFactory;
         _cache = cache;
     }
@@ -239,10 +245,12 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
     {
         var malarkeyKey = await MalarkeySigningCertificatePublicKey();
         var jwtHandler = new JsonWebTokenHandler();
+        Log($"Using client certificate for validation: {_clientCertificateForValidation}");
+        Log($"  With certificate hash: {_clientCertificateHashForValidation}");
         var validationResult = await jwtHandler.ValidateTokenAsync(token, new TokenValidationParameters
         {
             ValidIssuer = MalarkeyConstants.Authentication.TokenIssuer,
-            ValidAudience = _clientCertificatePem.HashPem(),
+            ValidAudience = _clientCertificateHashForValidation,
             IssuerSigningKey = malarkeyKey
         });
         if(!validationResult.IsValid)
@@ -260,9 +268,11 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         var request = new HttpRequestMessage(
             HttpMethod.Post, 
             new Uri($"{_conf.MalarkeyServerBaseAddress}{MalarkeyConstants.API.Paths.Profile.RefreshTokenRelativePath}"));
-        var requestContent = new MalarkeyProfileRefreshProviderTokenRequest(token.Provider.ToDto(), token.Token);
+        var requestContent = new MalarkeyProfileRefreshProviderTokenRequest(
+            IdentityProvider: token.Provider.ToDto(), 
+            AccessToken: token.Token,
+            ClientCertificate: _clientCertificatePem);
         request.Content = JsonContent.Create(requestContent);
-        request.Headers.Add(MalarkeyConstants.Authentication.AudienceHeaderName, _clientCertificatePem.UrlEncoded());
         var response = await client.SendAsync(request);
         response.EnsureSuccessStatusCode();
         var responseToken = (await response.Content.ReadFromJsonAsync<MalarkeyIdentityProviderTokenDto>())!;

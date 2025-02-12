@@ -55,8 +55,8 @@ public class MalarkeyServerAuthenticationHandler : AuthenticationHandler<Malarke
         _malarkeyTokenReceiver = appConf.Value.Certificate.PublicKeyPem.CleanCertificate();
     }
 
-    private string TokenReceiver => (Context?.Request?.Headers?.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var audience) ?? false) ?
-        audience.ToString() :
+    private string TokenReceiver => (Context?.Request?.Headers?.TryGetValue(MalarkeyConstants.AuthenticationRequestQueryParameters.ClientCertificateName, out var audience) ?? false) ?
+        audience.ToString().CleanCertificate() :
         _malarkeyTokenReceiver;
 
 
