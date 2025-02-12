@@ -129,7 +129,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
             return AuthenticateResult.Fail("Profile cookie could not be parsed as profile token");
 
         }
-        if (profileToken.ValidUntil < DateTime.Now)
+        if (profileToken.ValidUntil < DateTime.Now.ToUniversalTime())
         {
             Log($"Profile token expired. Only valid until: {profileToken.ValidUntil}");
             return AuthenticateResult.Fail("Profile cookie has expired");
@@ -150,7 +150,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         identityCookies = (await FilterVerifiableTokens(identityCookies)).ToList();
         var identityTokens = identityCookies
             .Select(cook => MalarkeyToken.ParseIdentityToken(cook))
-            .Where(_ => _ != null && _.ValidUntil > DateTime.Now)
+            .Where(_ => _ != null && _.ValidUntil > DateTime.Now.ToUniversalTime())
             .Select(_ => _!)
             .ToList();
         var identities = identityTokens
@@ -178,7 +178,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
                         Log($"No valid access token found for ID Provider: {authAttribute.IdentityProvider}");
                         return AuthenticateResult.Fail($"No valid access token found for ID Provider: {authAttribute.IdentityProvider}");
                     }
-                    if (idpToken.Expires < DateTime.Now)
+                    if (idpToken.Expires < DateTime.Now.ToUniversalTime())
                     {
                         var refreshed = await RefreshToken(idpToken);
                         if(refreshed == null)
@@ -303,7 +303,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         var profileToken = MalarkeyToken.ParseProfileToken(profileTokenString);
         if (profileToken == null) 
             return TypedResults.BadRequest("Profile token could not be parsed: " + profileTokenString);
-        if (profileToken.ValidUntil < DateTime.Now)
+        if (profileToken.ValidUntil < DateTime.Now.ToUniversalTime())
             return TypedResults.BadRequest("Profile token has expired");
 
         var identityParams = request.Form
@@ -319,7 +319,10 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
             .FirstOrDefault();
         if(state != null)
         {
-            var authSession = await _cache.Pop(state);
+            var encryptedStateBytes = Convert.FromBase64String(state);
+            var decryptedBytes = _clientCertificate.GetRSAPrivateKey()!.Decrypt(encryptedStateBytes, MalarkeyConstants.RSAPadding);
+            var decryptedState = UTF8Encoding.UTF8.GetString(decryptedBytes);
+            var authSession = await _cache.Pop(decryptedState);
             if(authSession != null)
             {
                 var returnee = new MalarkeyAuthenticationSuccessHttpResult(authSession, profileTokenString, identityTokenStrings, Logger);

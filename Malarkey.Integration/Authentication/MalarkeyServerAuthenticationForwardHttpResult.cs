@@ -21,9 +21,10 @@ internal class MalarkeyServerAuthenticationForwardHttpResult : MalarkeyHttpForwa
         ) : base(session.SendTo, [])
     {
         var _returnState = session.State;
-        if (session.EncryptState)
+        if (session.EncryptState && session.RequestState != null)
         {
             logger.LogInformation($"Will encrypt state using audience certificate: {session.Audience}");
+            logger.LogInformation($"  to encrypt request state: {session.RequestState}");
             var receiverCertBytes = Convert.FromBase64String(session.Audience);
             var pubKey = RSA.Create();
             logger.LogInformation($"  That's {receiverCertBytes.Length} bytes worth of public key");
@@ -31,7 +32,7 @@ internal class MalarkeyServerAuthenticationForwardHttpResult : MalarkeyHttpForwa
             logger.LogInformation($"  Loaded public key of size: {pubKey.KeySize}");
             var encryptedStateBytes = pubKey
                 .Encrypt(
-                  data: UTF8Encoding.UTF8.GetBytes(session.State), 
+                  data: UTF8Encoding.UTF8.GetBytes(session.RequestState), 
                   padding: MalarkeyConstants.RSAPadding
             );
             var encryptedState = Convert.ToBase64String(encryptedStateBytes);
