@@ -20,7 +20,7 @@ public class MalarkeyHttpForwardPostResult : MalarkeyHttpResult
     protected override string ProduceBody()
     {
         var ret = new StringBuilder();
-        ret.AppendLine($@"<form id=""{FormId}"" action=""{_url}"">");
+        ret.AppendLine($@"<form id=""{FormId}"" action=""{_url}"" method=""post"">");
         foreach (var p in PostValues)
             ret.AppendLine($@" <input type=""hidden"" name=""{p.Name}"" value=""{p.Value}"">");
         ret.AppendLine("</form>");
