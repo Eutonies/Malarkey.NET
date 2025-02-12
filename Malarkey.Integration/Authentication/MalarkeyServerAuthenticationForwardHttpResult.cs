@@ -2,6 +2,7 @@
 using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Common;
 using Microsoft.Extensions.Logging;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
@@ -24,10 +25,11 @@ internal class MalarkeyServerAuthenticationForwardHttpResult : MalarkeyHttpForwa
         {
             logger.LogInformation($"Will encrypt state using audience certificate: {session.Audience}");
             var receiverCertBytes = Convert.FromBase64String(session.Audience);
-            logger.LogInformation($"  That's {receiverCertBytes.Length} bytes worth of certificate");
-            var recieverCertificate = X509CertificateLoader.LoadCertificate(receiverCertBytes);
-            logger.LogInformation($"  Loaded certificate with friendly name: {recieverCertificate.FriendlyName}");
-            var encryptedStateBytes = recieverCertificate.PublicKey.GetRSAPublicKey()!
+            var pubKey = RSA.Create();
+            logger.LogInformation($"  That's {receiverCertBytes.Length} bytes worth of public key");
+            pubKey.ImportRSAPublicKey(receiverCertBytes, out var _);
+            logger.LogInformation($"  Loaded public key of size: {pubKey.KeySize}");
+            var encryptedStateBytes = pubKey
                 .Encrypt(
                   data: UTF8Encoding.UTF8.GetBytes(session.State), 
                   padding: MalarkeyConstants.RSAPadding
