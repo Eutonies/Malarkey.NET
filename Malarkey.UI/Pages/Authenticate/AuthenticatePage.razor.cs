@@ -106,6 +106,7 @@ public partial class AuthenticatePage
                    profileIdOverride: ProfileId,
                    alwaysChallengeOverride: AlwaysChallenge,
                    encryptedStateOverride: EncryptedState,
+                   clientCertificateOverride: ClientCertificate,
                    malarkeyPrivateKey: privateKey
                    );
             _authenticationSession = await AuthenticationSessionRepo.InitiateSession(_authenticationSession);

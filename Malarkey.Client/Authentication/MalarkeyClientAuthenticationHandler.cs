@@ -59,7 +59,7 @@ internal class MalarkeyClientAuthenticationHandler : AuthenticationHandler<Malar
         _logLevel = _conf.LogLevelToUse;
         _clientCertificate = conf.Value.ClientCertificate;
         var clientCertPem = _clientCertificate.ExportCertificatePem();
-        _clientCertificatePem = clientCertPem
+        _clientCertificatePem = _clientCertificate.GetRSAPublicKey()!.ExportRSAPublicKeyPem()
             .Replace("\n", "")
             .Replace("\r", "");
         _clientCertificateForValidation = _clientCertificate.GetRSAPublicKey()!.ExportRSAPublicKeyPem().CleanCertificate();

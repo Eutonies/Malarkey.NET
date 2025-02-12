@@ -41,6 +41,7 @@ public static class MalarkeyAuthenticationSessionResolver
         string? profileIdOverride = null,
         string? alwaysChallengeOverride = null,
         string? encryptedStateOverride = null,
+        string? clientCertificateOverride = null,
         RSA? malarkeyPrivateKey = null
         )
     {
@@ -76,7 +77,7 @@ public static class MalarkeyAuthenticationSessionResolver
         }
         var requestedScopes = (scopesOverride ?? queryPars
             .GetValueOrDefault(ScopesLookup)?.Value)?.Split(" ");
-        var audience = defaultAudience;
+        var audience = clientCertificateOverride?.CleanCertificate() ?? defaultAudience;
         if (queryPars.TryGetValue(ClientCertificateLookup, out var clientCertPar))
             audience = clientCertPar.Value.CleanCertificate();
         var existingProfileId = profileIdOverride?.Pipe(Guid.Parse) ?? (queryPars
