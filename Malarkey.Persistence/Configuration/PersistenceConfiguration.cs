@@ -10,5 +10,6 @@ public class PersistenceConfiguration
     public const string ConfigurationElementName = "Persistence";
     public MalarkeyDbConfiguration Db { get; set; }
 
+    public int? CleanupIntervalInSeconds { get; set; }
 
 }

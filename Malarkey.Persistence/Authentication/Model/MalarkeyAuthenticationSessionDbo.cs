@@ -30,6 +30,7 @@ internal class MalarkeyAuthenticationSessionDbo
     public string Audience { get; set; }
     public Guid? ExistingProfileId { get; set; }
     public bool AlwaysChallenge { get; set; }
+    public bool EncryptState { get; set; }
 
 
 
@@ -50,7 +51,8 @@ internal class MalarkeyAuthenticationSessionDbo
         ExistingProfileId: ExistingProfileId,
         AlwaysChallenge: AlwaysChallenge,
         RequestParameters: pars.Select(_ => _.ToDomain()).ToList(),
-        IdpSession: idpSession?.ToDomain()
+        IdpSession: idpSession?.ToDomain(),
+        EncryptState: EncryptState
     );
 
 }
@@ -79,7 +81,8 @@ internal static class MalarkeyAuthenticationSessionDboExtensions
                IdentityTokenId = sess.IdentityTokenId,
                Audience = sess.Audience,
                ExistingProfileId = sess.ExistingProfileId,
-               AlwaysChallenge = sess.AlwaysChallenge
+               AlwaysChallenge = sess.AlwaysChallenge,
+               EncryptState = sess.EncryptState
            },
            Parameters: sess.RequestParameters.Select(par => par.ToDbo()).ToList(),
            IdpSession: sess.IdpSession?.ToDbo()

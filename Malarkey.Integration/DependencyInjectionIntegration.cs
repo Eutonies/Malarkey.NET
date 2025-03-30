@@ -71,6 +71,7 @@ public static class DependencyInjectionIntegration
         return returnee;
     }
 
+
     private static IServiceCollection AddHttpClients(this IServiceCollection services)
     {
         services.AddHttpClient();

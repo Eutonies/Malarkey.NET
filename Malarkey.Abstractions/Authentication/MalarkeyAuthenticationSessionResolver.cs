@@ -3,6 +3,9 @@ using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Http;
+using System.Security.Cryptography;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using ParDefs = Malarkey.Abstractions.MalarkeyConstants.AuthenticationRequestQueryParameters;
 
 namespace Malarkey.Abstractions.Authentication;
@@ -15,6 +18,8 @@ public static class MalarkeyAuthenticationSessionResolver
     private static readonly string ScopesLookup = ParDefs.ScopesName.ToLower();
     private static readonly string ExistingProfileIdLookup = ParDefs.ExistingProfileIdName.ToLower();
     private static readonly string AlwaysChallengeLookup = ParDefs.AlwaysChallengeName.ToLower();
+    private static readonly string EncryptedStateLookup = ParDefs.EncryptedStateName.ToLower();
+    private static readonly string ClientPublicKeyLookup = ParDefs.ClientPublicKey.ToLower();
 
     private static HashSet<string> NamedParameters = new List<string>
     {
@@ -34,7 +39,10 @@ public static class MalarkeyAuthenticationSessionResolver
         string? idProviderOverride = null,
         string? scopesOverride = null,
         string? profileIdOverride = null,
-        string? alwaysChallengeOverride = null
+        string? alwaysChallengeOverride = null,
+        string? encryptedStateOverride = null,
+        string? clientPublicKeyOverride = null,
+        RSA? malarkeyPrivateKey = null
         )
     {
         var queryPars = req.Query
@@ -57,11 +65,21 @@ public static class MalarkeyAuthenticationSessionResolver
             .Pipe(_ => Enum.Parse<MalarkeyIdentityProvider>(_));
         var requestState = sendToStateOverride ?? queryPars
             .GetValueOrDefault(SendToStateLookup)?.Value;
+        var encryptedState = encryptedStateOverride ?? queryPars
+            .GetValueOrDefault(EncryptedStateLookup)?.Value;
+        var encryptState = false;
+        if(encryptedState != null && malarkeyPrivateKey != null)
+        {
+            encryptState = true;
+            var encedBytes = Convert.FromBase64String(encryptedState);
+            var bytes = malarkeyPrivateKey.Decrypt(encedBytes, MalarkeyConstants.RSAPadding);
+            requestState = UTF8Encoding.UTF8.GetString(bytes);
+        }
         var requestedScopes = (scopesOverride ?? queryPars
             .GetValueOrDefault(ScopesLookup)?.Value)?.Split(" ");
-        var audience = req.Headers.TryGetValue(MalarkeyConstants.Authentication.AudienceHeaderName, out var pubKey) ?
-              pubKey.ToString() :
-              defaultAudience;
+        var audience = clientPublicKeyOverride?.CleanCertificate() ?? defaultAudience;
+        if (queryPars.TryGetValue(ClientPublicKeyLookup, out var clientCertPar))
+            audience = clientCertPar.Value.CleanCertificate();
         var existingProfileId = profileIdOverride?.Pipe(Guid.Parse) ?? (queryPars
             .TryGetValue(ExistingProfileIdLookup, out var profId) ? 
                ((Guid?) Guid.Parse(profId.Value)) : 
@@ -93,7 +111,8 @@ public static class MalarkeyAuthenticationSessionResolver
               ExistingProfileId: existingProfileId,
               AlwaysChallenge: alwaysChallenge,
               RequestParameters: requestParameters,
-              IdpSession: null);
+              IdpSession: null,
+              EncryptState: encryptState);
         return returnee;
     }
 

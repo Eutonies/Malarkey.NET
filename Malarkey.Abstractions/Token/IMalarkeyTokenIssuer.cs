@@ -63,9 +63,12 @@ public interface IMalarkeyTokenIssuer
     public async Task<MalarkeyTokenValidationResult?> ValidateProfileToken(HttpContext context, string receiver)
     {
         using var scope = ServiceScopeFactory.CreateScope();
-        if(!context.Request.Cookies.TryGetValue(MalarkeyConstants.Authentication.ProfileCookieName, out var profileCookie) || string.IsNullOrWhiteSpace(profileCookie))
+        if(context.Request.Cookies.TryGetValue(MalarkeyConstants.Authentication.ProfileCookieName, out var profileCookie) && 
+            !string.IsNullOrWhiteSpace(profileCookie)) 
+            {
+                return await ValidateToken(profileCookie, receiver);
+            }
             return null;
-        return await ValidateToken(profileCookie, receiver);
     }
 
     public async Task<(IReadOnlyCollection<MalarkeyTokenValidationResult> Results, IReadOnlySet<string> FailedCookies)> ValidateIdentityTokens(HttpContext context, string receiver)
@@ -75,6 +78,7 @@ public interface IMalarkeyTokenIssuer
         var failedCookies = new HashSet<string>();
         var relevantCookies = context.Request.Cookies
             .Where(_ => _.Key.StartsWith(MalarkeyConstants.Authentication.IdentityCookieBaseName))
+            .Select(_ => (_.Key, Value: _.Value))
             .OrderBy(_ => _.Key)
             .ToList();
         var cookieValueMap = relevantCookies

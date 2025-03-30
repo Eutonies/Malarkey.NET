@@ -20,7 +20,7 @@ spec:
             secretName: malarkey-cert          
       containers:
       - name: malarkey
-        image: docker.io/library/malarkey:1.0.29
+        image: docker.io/library/malarkey:1.0.70
         imagePullPolicy: Never
         ports:
         - containerPort: 8080
@@ -32,25 +32,20 @@ spec:
         env:
         - name: UI__HostingBasePath
           value: malarkey
+        - name: Application__Certificate__CertificateFileName
+          value: /crts/malarkey.base64.pfx
+        - name: Application__Certificate__CertificatePassword
+          valueFrom:
+            secretKeyRef:
+              name: malarkey-secrets
+              key: certpassword
         - name: Integration__ServerBasePath
           value: https://eutonies.com/malarkey
-        - name: Integration__PublicKeyFile
-          value: /crts/malarkey.crt
         - name: Persistence__Db__ConnectionString
           valueFrom:
             secretKeyRef:
               name: malarkey-secrets
               key: dbconn
-        - name: Application__SigningCertificate__CertificatePassword
-          valueFrom:
-            secretKeyRef:
-              name: malarkey-secrets
-              key: certsignpassword
-        - name: Application__HostingCertificate__CertificatePassword
-          valueFrom:
-            secretKeyRef:
-              name: malarkey-secrets
-              key: certhostpassword
         - name: Integration__Microsoft__AzureAd__ClientCertificates__0__SourceType
           value: Path
         - name: Integration__Microsoft__AzureAd__ClientCertificates__0__CertificateDiskPath
@@ -75,3 +70,10 @@ spec:
             secretKeyRef:
               name: malarkey-secrets
               key: clientsecretspotify
+        - name: Integration__Email__ApiToken
+          valueFrom:
+            secretKeyRef:
+              name: malarkey-secrets
+              key: emailapitoken
+        - name: Integration__Email__VerifyEmailUrl
+          value: https://eutonies.com/malarkey/verify-email

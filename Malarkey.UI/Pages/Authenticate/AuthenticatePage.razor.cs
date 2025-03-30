@@ -4,6 +4,10 @@ using Malarkey.Abstractions.Util;
 using Microsoft.AspNetCore.Components;
 using Microsoft.Extensions.Options;
 using Malarkey.Integration.Configuration;
+using Azure.Core;
+using Malarkey.UI.Util;
+using System.Security.Cryptography;
+using Malarkey.Application.Configuration;
 
 namespace Malarkey.UI.Pages.Authenticate;
 
@@ -22,7 +26,7 @@ public partial class AuthenticatePage
     public IMalarkeyAuthenticationSessionCache AuthenticationSessionRepo { get; set; }
 
     [Inject]
-    public IOptions<MalarkeyIntegrationConfiguration> IntegrationConfiguration { get; set; }
+    public IOptions<MalarkeyApplicationConfiguration> ApplicationConfiguration { get; set; }
 
     [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SendToName)]
     [Parameter]
@@ -48,11 +52,18 @@ public partial class AuthenticatePage
     [Parameter]
     public string? AlwaysChallenge { get; set; }
 
-
-
     [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.SessionStateName)]
     [Parameter]
     public string? ExistingSessionState { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.EncryptedStateName)]
+    [Parameter]
+    public string? EncryptedState { get; set; }
+
+    [SupplyParameterFromQuery(Name = MalarkeyConstants.AuthenticationRequestQueryParameters.ClientPublicKey)]
+    [Parameter]
+    public string? ClientPublicKey { get; set; }
+
 
     private MalarkeyAuthenticationSession? _authenticationSession;
 
@@ -74,9 +85,10 @@ public partial class AuthenticatePage
             _authenticationSession = await AuthenticationSessionRepo.LoadByState(ExistingSessionState);
         if(_authenticationSession == null)
         {
-            var audience = IntegrationConfiguration.Value
-                .PublicKey.CleanCertificate();
+            var audience = ApplicationConfiguration.Value
+                .Certificate.PublicKeyPem.CleanCertificate();
             var context = ContextAccessor.HttpContext!;
+            var privateKey = ApplicationConfiguration.Value.Certificate.PrivateKey;
             _authenticationSession = context.Request
                 .ResolveSession(
                    defaultAudience: audience,
@@ -85,7 +97,10 @@ public partial class AuthenticatePage
                    idProviderOverride: IdProvider,
                    scopesOverride: Scopes,
                    profileIdOverride: ProfileId,
-                   alwaysChallengeOverride: AlwaysChallenge
+                   alwaysChallengeOverride: AlwaysChallenge,
+                   encryptedStateOverride: EncryptedState,
+                   clientPublicKeyOverride: ClientPublicKey,
+                   malarkeyPrivateKey: privateKey
                    );
             _authenticationSession = await AuthenticationSessionRepo.InitiateSession(_authenticationSession);
         }

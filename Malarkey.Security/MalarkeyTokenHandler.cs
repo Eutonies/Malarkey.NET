@@ -13,6 +13,8 @@ using Malarkey.Abstractions.Token.Serialization;
 using Malarkey.Security.Persistence;
 using Malarkey.Abstractions;
 using Malarkey.Abstractions.Util;
+using System.Security.Cryptography;
+using System.Text;
 
 namespace Malarkey.Security;
 internal class MalarkeyTokenHandler : IMalarkeyTokenIssuer
@@ -25,6 +27,8 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenIssuer
     private readonly JsonWebTokenHandler _jwtHandler;
     private readonly SigningCredentials _credentials;
 
+    internal static readonly HashAlgorithm ReceiverHasher = SHA256.Create();
+
     public IServiceScopeFactory ServiceScopeFactory => _scopeFactory;
 
     public string PublicKey => _rsaPublicKey.Rsa.ExportRSAPublicKeyPem();
@@ -34,7 +38,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenIssuer
         _scopeFactory = scopeFactory;
         using var scope = scopeFactory.CreateScope();
         _securityConfiguration = scope.ServiceProvider.GetRequiredService<IOptions<MalarkeyApplicationConfiguration>>().Value;
-        _certificate = _securityConfiguration.SigningCertificate.AsCertificate;
+        _certificate = _securityConfiguration.Certificate.AsCertificate;
         _rsaPublicKey = new RsaSecurityKey(_certificate.GetRSAPublicKey());
         _rsaPrivateKey = new RsaSecurityKey(_certificate.GetRSAPrivateKey());
         _jwtHandler = new JsonWebTokenHandler();
@@ -45,12 +49,11 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenIssuer
         await Task.CompletedTask;
         var token = new MalarkeyProfileToken(
             TokenId: Guid.NewGuid(),
-            IssuedTo: receiverPublicKey,
+            IssuedTo: receiverPublicKey.HashPem(),
             IssuedAt: MalarkeySecurityConstants.Now.ToUniversalTime(),
             ValidUntil: MalarkeySecurityConstants.Now.ToUniversalTime() + MalarkeySecurityConstants.TokenLifeTime,
             Profile: profile
             );
-        var payload = profile.ToPayloadTso(receiverPublicKey, expiresAt: token.ValidUntil, token.TokenId);
         var tokenString = CreateTokenString(token, receiverPublicKey);
         using var scope = _scopeFactory.CreateScope();
         var tokenRepo = scope.ServiceProvider.GetRequiredService<IMalarkeyTokenRepository>();
@@ -64,7 +67,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenIssuer
         await Task.CompletedTask;
         var token = new MalarkeyIdentityToken(
             TokenId: Guid.NewGuid(),
-            IssuedTo: receiverPublicKey,
+            IssuedTo: receiverPublicKey.HashPem(),
             IssuedAt: MalarkeySecurityConstants.Now.ToUniversalTime(),
             ValidUntil: MalarkeySecurityConstants.Now.ToUniversalTime() + MalarkeySecurityConstants.TokenLifeTime,
             Identity: identity
@@ -79,7 +82,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenIssuer
     public string CreateTokenString(MalarkeyProfileToken profileToken, string receiverPublicKey)
     {
         receiverPublicKey = receiverPublicKey.CleanCertificate();
-        var payload = profileToken.ToPayloadTso(receiverPublicKey);
+        var payload = profileToken.ToPayloadTso(receiverPublicKey.HashPem());
         var header = profileToken.ToHeaderTso();
         var tokenString = _jwtHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
 
@@ -89,7 +92,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenIssuer
     public string CreateTokenString(MalarkeyIdentityToken identityToken, string receiverPublicKey)
     {
         receiverPublicKey = receiverPublicKey.CleanCertificate();
-        var payload = identityToken.ToPayloadTso(receiverPublicKey);
+        var payload = identityToken.ToPayloadTso(receiverPublicKey.HashPem());
         var header = identityToken.ToHeaderTso();
         var tokenString = _jwtHandler.CreateToken(payload.ToTokenDescriptor(header, _credentials));
         return tokenString;
@@ -115,7 +118,7 @@ internal class MalarkeyTokenHandler : IMalarkeyTokenIssuer
     {
         try
         {
-            receiver= receiver.CleanCertificate();
+            receiver= receiver.CleanCertificate().HashPem();
             var result = await _jwtHandler.ValidateTokenAsync(token, new TokenValidationParameters
             {
                 ValidIssuer = MalarkeyConstants.Authentication.TokenIssuer,

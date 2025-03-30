@@ -1,4 +1,5 @@
 ﻿using Malarkey.Abstractions;
+using Malarkey.Abstractions.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Routing;

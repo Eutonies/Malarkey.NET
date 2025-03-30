@@ -13,7 +13,8 @@ using Malarkey.Integration.Authentication;
 using Malarkey.UI.Components.Authentication;
 using Malarkey.UI.Pages.Profile;
 using Malarkey.Abstractions.Util;
-using Malarkey.Server;
+using Malarkey.UI.BackgroundServices;
+using Malarkey.UI.Pages.Authenticate;
 
 namespace Malarkey.UI;
 
@@ -28,7 +29,7 @@ public static class DependencyInjection
         builder.Configuration.AddEnvironmentVariables();
         builder.AddApplicationConfiguration();
         builder.AddPersistenceConfiguration();
-        builder.AddServerConfiguration();
+        builder.AddIntegrationConfiguration();
         builder.Services.Configure<MalarkeyUIConfiguration>(builder.Configuration.GetSection(MalarkeyUIConfiguration.ConfigurationElementName));
         return builder;
     }
@@ -39,7 +40,7 @@ public static class DependencyInjection
         IdentityModelEventSource.ShowPII = true;
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
-        builder.AddServerServices();
+        builder.AddIntegrationServices();
         builder.AddApplication();
         builder.AddPersistence();
         builder.Services.AddHttpContextAccessor();
@@ -52,6 +53,8 @@ public static class DependencyInjection
         builder.Services.AddHttpLogging();
         builder.Services.AddSingleton<MalarkeySynchronizer>();
         builder.AddApi();
+        builder.Services.AddHostedService<CleanupBackgroundService>();
+
         return builder;
     }
 
@@ -64,12 +67,12 @@ public static class DependencyInjection
         app.UseMiddleware<MalarkeyRequestLoggingMiddleware>();   
         app.UseHttpLogging();
         app.MapStaticAssets();
+        app.UseApi(uiConf.HostingBasePath);
         app.UseRouting();
         app.MapRazorComponents<App>()
             .DisableAntiforgery()
             .AddInteractiveServerRenderMode();
-        app.UseMalarkeyServer();
-        app.UseApi();
+        app.UseIntegration();
         //app.MapRazorPages();
 
         return app;

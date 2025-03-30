@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -8,6 +9,7 @@ namespace Malarkey.Abstractions;
 public static class MalarkeyConstants
 {
     public const string MalarkeyAuthenticationScheme = "Malarkey.Session";
+    public static readonly RSAEncryptionPadding RSAPadding = RSAEncryptionPadding.Pkcs1;
 
     public static class Authentication
     {
@@ -16,7 +18,6 @@ public static class MalarkeyConstants
         public const string TokenIssuer = "eutonies.com/malarkey";
         public const string TokenAlgorithm = "RS256";
         public const string TokenType = "JWT";
-        public const string AudienceHeaderName = API.ClientCertificateHeaderName;
         public const string ServerAuthenticationPath = "authenticate";
         public const string ServerChallengePath = "challenge";
 
@@ -41,8 +42,6 @@ public static class MalarkeyConstants
             public static class Certificates
             {
                 public const string CertificatesPath = "certificates";
-                public const string HostingCertificateRelativePath = "hosting-certificate";
-                public const string HostingCertificateAbsolutePath = $"{ApiPath}/{CertificatesPath}/{HostingCertificateRelativePath}";
                 public const string SigningCertificateRelativePath = "signing-certificate";
                 public const string SigningCertificateAbsolutePath = $"{ApiPath}/{CertificatesPath}/{SigningCertificateRelativePath}";
 
@@ -68,6 +67,8 @@ public static class MalarkeyConstants
         public const string ExistingProfileIdName = "profileid";
         public const string AlwaysChallengeName = "alwayschallenge";
         public const string SessionStateName = "sessionstate";
+        public const string EncryptedStateName = "encsessionstate";
+        public const string ClientPublicKey = "clientpubkey";
     }
 
 
@@ -78,9 +79,11 @@ public static class MalarkeyConstants
         /// </summary>
         public const string ProfileTokenName = "malarkeyprofiletoken";
         /// <summary>
-        /// If Malarkey authentication succeeds, identity token for employed provider will returned as <see cref="IdentityTokenName"/> query parameter on forward
+        /// If Malarkey authentication succeeds, identity tokens returned as <see cref="IdentityTokenBaseName"/>.indx form parameter on forward
         /// </summary>
-        public const string IdentityTokenName = "malarkeyidentitytoken";
+        public static string IdentityTokenName(int indx) => $"{IdentityTokenBaseName}.{indx}";
+
+        public const string IdentityTokenBaseName = "malarkeyidentitytoken";
 
         /// <summary>
         /// If the access-token obtained from identity provider is transferable for use by client API it will be returned as <see cref="IdentityProviderAccessTokenName"/> query parameter on forward

@@ -1,7 +1,4 @@
-
 using Malarkey.UI;
-using Malarkey.UI.Pages;
-using System.Security.Cryptography;
 
 
 var builder = WebApplication.CreateBuilder(args)

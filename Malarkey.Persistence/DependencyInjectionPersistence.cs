@@ -12,6 +12,8 @@ using Microsoft.Extensions.Options;
 using Npgsql.NameTranslation;
 using Malarkey.Application.Profile;
 using Malarkey.Abstractions.Token;
+using Malarkey.Application.Cleanup;
+using Malarkey.Persistence.Cleanup;
 
 namespace Malarkey.Persistence;
 public static class DependencyInjectionPersistence
@@ -30,6 +32,7 @@ public static class DependencyInjectionPersistence
         builder.Services.AddSingleton<IMalarkeyProfileRepository, MalarkeyProfileRepository>();
         builder.Services.AddSingleton<IMalarkeyTokenCache, MalarkeyTokenRepository>();
         builder.Services.AddSingleton<IVerificationEmailHandler, VerificationEmailHandler>();
+        builder.Services.AddSingleton<IPersistenceCleaner, PersistenceCleaner>();
         return builder;
     }
 

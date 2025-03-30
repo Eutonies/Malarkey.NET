@@ -11,33 +11,10 @@ using System.Threading.Tasks;
 
 namespace Malarkey.API.Common;
 
-[Route("api/[controller]")]
+[Route(MalarkeyConstants.API.ApiPath +  "/[controller]")]
 public class MalarkeyController : ControllerBase
 {
 
-
-    protected string? ExtractCertificate() => Request.Headers
-            .Where(_ => _.Key == MalarkeyConstants.API.ClientCertificateHeaderName)
-            .Select(_ => _.Value.ToString().UrlDecoded())
-            .FirstOrDefault();
-
-    protected async Task<Results<BadRequest<string>,Ok<A>>> RequireClientCertificate<A>(Func<string, Task<A>> toPerform)
-    {
-        var clientCert = ExtractCertificate();
-        if(clientCert == null)
-        {
-            return TypedResults.BadRequest($"No client certificate found in header: {MalarkeyConstants.API.ClientCertificateHeaderName}");
-        }
-        try
-        {
-            var result = await toPerform(clientCert);
-            return TypedResults.Ok(result);
-        }
-        catch(Exception ex)
-        {
-            return TypedResults.BadRequest(ex.Message);
-        }
-    }
 
 
 }
