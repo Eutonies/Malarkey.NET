@@ -43,21 +43,36 @@ jobs:
         dotnet-version: 9.0.x
     - name: .NET Build & Pack
       shell: pwsh
+      env:
+        PKGVERS: ${{ needs.define-version-number.outputs.package-version }}
       run: |
         dotnet build Malarkey.Abstractions/Malarkey.Abstractions.csproj -c Release
         dotnet build Malarkey.Client/Malarkey.Client.csproj -c Release
+        dotnet build Malarkey.Integration/Malarkey.Integration.csproj -c Release
+        dotnet pack Malarkey.Abstractions/Malarkey.Abstractions.csproj -c Release --artifacts-path ./dist -p:AssemblyVersion=$Env:PKGVERS -p:Version=$Env:PKGVERS
+        dotnet pack Malarkey.Client/Malarkey.Client.csproj -c Release --artifacts-path ./dist -p:AssemblyVersion=$Env:PKGVERS -p:Version=$Env:PKGVERS
+        dotnet pack Malarkey.Integration/Malarkey.Integration.csproj -c Release --artifacts-path ./dist -p:AssemblyVersion=$Env:PKGVERS -p:Version=$Env:PKGVERS
 
-        dotnet pack Malarkey.Abstractions/Malarkey.Abstractions.csproj -c Release --artifacts-path ./dist
-        dotnet pack Malarkey.Client/Malarkey.Client.csproj -c Release --artifacts-path ./dist
     - name: Publish to Nuget package repository
       shell: pwsh
       env:
         actionsuser: ${{ secrets.EUTONIES_GITHUB_ACTIONS_USER }}
+        galleryuser: ${{ secrets.EUTONIES_NUGET_GALLERY_USER }}
+        gallerykey: ${{ secrets.EUTONIES_NUGET_GALLERY_APIKEY }}
+        GH_TOKEN: ${{ github.token }}
       run: |
         dotnet nuget add source --username $Env:actionsuser --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name "github" "https://nuget.pkg.github.com/Eutonies/index.json"
         $packageFolder = "./dist/package/release"
         $vers = $Env:packageversion
         $versionName = "v$Env:packageversion"
-        gh release create $versionName "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" "${packageFolder}/Malarkey.Client.${vers}.nupkg"
+        gh release create $versionName "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" "${packageFolder}/Malarkey.Client.${vers}.nupkg" "${packageFolder}/Malarkey.Integration.${vers}.nupkg"
+        gh release upload $versionName "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" "${packageFolder}/Malarkey.Client.${vers}.nupkg" "${packageFolder}/Malarkey.Integration.${vers}.nupkg"
+
         dotnet nuget push "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" --source "github"
         dotnet nuget push "${packageFolder}/Malarkey.Client.${vers}.nupkg" --source "github"
+        dotnet nuget push "${packageFolder}/Malarkey.Integration.${vers}.nupkg" --source "github"
+
+        dotnet nuget push "${packageFolder}/Malarkey.Abstractions.${vers}.nupkg" --source "https://api.nuget.org/v3/index.json" --api-key $Env:gallerykey
+        dotnet nuget push "${packageFolder}/Malarkey.Client.${vers}.nupkg" --source "https://api.nuget.org/v3/index.json" --api-key $Env:gallerykey
+        dotnet nuget push "${packageFolder}/Malarkey.Integration.${vers}.nupkg" --source "https://api.nuget.org/v3/index.json" --api-key $Env:gallerykey
+
