@@ -1,14 +1,5 @@
 ﻿using Malarkey.Abstractions.Authentication;
-using Malarkey.Abstractions.Util;
-using Malarkey.Integration.Authentication.Naming;
-using Malarkey.Integration.Configuration;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Malarkey.Abstractions.Profile;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;

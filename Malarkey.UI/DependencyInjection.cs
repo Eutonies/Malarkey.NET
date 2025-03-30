@@ -27,7 +27,7 @@ public static class DependencyInjection
         builder.Configuration.AddEnvironmentVariables();
         builder.AddApplicationConfiguration();
         builder.AddPersistenceConfiguration();
-        builder.AddIntegrationConfiguration();
+        builder.AddMalarkeyIntegrationConfiguration();
         builder.Services.Configure<MalarkeyUIConfiguration>(builder.Configuration.GetSection(MalarkeyUIConfiguration.ConfigurationElementName));
         return builder;
     }
@@ -38,7 +38,7 @@ public static class DependencyInjection
         IdentityModelEventSource.ShowPII = true;
         builder.Services.AddRazorComponents()
             .AddInteractiveServerComponents();
-        builder.AddIntegrationServices();
+        builder.AddMalarkeyIntegrationServices();
         builder.AddApplication();
         builder.AddPersistence();
         builder.Services.AddHttpContextAccessor();
@@ -68,7 +68,7 @@ public static class DependencyInjection
         app.MapRazorComponents<App>()
             .DisableAntiforgery()
             .AddInteractiveServerRenderMode();
-        app.UseIntegration();
+        app.UseMalarkeyIntegration();
         app.UseApi();
         //app.MapRazorPages();
 

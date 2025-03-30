@@ -15,7 +15,7 @@ using Malarkey.Abstractions;
 using Malarkey.Abstractions.Util;
 
 namespace Malarkey.Security;
-internal class MalarkeyTokenHandler : IMalarkeyTokenHandler
+internal class MalarkeyTokenHandler : IMalarkeyTokenIssuer
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly MalarkeyApplicationConfiguration _securityConfiguration;

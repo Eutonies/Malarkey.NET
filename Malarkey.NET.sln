@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Client", "Malarkey
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Abstractions", "Malarkey.Abstractions\Malarkey.Abstractions.csproj", "{156E4109-91D6-49F4-ADF7-6947CF1158DA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Server", "Malarkey.Server\Malarkey.Server.csproj", "{69EC1AAC-D186-4DF4-94C9-C26B421A55F8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -70,6 +72,10 @@ Global
 		{156E4109-91D6-49F4-ADF7-6947CF1158DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{156E4109-91D6-49F4-ADF7-6947CF1158DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{156E4109-91D6-49F4-ADF7-6947CF1158DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69EC1AAC-D186-4DF4-94C9-C26B421A55F8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69EC1AAC-D186-4DF4-94C9-C26B421A55F8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69EC1AAC-D186-4DF4-94C9-C26B421A55F8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69EC1AAC-D186-4DF4-94C9-C26B421A55F8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

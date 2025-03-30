@@ -12,4 +12,14 @@ public sealed record MalarkeyIdentityToken(
     DateTime IssuedAt,
     DateTime ValidUntil,
     MalarkeyProfileIdentity Identity
-    ) : MalarkeyToken(TokenId, IssuedTo, IssuedAt, ValidUntil);
+    ) : MalarkeyToken(TokenId, IssuedTo, IssuedAt, ValidUntil)
+{
+    public override MalarkeyIdentityToken WithId(Guid tokenId) => new MalarkeyIdentityToken(
+        TokenId: tokenId,
+        IssuedTo: IssuedTo,
+        IssuedAt: IssuedAt,
+        ValidUntil: ValidUntil,
+        Identity: Identity
+       );
+
+}

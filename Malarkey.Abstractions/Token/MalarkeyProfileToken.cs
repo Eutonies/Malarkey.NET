@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -12,4 +13,14 @@ public sealed record MalarkeyProfileToken(
     DateTime IssuedAt,
     DateTime ValidUntil,
     MalarkeyProfile Profile
-    ) : MalarkeyToken(TokenId, IssuedTo, IssuedAt, ValidUntil);
+    ) : MalarkeyToken(TokenId, IssuedTo, IssuedAt, ValidUntil)
+{
+    public override MalarkeyProfileToken WithId(Guid tokenId) => new MalarkeyProfileToken(
+        TokenId: tokenId,
+        IssuedTo: IssuedTo,
+        IssuedAt: IssuedAt,
+        ValidUntil: ValidUntil,
+        Profile: Profile
+   );
+
+}

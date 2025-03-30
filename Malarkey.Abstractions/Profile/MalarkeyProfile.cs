@@ -17,4 +17,19 @@ public sealed record MalarkeyProfile(
     DateTime? NextVerificationSendTime,
     byte[]? ProfileImage = null,
     string? ProfileImageType = null
-    );
+    )
+{
+    public static MalarkeyProfile With(string profileName, string? firstName = null, string? lastName = null, string? primaryEmail = null) => new MalarkeyProfile(
+        ProfileId: Guid.NewGuid(),
+        ProfileName: profileName,
+        CreatedAt: DateTime.Now,
+        AbsorbedBy: null,
+        FirstName: firstName,
+        LastName: lastName,
+        PrimaryEmail: primaryEmail,
+        PrimaryEmailIsVerified: false,
+        NextVerificationSendTime: null);
+
+
+
+}

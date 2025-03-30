@@ -37,4 +37,6 @@ public abstract record MalarkeyToken
     }
 
 
+    public abstract MalarkeyToken WithId(Guid tokenId);
+
 }
