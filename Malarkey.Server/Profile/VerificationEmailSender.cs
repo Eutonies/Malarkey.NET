@@ -7,8 +7,8 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Encodings.Web;
 
-namespace Malarkey.Integration.Profile;
-internal class VerificationEmailSender : IVerificationEmailSender
+namespace Malarkey.Server.Profile;
+public class VerificationEmailSender : IVerificationEmailSender
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly string _emailApiBaseUrl;
@@ -19,7 +19,7 @@ internal class VerificationEmailSender : IVerificationEmailSender
 
     private string EmailEndpointUrl => $"{_emailApiBaseUrl}email";
 
-    public VerificationEmailSender(IHttpClientFactory httpClientFactory, IOptions<MalarkeyIntegrationConfiguration> conf, ILogger<VerificationEmailSender> logger)
+    public VerificationEmailSender(IHttpClientFactory httpClientFactory, IOptions<MalarkeyServerConfiguration> conf, ILogger<VerificationEmailSender> logger)
     {
         _httpClientFactory = httpClientFactory;
         _emailApiBaseUrl = conf.Value.Email.ApiBaseAddress;

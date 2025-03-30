@@ -7,6 +7,7 @@ using Malarkey.Application.Common;
 using Malarkey.Application.Profile;
 using Malarkey.Application.Profile.Persistence;
 using Malarkey.Integration.Authentication;
+using Malarkey.Server.Authentication;
 using Malarkey.UI.Session;
 using Malarkey.UI.Util;
 using Microsoft.AspNetCore.Components;

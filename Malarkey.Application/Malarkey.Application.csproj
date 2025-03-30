@@ -20,4 +20,9 @@
     <ProjectReference Include="..\Malarkey.Abstractions\Malarkey.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Authentication\" />
+    <Folder Include="Util\" />
+  </ItemGroup>
+
 </Project>

@@ -21,9 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Malarkey.Integration\Malarkey.Integration.csproj" />
     <ProjectReference Include="..\Malarkey.Persistence\Malarkey.Persistence.csproj" />
-    <ProjectReference Include="..\Malarkey.Security\Malarkey.Security.csproj" />
+    <ProjectReference Include="..\Malarkey.Server\Malarkey.Server.csproj" />
     <ProjectReference Include="..\Malarkey.API\Malarkey.API.csproj" />
   </ItemGroup>
 

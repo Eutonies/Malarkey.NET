@@ -1,27 +1,14 @@
 ﻿using Malarkey.Abstractions;
 using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Profile;
-using Malarkey.Application.Authentication;
-using Malarkey.Application.Profile;
 using Malarkey.Integration.Authentication;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Malarkey.Integration.Configuration;
-using Malarkey.Integration.Profile;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SpyOff.Infrastructure.Tracks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Malarkey.Integration;
 public static class DependencyInjectionIntegration
@@ -36,9 +23,8 @@ public static class DependencyInjectionIntegration
     public static WebApplicationBuilder AddIntegrationServices(this WebApplicationBuilder builder)
     {
         var conf = builder.Configuration.IntegrationConfig();
-        builder.Services.AddSingleton<IMalarkeyServerAuthenticationEventHandler, MalarkeyServerAuthenticationEvents>();
         builder.Services.AddAuthentication(MalarkeyConstants.MalarkeyAuthenticationScheme)
-            .AddScheme<MalarkeyServerAuthenticationHandlerOptions, MalarkeyServerAuthenticationHandler>(
+            .AddScheme<MalarkeyIntegrationAuthenticationHandlerOptions, MalarkeyIntegrationAuthenticationHandler>(
                authenticationScheme: MalarkeyConstants.MalarkeyAuthenticationScheme,
                configureOptions: opts =>
                {
@@ -53,7 +39,6 @@ public static class DependencyInjectionIntegration
         builder.Services.AddKeyedScoped<IMalarkeyIdentityProviderTokenRefresher, MalarkeyFacebookOAuthFlowHandler>(MalarkeyIdentityProvider.Facebook);
         builder.Services.AddScoped<IMalarkeyOAuthFlowHandler, MalarkeySpotifyOAuthFlowHandler>();
         builder.Services.AddKeyedScoped<IMalarkeyIdentityProviderTokenRefresher, MalarkeySpotifyOAuthFlowHandler>(MalarkeyIdentityProvider.Spotify);
-        builder.Services.AddSingleton<IVerificationEmailSender, VerificationEmailSender>();
         builder.Services.AddHttpClients();
         return builder;
     }
@@ -66,12 +51,12 @@ public static class DependencyInjectionIntegration
         app.UseAuthorization();
         app.MapGet(
             conf.RedirectPath, 
-            async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, 
+            async ([FromServices] MalarkeyIntegrationAuthenticationHandler authHandler, 
                     HttpRequest request) => await authHandler.HandleCallback(request)
         );
         app.MapPost(
             conf.RedirectPath, 
-            async ([FromServices] MalarkeyServerAuthenticationHandler authHandler, 
+            async ([FromServices] MalarkeyIntegrationAuthenticationHandler authHandler, 
                     HttpRequest request) => await authHandler.HandleCallback(request)
         );
         return app;

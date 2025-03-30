@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.Json;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
-internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
+public class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
     private readonly IHttpClientFactory _httpClientFactory;
 
@@ -27,7 +27,7 @@ internal class MalarkeyFacebookOAuthFlowHandler : MalarkeyOAuthFlowHandler
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate;
 
     protected override MalarkeyOAuthNamingScheme ProduceNamingScheme() => MalarkeyFacebookOAuthNamingScheme.Init(_conf.NamingSchemeOverwrites);
-    protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Facebook;
+    protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Facebook!;
 
     protected override bool StripCodeChallengePadding => true;
 

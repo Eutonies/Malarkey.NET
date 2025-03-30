@@ -23,7 +23,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Malarkey.Application\Malarkey.Application.csproj" />
-    <ProjectReference Include="..\Malarkey.Security\Malarkey.Security.csproj" />
   </ItemGroup>
 
 </Project>

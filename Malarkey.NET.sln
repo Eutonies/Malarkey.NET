@@ -11,8 +11,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.UI", "Malarkey.UI\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.API", "Malarkey.API\Malarkey.API.csproj", "{6E632400-8A19-4402-B499-5FD988733918}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Malarkey.Security", "Malarkey.Security\Malarkey.Security.csproj", "{D9B1BB14-FF9B-4416-B321-B9F100C6510E}"
-EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{84202F64-5677-4283-878A-E61A1CF77C0D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Malarkey.Persistence", "Malarkey.Persistence\Malarkey.Persistence.csproj", "{16BFABE8-A02B-4D45-9B90-935C8A66273B}"
@@ -52,10 +50,6 @@ Global
 		{6E632400-8A19-4402-B499-5FD988733918}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{6E632400-8A19-4402-B499-5FD988733918}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6E632400-8A19-4402-B499-5FD988733918}.Release|Any CPU.Build.0 = Release|Any CPU
-		{D9B1BB14-FF9B-4416-B321-B9F100C6510E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D9B1BB14-FF9B-4416-B321-B9F100C6510E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D9B1BB14-FF9B-4416-B321-B9F100C6510E}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D9B1BB14-FF9B-4416-B321-B9F100C6510E}.Release|Any CPU.Build.0 = Release|Any CPU
 		{84202F64-5677-4283-878A-E61A1CF77C0D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{84202F64-5677-4283-878A-E61A1CF77C0D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{84202F64-5677-4283-878A-E61A1CF77C0D}.Release|Any CPU.ActiveCfg = Release|Any CPU

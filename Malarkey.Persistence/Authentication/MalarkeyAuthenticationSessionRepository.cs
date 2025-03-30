@@ -5,11 +5,10 @@ using Malarkey.Abstractions.Authentication;
 using Malarkey.Persistence.Context;
 using Malarkey.Persistence.Token.Model;
 using Microsoft.EntityFrameworkCore;
-using Malarkey.Application.Authentication;
 using Malarkey.Persistence.Authentication.Model;
 
 namespace Malarkey.Persistence.Authentication;
-internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthenticationSessionRepository
+internal class MalarkeyAuthenticationSessionRepository : IMalarkeyAuthenticationSessionCache
 {
     private readonly IDbContextFactory<MalarkeyDbContext> _contectFactory;
 

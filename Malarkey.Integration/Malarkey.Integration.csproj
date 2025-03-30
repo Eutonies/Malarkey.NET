@@ -25,6 +25,10 @@
     <ProjectReference Include="..\Malarkey.Abstractions\Malarkey.Abstractions.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Profile\" />
+  </ItemGroup>
+
   <Target Name="PreBuild" BeforeTargets="PreBuildEvent">
     <Exec Command="$(NSwagExe_Net90) run Clients/Spotify/SpotifyAPIClient.nswag" Condition="1 == 2"></Exec>
   </Target>

@@ -4,23 +4,14 @@ using Malarkey.Abstractions.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Malarkey.Abstractions.Token;
-using Malarkey.Application.Util;
-using System.Net.Http;
 using System.Text.Json;
 using System.IdentityModel.Tokens.Jwt;
 using Microsoft.Extensions.Logging;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
-internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
+public class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
     private readonly IHttpClientFactory _httpClientFactory;
     public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Google;
@@ -36,7 +27,7 @@ internal class MalarkeyGoogleOAuthFlowHandler : MalarkeyOAuthFlowHandler
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate;
 
     protected override MalarkeyOAuthNamingScheme ProduceNamingScheme() => MalarkeyGoogleOAuthNamingScheme.Init(_conf.NamingSchemeOverwrites);
-    protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Google;
+    protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Google!;
 
     public override IReadOnlyDictionary<string, string> ProduceRequestQueryParameters(MalarkeyAuthenticationSession session, MalarkeyAuthenticationIdpSession idpSession)
     {

@@ -1,18 +1,9 @@
 ﻿using Malarkey.Abstractions;
-using Malarkey.Abstractions.Profile;
-using Malarkey.Application;
 using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Util;
-using Malarkey.Integration;
-using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components;
-using Microsoft.AspNetCore.Components.Web;
-using Malarkey.Application.Authentication;
-using Malarkey.Integration.Authentication;
 using Microsoft.Extensions.Options;
 using Malarkey.Integration.Configuration;
-using Azure.Core;
-using Malarkey.UI.Util;
 
 namespace Malarkey.UI.Pages.Authenticate;
 
@@ -28,7 +19,7 @@ public partial class AuthenticatePage
     public ILogger<AuthenticatePage> Logger { get; set; }
 
     [Inject]
-    public IMalarkeyAuthenticationSessionRepository AuthenticationSessionRepo { get; set; }
+    public IMalarkeyAuthenticationSessionCache AuthenticationSessionRepo { get; set; }
 
     [Inject]
     public IOptions<MalarkeyIntegrationConfiguration> IntegrationConfiguration { get; set; }

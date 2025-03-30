@@ -1,5 +1,4 @@
-﻿using Malarkey.Application.Util;
-using Malarkey.Abstractions.Authentication;
+﻿using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Util;
 using Malarkey.Integration.Authentication.Naming;
@@ -11,11 +10,10 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using Malarkey.Abstractions.Token;
 using static Malarkey.Integration.Authentication.OAuthFlowHandlers.IMalarkeyOAuthFlowHandler;
-using Malarkey.Application.Authentication;
 using Microsoft.Extensions.Logging;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
-internal class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMalarkeyIdentityProviderTokenRefresher
+public class MalarkeySpotifyOAuthFlowHandler : MalarkeyOAuthFlowHandler, IMalarkeyIdentityProviderTokenRefresher
 {
     private readonly IHttpClientFactory _httpClientFactory;
     public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Spotify;

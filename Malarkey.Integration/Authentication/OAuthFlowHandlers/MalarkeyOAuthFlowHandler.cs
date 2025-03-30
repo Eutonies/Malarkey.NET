@@ -2,24 +2,16 @@
 using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Token;
 using Malarkey.Abstractions.Util;
-using Malarkey.Application.Authentication;
-using Malarkey.Application.Security;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
-internal abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler, IMalarkeyIdentityProviderTokenRefresher
+public abstract class MalarkeyOAuthFlowHandler : IMalarkeyOAuthFlowHandler, IMalarkeyIdentityProviderTokenRefresher
 {
     protected static readonly char[] CodeVerifierAllowedChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~".ToCharArray();
 

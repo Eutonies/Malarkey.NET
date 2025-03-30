@@ -4,9 +4,7 @@ using Malarkey.Abstractions;
 using Malarkey.UI.Session;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components;
-using System.Text;
 using Malarkey.Abstractions.Authentication;
-using Malarkey.Application.Authentication;
 using Malarkey.UI.Pages.Authenticate;
 
 namespace Malarkey.UI.Components.Authentication;
@@ -23,7 +21,7 @@ public partial class IdpSelectionComponent
     public MalarkeyAuthenticationSession Session { get; set; }
 
     [Inject]
-    public IMalarkeyAuthenticationSessionRepository AuthenticationRepo { get; set; }
+    public IMalarkeyAuthenticationSessionCache AuthenticationRepo { get; set; }
 
     private bool IsAuthenticated => SessionState.User != null;
 

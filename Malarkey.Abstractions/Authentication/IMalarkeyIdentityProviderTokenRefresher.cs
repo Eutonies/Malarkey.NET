@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Malarkey.Application.Authentication;
+namespace Malarkey.Abstractions.Authentication;
 public interface IMalarkeyIdentityProviderTokenRefresher
 {
     Task<IdentityProviderToken?> Refresh(string refreshToken, string audiencePublicKey);

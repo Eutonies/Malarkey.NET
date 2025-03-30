@@ -5,20 +5,13 @@ using Malarkey.Persistence.Configuration;
 using Malarkey.Persistence.Context;
 using Malarkey.Persistence.Profile;
 using Malarkey.Persistence.Token.Model;
-using Malarkey.Security.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using Npgsql.NameTranslation;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Malarkey.Application.Profile;
-using Malarkey.Application.Authentication;
+using Malarkey.Abstractions.Token;
 
 namespace Malarkey.Persistence;
 public static class DependencyInjectionPersistence
@@ -33,9 +26,9 @@ public static class DependencyInjectionPersistence
     {
         builder.Services.AddDbContextFactory<MalarkeyDbContext>(ConfigureDb, lifetime: ServiceLifetime.Singleton);
         //builder.Services.AddDbContext<MalarkeyDbContext>(ConfigureDb, contextLifetime : ServiceLifetime.Scoped);
-        builder.Services.AddSingleton<IMalarkeyAuthenticationSessionRepository, MalarkeyAuthenticationSessionRepository>();
+        builder.Services.AddSingleton<IMalarkeyAuthenticationSessionCache, MalarkeyAuthenticationSessionRepository>();
         builder.Services.AddSingleton<IMalarkeyProfileRepository, MalarkeyProfileRepository>();
-        builder.Services.AddSingleton<IMalarkeyTokenRepository, MalarkeyTokenRepository>();
+        builder.Services.AddSingleton<IMalarkeyTokenCache, MalarkeyTokenRepository>();
         builder.Services.AddSingleton<IVerificationEmailHandler, VerificationEmailHandler>();
         return builder;
     }

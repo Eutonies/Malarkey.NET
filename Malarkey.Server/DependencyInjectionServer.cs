@@ -1,45 +1,35 @@
 ﻿using Malarkey.Abstractions;
 using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Profile;
-using Malarkey.Application.Authentication;
 using Malarkey.Application.Profile;
 using Malarkey.Integration.Authentication;
 using Malarkey.Integration.Authentication.OAuthFlowHandlers;
 using Malarkey.Integration.Configuration;
-using Malarkey.Integration.Profile;
 using Malarkey.Server.Authentication;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
+using Malarkey.Server.Profile;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using SpyOff.Infrastructure.Tracks;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Malarkey.Server;
-public static class DependencyInjectionIntegration
+public static class DependencyInjectionServer
 {
 
-    public static WebApplicationBuilder AddIntegrationConfiguration(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddServerConfiguration(this WebApplicationBuilder builder)
     {
-        builder.Services.Configure<MalarkeyIntegrationConfiguration>(builder.Configuration.GetSection(MalarkeyIntegrationConfiguration.ConfigurationElementName));
+        builder.Services.Configure<MalarkeyIntegrationConfiguration>(builder.Configuration.GetSection(MalarkeyServerConfiguration.ConfigurationElementName));
+        builder.Services.Configure<MalarkeyServerConfiguration>(builder.Configuration.GetSection(MalarkeyServerConfiguration.ConfigurationElementName));
         return builder;
     }
 
-    public static WebApplicationBuilder AddIntegrationServices(this WebApplicationBuilder builder)
+    public static WebApplicationBuilder AddServerServices(this WebApplicationBuilder builder)
     {
         var conf = builder.Configuration.IntegrationConfig();
         builder.Services.AddSingleton<IMalarkeyServerAuthenticationEventHandler, MalarkeyServerAuthenticationEvents>();
         builder.Services.AddAuthentication(MalarkeyConstants.MalarkeyAuthenticationScheme)
-            .AddScheme<MalarkeyServerAuthenticationHandlerOptions, MalarkeyServerAuthenticationHandler>(
+            .AddScheme<MalarkeyIntegrationAuthenticationHandlerOptions, MalarkeyServerAuthenticationHandler>(
                authenticationScheme: MalarkeyConstants.MalarkeyAuthenticationScheme,
                configureOptions: opts =>
                {
@@ -60,7 +50,7 @@ public static class DependencyInjectionIntegration
     }
 
 
-    public static WebApplication UseIntegration(this WebApplication app)
+    public static WebApplication UseMalarkeyServer(this WebApplication app)
     {
         var conf = app.Configuration.IntegrationConfig();
         app.UseAuthentication();

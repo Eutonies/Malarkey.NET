@@ -1,15 +1,9 @@
 ﻿using Malarkey.Abstractions.Token;
 using Malarkey.Persistence.Context;
-using Malarkey.Security.Persistence;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Malarkey.Persistence.Token.Model;
-internal class MalarkeyTokenRepository : IMalarkeyTokenRepository
+internal class MalarkeyTokenRepository : IMalarkeyTokenCache
 {
     private readonly IDbContextFactory<MalarkeyDbContext> _contextFactory;
 

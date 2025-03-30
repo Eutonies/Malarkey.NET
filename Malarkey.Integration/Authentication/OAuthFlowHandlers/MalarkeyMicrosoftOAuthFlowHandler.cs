@@ -1,25 +1,16 @@
-﻿using Malarkey.Application.Profile.Persistence;
-using Malarkey.Application.Util;
-using Malarkey.Abstractions.Authentication;
+﻿using Malarkey.Abstractions.Authentication;
 using Malarkey.Abstractions.Profile;
 using Malarkey.Abstractions.Util;
 using Malarkey.Integration.Authentication.Naming;
 using Malarkey.Integration.Configuration;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 
 namespace Malarkey.Integration.Authentication.OAuthFlowHandlers;
-internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
+public class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
 {
     
     public override MalarkeyIdentityProvider HandlerFor => MalarkeyIdentityProvider.Microsoft;
@@ -33,7 +24,7 @@ internal class MalarkeyMicrosoftOAuthFlowHandler : MalarkeyOAuthFlowHandler
     public override string AuthorizationEndpoint => _conf.AuthorizationEndpointTemplate.Replace("{tenant}", _conf.Tenant);
 
     protected override MalarkeyOAuthNamingScheme ProduceNamingScheme() => MalarkeyMicrosoftOAuthNamingScheme.Init(_conf.NamingSchemeOverwrites);
-    protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Microsoft;
+    protected override MalarkeyIdentityProviderConfiguration ProduceConfiguration() => _intConf.Microsoft!;
     public override async Task<IMalarkeyOAuthFlowHandler.RedirectData?> ExtractRedirectData(HttpRequest request)
     {
         var body = await request.Body.ReadAsStringAsync();
